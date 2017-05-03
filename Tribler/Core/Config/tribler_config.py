@@ -408,7 +408,7 @@ class TriblerConfig(object):
         return self.config['tunnel_community']['enabled']
 
     def set_tunnel_community_socks5_listen_ports(self, ports):
-        self.config['tunnel_community']['socks5_listen_ports'] = ports
+        self.config['tunnel_community']['socks5_listen_ports'] = [str(port) for port in ports]
 
     def get_tunnel_community_socks5_listen_ports(self):
         ports = self.config['tunnel_community']['socks5_listen_ports']
