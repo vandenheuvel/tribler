@@ -74,7 +74,7 @@ seeding_time = integer(default=60)
 
 [dispersy]
 enabled = boolean(default=True)
-port = integer(min=1, max=65536, default=7759)
+port = integer(min=-1, max=65536, default=7759)
 
 [video_server]
 enabled = boolean(default=True)

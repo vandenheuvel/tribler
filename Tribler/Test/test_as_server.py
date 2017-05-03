@@ -276,8 +276,6 @@ class TestAsServer(AbstractServer):
 
     def setUpPreSession(self):
         self.config = TriblerConfig()
-        self.config.set_dispersy_port(-1)
-        self.config.set_libtorrent_port(-1)
         self.config.set_default_destination_dir(self.dest_dir)
         self.config.set_state_dir(self.getStateDir())
         self.config.set_torrent_checking_enabled(False)

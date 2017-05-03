@@ -303,16 +303,23 @@ class TriblerConfig(object):
         self.config['libtorrent']['anon_proxy_type'] = proxy_type
         if server and proxy_type:
             self.config['libtorrent']['anon_proxy_server_ip'] = server[0]
-            self.config['libtorrent']['anon_proxy_server_ports'] = server[1]
+            # Convert the integers into strings for the config
+            self.config['libtorrent']['anon_proxy_server_ports'] = [str(i) for i in server[1]]
         else:
             self.config['libtorrent']['anon_proxy_server_ip'] = None
             self.config['libtorrent']['anon_proxy_server_ports'] = None
         self.config['libtorrent']['anon_proxy_auth'] = auth if proxy_type in [3, 5] else None
 
     def get_anon_proxy_settings(self):
+        """
+        Get the anon proxy settings.
+
+        :return: a 4-tuple with the proxytype in int, (ip as string, list of ports in int), auth 
+        """
         return (self.config['libtorrent']['anon_proxy_type'],
                 (self.config['libtorrent']['anon_proxy_server_ip'],
-                 self.config['libtorrent']['anon_proxy_server_ports']),
+                 # Convert the strings from the config into ints
+                 [int(s) for s in self.config['libtorrent']['anon_proxy_server_ports']]),
                 self.config['libtorrent']['anon_proxy_auth'])
 
     def set_libtorrent_max_conn_download(self, value):
