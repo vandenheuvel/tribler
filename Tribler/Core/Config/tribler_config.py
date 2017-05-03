@@ -32,44 +32,34 @@ class TriblerConfig(object):
         """
         Create a new TriblerConfig instance.
 
-        :param config: a ConfigObj
+        :param config: a ConfigObj instance
         :raises an InvalidConfigException if ConfigObj is invalid
         """
-        self.selected_ports = {}
         self._logger = logging.getLogger(self.__class__.__name__)
 
-        if config:
-            self.config = config
-        else:
-            self.config = ConfigObj(configspec=CONFIG_SPEC_PATH)
-
+        self.config = config or ConfigObj(configspec=CONFIG_SPEC_PATH)
         self.validate()
+
+        self.selected_ports = {}
         self._set_video_analyser_path()
 
     @staticmethod
     def load(config_path=None):
-        """Load a TriblerConfig from disk."""
-        tribler_config = TriblerConfig()
-
-        if not config_path:
-            config_path = os.path.join(TriblerConfig.get_default_state_dir(), FILENAME)
-
-        if not os.path.exists(TriblerConfig.get_default_state_dir()):
-            os.mkdir(TriblerConfig.get_default_state_dir())
-
-        tribler_config.config = ConfigObj(config_path, configspec=CONFIG_SPEC_PATH)
-        tribler_config.validate()
-
-        return tribler_config
+        """
+        Load a TriblerConfig from disk.
+        """
+        return TriblerConfig(ConfigObj(config_path, configspec=CONFIG_SPEC_PATH))
 
     def copy(self):
-        """Return a TriblerConfig object that has the same values."""
-        cpy_config = TriblerConfig()
+        """
+        Return a TriblerConfig object that has the same values.
+        """
+        # References to the sections are copied here
+        new_configobj = ConfigObj(self.config.copy(), configspec=self.config.configspec)
+        # Make a deep copy of every section
         for section in self.config:
-            for key in self.config[section]:
-                cpy_config.config[section][key] = self.config[section][key]
-
-        return cpy_config
+            new_configobj[section] = self.config[section].copy()
+        return TriblerConfig(new_configobj)
 
     def validate(self):
         """
@@ -82,6 +72,15 @@ class TriblerConfig(object):
         validation_result = self.config.validate(validator, copy=True)
         if validation_result is not True:
             raise InvalidConfigException(msg="TriblerConfig is invalid: %s" % str(validation_result))
+
+    def write(self):
+        """
+        Write the configuration to the config file in the state dir as specified in the config.
+        """
+        if not os.path.exists(self.get_state_dir()):
+            os.makedirs(self.get_state_dir())
+        with open(os.path.join(self.get_state_dir(), FILENAME), 'w') as outfile:
+            self.config.write(outfile=outfile)
 
     @staticmethod
     def get_default_state_dir(home_dir_postfix=u'.Tribler'):
@@ -153,11 +152,6 @@ class TriblerConfig(object):
                 self.config['general']['videoanalyserpath'] = os.path.abspath(ffmpeg_name)
         else:
             self.config['general']['videoanalyserpath'] = os.path.abspath(ffmpeg_path)
-
-    def write(self):
-        """Write the configuration to the config file in the state dir as specified in the config."""
-        with open(os.path.join(self.get_state_dir(), FILENAME), 'w') as outfile:
-            self.config.write(outfile=outfile)
 
     # General
 

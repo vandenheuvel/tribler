@@ -76,7 +76,7 @@ class Session(object):
         self.ignore_singleton = ignore_singleton
         self.session_lock = NoDispersyRLock()
 
-        self.config = config or TriblerConfig.load()
+        self.config = config or TriblerConfig()
         self.get_ports_in_config()
         self.create_state_directory_structure()
 
