@@ -1,7 +1,10 @@
+import ast
+from ConfigParser import RawConfigParser
+import logging
+
 from Tribler.Core.Config.tribler_config import TriblerConfig
 from Tribler.Core.exceptions import InvalidConfigException
-
-from ConfigParser import RawConfigParser
+logger = logging.getLogger(__name__)
 
 
 def convert(config):
@@ -52,9 +55,8 @@ def convert_tribler(cfg, old_config):
             try:
                 temp_config.validate()
                 config = temp_config
-            except InvalidConfigException:
-                # TODO: Logging
-                pass
+            except InvalidConfigException as exc:
+                logger.debug("The following field in the old tribler.conf was wrong: %e" % exc.args)
     return config
 
 
@@ -88,12 +90,14 @@ def convert_libtribler(cfg, old_config):
             elif section == "tunnel_community" and name == "enabled":
                 temp_config.set_tunnel_community_enabled(value)
             elif section == "tunnel_community" and name == "socks5_listen_ports":
-                temp_config.set_tunnel_community_socks5_listen_ports(value)
+                val_literal = ast.literal_eval(value)
+                if isinstance(val_literal, list):
+                    temp_config.set_tunnel_community_socks5_listen_ports(val_literal)
             elif section == "tunnel_community" and name == "exitnode_enabled":
                 temp_config.set_tunnel_community_exitnode_enabled(value)
             elif section == "multichain" and name == "enabled":
                 temp_config.set_multichain_enabled(value)
-            elif section == "general" and name == "ec_keypar_filename_multichain":
+            elif section == "general" and name == "ec_keypair_filename_multichain":
                 temp_config.set_multichain_permid_keypair_filename(value)
             elif section == "metadata" and name == "enabled":
                 temp_config.set_metadata_enabled(value)
@@ -133,10 +137,11 @@ def convert_libtribler(cfg, old_config):
                 temp_config.set_anon_listen_port(value)
             elif section == "libtorrent" and name == "anon_proxytype":
                 temp_config.config["libtorrent"]["anon_proxy_type"] = value
-            elif section == "libtorrent" and name == "anon_proxyserver_ip":
-                temp_config.config["libtorrent"]["anon_proxy_server_ip"] = value
-            elif section == "libtorrent" and name == "anon_proxyserver_ports":
-                temp_config.config["libtorrent"]["anon_proxy_server_ports"] = value
+            elif section == "libtorrent" and name == "anon_proxyserver":
+                val_literal = ast.literal_eval(value)
+                if isinstance(val_literal, tuple) and isinstance(val_literal[1], list):
+                    temp_config.config["libtorrent"]["anon_proxy_server_ip"] = val_literal[0]
+                    temp_config.config["libtorrent"]["anon_proxy_server_ports"] = [str(port) for port in val_literal[1]]
             elif section == "libtorrent" and name == "anon_proxyauth":
                 temp_config.config["libtorrent"]["anon_proxy_auth"] = value
             elif section == "dispersy" and name == "enabled":
@@ -174,19 +179,20 @@ def convert_libtribler(cfg, old_config):
             elif section == "credit_mining" and name == "logging_interval":
                 temp_config.set_credit_mining_logging_interval(value)
             elif section == "credit_mining" and name == "boosting_sources":
-                temp_config.set_credit_mining_boosting_sources(value)
+                temp_config.set_credit_mining_sources(ast.literal_eval(value), 'boosting_sources')
             elif section == "credit_mining" and name == "boosting_enabled":
-                temp_config.set_credit_mining_boosting_enabled(value)
+                temp_config.set_credit_mining_sources(ast.literal_eval(value), "boosting_enabled")
             elif section == "credit_mining" and name == "boosting_disabled":
-                temp_config.set_credit_mining_boosting_disabled(value)
+                temp_config.set_credit_mining_sources(ast.literal_eval(value), "boosting_disabled")
             elif section == "credit_mining" and name == "archive_sources":
-                temp_config.set_credit_mining_archive_sources(value)
+                temp_config.set_credit_mining_sources(ast.literal_eval(value), "archive_sources")
             elif section == "credit_mining" and name == "policy":
                 temp_config.set_credit_mining_policy(value)
+
             try:
                 temp_config.validate()
                 config = temp_config
-            except InvalidConfigException:
-                # TODO: Logging
-                pass
+            except InvalidConfigException as exc:
+                logger.debug("The following field in the old libtribler.conf was wrong: %s" % exc.args)
+
     return config

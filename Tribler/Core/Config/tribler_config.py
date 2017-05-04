@@ -422,11 +422,20 @@ class TriblerConfig(object):
     def get_tunnel_community_exitnode_enabled(self):
         return self.config['tunnel_community']['exitnode_enabled']
 
+    def set_default_number_hops(self, value):
+        self.config['download_defaults']['number_hops'] = value
+
     def get_default_number_hops(self):
         return self.config['download_defaults']['number_hops']
 
+    def set_default_anonymity_enabled(self, value):
+        self.config['download_defaults']['anonymity_enabled'] = value
+
     def get_default_anonymity_enabled(self):
         return self.config['download_defaults']['anonymity_enabled']
+
+    def set_default_safeseeding_enabled(self, value):
+        self.config['download_defaults']['safeseeding_enabled'] = value
 
     def get_default_safeseeding_enabled(self):
         return self.config['download_defaults']['safeseeding_enabled']
