@@ -63,6 +63,7 @@ def convert_tribler(cfg, old_config):
 def convert_libtribler(cfg, old_config):
     """
     Add the old values of the libtribler.conf file to the newer Config file.
+    
     :param cfg: The Config file to which the old data can be written
     :param old_config: A RawConfigParser containing the old libtribler.conf Config file
     :return: The edited Config file

@@ -40,9 +40,8 @@ class TestConfigUpgrade70to71(TriblerCoreTest):
         old_config.read(os.path.join(self.CONFIG_PATH, "libtriblercorrupt70.conf"))
         new_config = TriblerConfig()
         result_config = Tribler.Core.Upgrade.config_converter.convert_libtribler(new_config, old_config)
-        self.assertEqual(result_config.get_permid_keypair_filename(), new_config.get_permid_keypair_filename())
-        self.assertEqual(result_config.get_tunnel_community_socks5_listen_ports(),
-                         new_config.get_tunnel_community_socks5_listen_ports())
-        self.assertEqual(result_config.get_metadata_store_dir(), new_config.get_metadata_store_dir())
-        self.assertEqual(result_config.get_anon_proxy_settings(), new_config.get_anon_proxy_settings())
+        self.assertTrue(new_config.get_permid_keypair_filename().endswith("ec.pem"))
+        self.assertTrue(len(new_config.get_tunnel_community_socks5_listen_ports()), 5)
+        self.assertEqual("collected_metadata", new_config.get_metadata_store_dir())
+        self.assertEqual((0, ('127.0.0.1', [-1, -1, -1, -1, -1]), ''), new_config.get_anon_proxy_settings())
         self.assertEqual(result_config.get_credit_mining_sources(), new_config.get_credit_mining_sources())
