@@ -3,15 +3,14 @@ This file contains everything related to persistence for MultiChain.
 """
 from os import path
 
-from Tribler.dispersy.database import Database
 from Tribler.community.multichain.block import MultiChainBlock
-
+from Tribler.dispersy.database import Database
 
 DATABASE_DIRECTORY = path.join(u"sqlite")
 # Path to the database location + dispersy._workingdirectory
 DATABASE_PATH = path.join(DATABASE_DIRECTORY, u"multichain.db")
 # Version to keep track if the db schema needs to be updated.
-LATEST_DB_VERSION = 2
+LATEST_DB_VERSION = 3
 # Schema for the MultiChain DB.
 schema = u"""
 CREATE TABLE IF NOT EXISTS multi_chain(
