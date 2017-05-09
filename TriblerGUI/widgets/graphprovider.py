@@ -14,10 +14,9 @@ class GraphProvider():
         :return: the pyplot figure.
         """
         G = nx.Graph()
-        pos = [(2, 2), (1, 1), (2, 3), (3, 1)]  # positions for all nodes
+        pos = [(2, 2), (1, 1), (2, 3), (3, 1)]
 
         fig = pyplot.figure()
-        ax = fig.add_subplot(111)
         nx.draw_networkx_nodes(G, pos,
                                nodelist=[0],
                                node_color='r',
