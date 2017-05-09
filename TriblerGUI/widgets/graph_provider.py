@@ -1,17 +1,22 @@
+"""
+Provides a class which encapsulates the graph construction logic.
+"""
+
 import networkx as nx
 from matplotlib import pyplot
 
 
 class GraphProvider():
     """
-    Provides the pyplot figure of the network.
+    Provides the matplotlib figure of the network.
     """
 
     def provide_figure(self):
         """
-        Provide the pyplot figure computed from the multichain data.
-        TODO: add actual multichain data implementation.
-        :return: the pyplot figure.
+        Provide the matplotlib figure computed from the multichain data.
+        TODO: add actual multichain data implementation, dummy data is inserted for now.
+        
+        :return: the matplotlib figure
         """
         G = nx.Graph()
         pos = [(2, 2), (1, 1), (2, 3), (3, 1)]
