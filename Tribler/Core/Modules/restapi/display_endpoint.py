@@ -31,15 +31,16 @@ class DisplayEndpoint(resource.Resource):
         return None
 
     @staticmethod
-    def return_400(request, message="your request seems to be wrong"):
+    def return_error(request, http_code=http.BAD_REQUEST, message="your request seems to be wrong"):
         """
-        Return a HTTP Code 400 with the given message.
+        Return an HTTP error with the given message.
 
         :param request: the request which has to be changed
+        :param http_code: the http error code
         :param message: the error message which is used in the JSON string
         :return: the error message formatted in JSON
         """
-        request.setResponseCode(http.BAD_REQUEST)
+        request.setResponseCode(http_code)
         return json.dumps({"error": message})
 
     def render_GET(self, request):
@@ -87,10 +88,10 @@ class DisplayEndpoint(resource.Resource):
         :return: the node data formatted in JSON
         """
         if "focus_node" not in request.args:
-            return DisplayEndpoint.return_400(request, "focus_node parameter missing")
+            return DisplayEndpoint.return_error(request, http.BAD_REQUEST, "focus_node parameter missing")
 
         if len(request.args["focus_node"]) < 1 or len(request.args["focus_node"][0]) == 0:
-            return DisplayEndpoint.return_400(request, "focus_node parameter empty")
+            return DisplayEndpoint.return_error(request, http.BAD_REQUEST, "focus_node parameter empty")
 
         neighbor_level = 1
         # Note that isdigit() checks if all chars are numbers, hence negative numbers are not possible to be set
@@ -100,8 +101,7 @@ class DisplayEndpoint(resource.Resource):
 
         mc_community = self.get_multichain_community()
         if not mc_community:
-            request.setResponseCode(http.NOT_FOUND)
-            return json.dumps({"error": "multichain community not found"})
+            return DisplayEndpoint.return_error(request, http.NOT_FOUND, "multichain community not found")
 
         focus_node = request.args["focus_node"][0]
         nodes = mc_community.get_nodes(focus_node, neighbor_level)
