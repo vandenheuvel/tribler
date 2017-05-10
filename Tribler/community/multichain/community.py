@@ -310,7 +310,7 @@ class MultiChainCommunity(Community):
         return nodes
 
     @blocking_call_on_reactor_thread
-    def get_edges(self, public_key=None, list_of_nodes=None):
+    def get_edges(self, list_of_nodes=None):
         """
         Returns a dictionary with all edges between certain nodes around a certain focus node, regarding the local multichain database
 
@@ -318,8 +318,6 @@ class MultiChainCommunity(Community):
         :param list_of_nodes: the list of nodes between which the edges have to be returned
         :return: a dictionary with edges
         """
-        if public_key is None:
-            public_key = self.my_member.public_key
         # TODO: make call instead of using dummy data
         # for pair in itertools.combinations(list_of_nodes, 2):
         #    list_of_edges.append(self.persistence.get_edge(*pair))
