@@ -309,8 +309,34 @@ class MultiChainCommunity(Community):
             nodes[current]["total_down"] = current_statistics["total down"]
         return nodes
 
-    
-    @inlineCallbacks
+    @blocking_call_on_reactor_thread
+    def get_edges(self, public_key=None, list_of_nodes=None):
+        """
+        Returns a dictionary with all edges between certain nodes around a certain focus node, regarding the local multichain database
+
+        :param public_key: the public key of the focus node
+        :param list_of_nodes: the list of nodes between which the edges have to be returned
+        :return: a dictionary with edges
+        """
+        if public_key is None:
+            public_key = self.my_member.public_key
+        # TODO: make call instead of using dummy data
+        # for pair in itertools.combinations(list_of_nodes, 2):
+        #    list_of_edges.append(self.persistence.get_edge(*pair))
+        list_of_edges = [["abc", "def", 34243543, 3424542], ["abc", "ghi", 12342134, 5434323],
+                         ["abc", "xyz", 6789076, 6789672], ["def", "ghi", 67890765, 7686532],
+                         ["def", "xyz", 3456789, 67892323], ["ghi", "xyz", 67897612, 43432322]]
+        number_of_edges = len(list_of_edges)
+        edges = []
+        for current in range(number_of_edges):
+            edges[current] = dict()
+            edges[current]["from"] = list_of_edges[current][0]
+            edges[current]["to"] = list_of_edges[current][1]
+            edges[current]["size"] = self.compute_edge_size(list_of_edges[current][2], list_of_edges[current][3])
+        return edges
+
+
+@inlineCallbacks
     def unload_community(self):
         self.logger.debug("Unloading the MultiChain Community.")
         if self.notifier:
