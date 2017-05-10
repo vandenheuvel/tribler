@@ -286,8 +286,8 @@ class MultiChainCommunity(Community):
     @blocking_call_on_reactor_thread
     def get_nodes(self, public_key=None, neighbor_radius=1):
         """
-        Returns a dictionary with the neighboring nodes of a certain focus node within a certain radius,
-            regarding the local multichain database
+        Return a dictionary with the neighboring nodes of a certain focus node within a certain radius,
+            regarding the local multichain database.
 
         :param public_key: the public key of the focus node
         :param neighbor_radius: the radius within which the neighbors have to be returned
@@ -317,8 +317,8 @@ class MultiChainCommunity(Community):
     @blocking_call_on_reactor_thread
     def get_edges(self, nodes=None):
         """
-        Returns a dictionary with all edges between certain nodes around a certain focus node,
-            regarding the local multichain database
+        Return a dictionary with all edges between certain nodes around a certain focus node,
+            regarding the local multichain database.
 
         :param public_key: the public key of the focus node
         :param nodes: the dictionary of nodes between which the edges have to be returned
@@ -328,28 +328,21 @@ class MultiChainCommunity(Community):
         # TODO: make call instead of using dummy data
         # for pair in itertools.combinations(list_of_nodes, 2):
         #    list_of_edges.append(self.persistence.get_edge(*pair))
-        list_of_edges = [["abc", "def", 0, 0], ["def", "abc", 0, 0], ["abc", "ghi", 0, 0], ["ghi", "abc", 0, 0],
-                         ["abc", "xyz", 0, 0], ["xyz", "abc", 0, 0], ["def", "ghi", 0, 0], ["ghi", "def", 0, 0],
-                         ["def", "xyz", 0, 0], ["xyz", "def", 0, 0], ["ghi", "xyz", 0, 0], ["xyz", "ghi", 0, 0]]
+        list_of_edges = [["abc", "def", 0, 0], ["abc", "ghi", 0, 0],
+                         ["abc", "xyz", 0, 0], ["def", "ghi", 0, 0],
+                         ["def", "xyz", 0, 0], ["ghi", "xyz", 0, 0]]
         number_of_edges = len(list_of_edges)
         edges = []
         for current in range(number_of_edges):
-            edges[current] = dict()
-            edges[current]["from"] = list_of_edges[current][0]
-            edges[current]["to"] = list_of_edges[current][1]
-            edges[current]["size"] = self.compute_edge_size(list_of_edges[current][2], list_of_edges[current][3])
+            edges[2 * current] = dict()
+            edges[2 * current]["from"] = list_of_edges[current][0]
+            edges[2 * current]["to"] = list_of_edges[current][1]
+            edges[2 * current]["amount"] = list_of_edges[current][2]
+            edges[2 * current + 1] = dict()
+            edges[2 * current + 1]["from"] = list_of_edges[current][1]
+            edges[2 * current + 1]["to"] = list_of_edges[current][0]
+            edges[2 * current + 1]["amount"] = list_of_edges[current][3]
         return edges
-
-    def compute_edge_size(self, up=0, down=0):
-        """
-        Computes an edge size, according to the total upload/download rate over that edge
-
-        :param up: the amount of uploaded data
-        :param down: the amount of downloaded data
-        :return: the edge size
-        """
-        # TODO: use more sophisticated metric
-        return up - down
 
 
     @inlineCallbacks
