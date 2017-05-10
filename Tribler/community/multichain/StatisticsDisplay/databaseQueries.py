@@ -11,14 +11,14 @@ class DatabaseQueries(object):
             """
 
     # Query to find how much a node uploaded to others
-    total_self_up_query = "SELECT sum(up) FROM multi_chain where hex(public_key_requester) = ?"
+    total_self_up_query =    "SELECT sum(up) FROM multi_chain where hex(public_key_requester) = ?"
     # Query to find how much a ohters downloaded from a node
-    total_other_down_query = "SELECT sum(down) FROM multi_chain WHERE hex(public_key_responder = ?)"
+    total_other_down_query = "SELECT sum(down) FROM multi_chain where hex(public_key_responder) = ?"
 
     # Query to find how much a node downloaded to others
     total_self_down_query = "SELECT sum(down) FROM multi_chain where hex(public_key_requester) = ?"
     # Query to find how much others uploaded to a node
-    total_other_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_responder = ?)"
+    total_other_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_responder) = ?"
 
     # Query to find how much a node uploaded to a neighbor
     neighbor_self_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_requester) = ?" \
@@ -107,5 +107,8 @@ class DatabaseQueries(object):
     ('7', '6',  12,   5,    0, 0, 0, '', '', 'z', 0, 0, 0, 'a', '', ''),
     
     ('9', '10', 51,   123,  0, 0, 0, '', '', '0', 0, 0, 0, 'a', '', ''),
-    ('10', '9', 76,   5,    0, 0, 0, '', '', '1', 0, 0, 0, 'a', '', '')
+    ('10', '9', 76,   5,    0, 0, 0, '', '', '1', 0, 0, 0, 'a', '', ''),
+    
+    ('c', 'a',  10,   2,    0, 0, 0, '', '', '2', 0, 0, 0, 'a', '', ''),
+    ('b', 'c',  5,    1,    0, 0, 0, '', '', '3', 0, 0, 0, 'a', '', '')
     """

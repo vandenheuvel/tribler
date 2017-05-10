@@ -33,6 +33,9 @@ class TestStatisticsDatabase(BaseTestCase):
         yield super(TestStatisticsDatabase, self).setUp()
         self.driver = DbDriver()
         self.focus_node = NetworkNode("30", self.driver)  # hardcoded hex of focus node
+        self.edge_node_a = NetworkNode("61", self.driver)
+        self.edge_node_b = NetworkNode("62", self.driver)
+        self.fake_node = NetworkNode("0", self.driver)
 
     def test_get_neighbors(self):
         # Arrange
@@ -40,19 +43,75 @@ class TestStatisticsDatabase(BaseTestCase):
         # Act
         result_list = self.focus_node.neighbor_keys
         # Assert
-        self.assertEqual(sorted(expected_result), sorted(result_list), "List of neighbors in other than expected")
+        self.assertEqual(sorted(expected_result), sorted(result_list))
+
+    def test_get_neighbors_non_existent(self):
+        # Arrange
+        expected_result = []
+        # Act
+        result_list = self.fake_node.neighbor_keys
+        # Assert
+        self.assertEqual(sorted(expected_result), sorted(result_list))
+
+    def test_total_up_init(self):
+        # Act
+        focus_up = self.focus_node.total_uploaded
+        # Assert
+        self.assertEqual(focus_up, -1)
 
     def test_total_up(self):
         # Act
         focus_up = self.focus_node.total_up()
         # Assert
-        self.assertEqual(focus_up, 1224, "Total up other than expected: %d" % focus_up)
+        self.assertEqual(focus_up, 247)
+
+    def test_total_up_only_up(self):
+        # Act
+        focus_up = self.edge_node_b.total_up()
+        # Assert
+        self.assertEqual(focus_up, 5)
+
+    def test_total_up_only_down(self):
+        # Act
+        focus_up = self.edge_node_a.total_up()
+        # Assert
+        self.assertEqual(focus_up, 2)
+
+    def test_total_up_fake(self):
+        # Act
+        focus_up = self.fake_node.total_up()
+        # Assert
+        self.assertEqual(focus_up, 0)
+
+    def test_total_down_init(self):
+        # Act
+        focus_down = self.focus_node.total_downloaded
+        # Assert
+        self.assertEqual(focus_down, -1)
 
     def test_total_down(self):
         # Act
         focus_down = self.focus_node.total_down()
         # Assert
-        self.assertEqual(focus_down, 3881, "Total down other than expected: %d" % focus_down)
+        self.assertEqual(focus_down, 963)
+
+    def test_total_down_only_down(self):
+        # Act
+        focus_down = self.edge_node_a.total_down()
+        # Assert
+        self.assertEqual(focus_down, 10)
+
+    def test_total_down_only_up(self):
+        # Act
+        focus_down = self.edge_node_b.total_down()
+        # Assert
+        self.assertEqual(focus_down, 1)
+
+    def test_total_down_fake(self):
+        # Act
+        focus_down = self.fake_node.total_down()
+        # Assert
+        self.assertEqual(focus_down, 0)
 
     def test_neighbor_up(self):
         # Arrange
@@ -60,7 +119,25 @@ class TestStatisticsDatabase(BaseTestCase):
         # Act
         neighbor_up = self.focus_node.neighbor_up(neighbor_key)
         # Assert
-        self.assertEqual(neighbor_up, 28, "Neighbor up other than expected: %d" % neighbor_up)
+        self.assertEqual(neighbor_up, 28)
+
+    def test_neighbor_up_only_up(self):
+        # Act
+        focus_up = self.edge_node_b.neighbor_up("63")
+        # Assert
+        self.assertEqual(focus_up, 5)
+
+    def test_neighbor_up_only_down(self):
+        # Act
+        focus_up = self.edge_node_a.neighbor_up("63")
+        # Assert
+        self.assertEqual(focus_up, 2)
+
+    def test_neighbor_up_fake(self):
+        # Act
+        focus_up = self.fake_node.neighbor_up("30")
+        # Assert
+        self.assertEqual(focus_up, 0)
 
     def test_neighbor_down(self):
         # Arrange
@@ -68,12 +145,22 @@ class TestStatisticsDatabase(BaseTestCase):
         # Act
         neighbor_down = self.focus_node.neighbor_down(neighbor_key)
         # Assert
-        self.assertEqual(neighbor_down, 54, "Neighbor down other than expected: %d" % neighbor_down)
+        self.assertEqual(neighbor_down, 54)
 
-    def test_neighbor_up_not_neighbor(self):
-        # Arrange
-        neighbor_key = "41"
+    def test_neighbor_down_only_down(self):
         # Act
-        neighbor_up = self.focus_node.neighbor_up(neighbor_key)
+        focus_down = self.edge_node_a.neighbor_down("63")
         # Assert
-        self.assertEqual(neighbor_up, 0, "Neighbor up other than expected: %d" % neighbor_up)
+        self.assertEqual(focus_down, 10)
+
+    def test_neighbor_down_only_up(self):
+        # Act
+        focus_down = self.edge_node_b.neighbor_down("63")
+        # Assert
+        self.assertEqual(focus_down, 1)
+
+    def test_neighbor_down_fake(self):
+        # Act
+        focus_up = self.fake_node.neighbor_up("30")
+        # Assert
+        self.assertEqual(focus_up, 0)

@@ -21,7 +21,7 @@ class DbDriver(object):
 
         :param database: Location of the database, memory if none is given.
         """
-        self.connection = sqlite3.connect(default_database)
+        self.connection = sqlite3.connect(database)
         self.cursor = self.connection.cursor()
         if database == default_database:
             self.cursor.execute(DatabaseQueries.create_table_query)
