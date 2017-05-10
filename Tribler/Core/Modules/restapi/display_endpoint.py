@@ -98,8 +98,15 @@ class DisplayEndpoint(resource.Resource):
                 request.args["neighbor_level"][0].isdigit():
             neighbor_level = int(request.args["neighbor_level"][0])
 
-        # TODO: Remove dummy return and change to aggregated data calculation
-        return json.dumps({"focus_node": request.args["focus_node"][0],
+        mc_community = self.get_multichain_community()
+        if not mc_community:
+            request.setResponseCode(http.NOT_FOUND)
+            return json.dumps({"error": "multichain community not found"})
+
+        focus_node = request.args["focus_node"][0]
+        nodes = mc_community.get_nodes(focus_node, neighbor_level)
+        edges = mc_community.get_edges(nodes)
+        return json.dumps({"focus_node": focus_node,
                            "neighbor_level": neighbor_level,
-                           "nodes": [{"public_key": "xyz", "total_up": 0, "total_down": 0}],
-                           "edges": []})
+                           "nodes": nodes,
+                           "edges": edges})
