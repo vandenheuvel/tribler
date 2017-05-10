@@ -39,18 +39,18 @@ class TestDisplayEndpoint(AbstractApiTest):
                                  {"public_key": "ghi", "total_up": 0, "total_down": 0},
                                  {"public_key": "xyz", "total_up": 0, "total_down": 0}],
                        "edges":
-                           [{"from": "abc", "to": "def", "size": 0},
-                            {"from": "def", "to": "abc", "size": 0},
-                            {"from": "abc", "to": "ghi", "size": 0},
-                            {"from": "ghi", "to": "abc", "size": 0},
-                            {"from": "abc", "to": "xyz", "size": 0},
-                            {"from": "xyz", "to": "abc", "size": 0},
-                            {"from": "def", "to": "ghi", "size": 0},
-                            {"from": "ghi", "to": "def", "size": 0},
-                            {"from": "def", "to": "xyz", "size": 0},
-                            {"from": "xyz", "to": "def", "size": 0},
-                            {"from": "ghi", "to": "xyz", "size": 0},
-                            {"from": "xyz", "to": "ghi", "size": 0}]}
+                           [{"from": "abc", "to": "def", "amount": 0},
+                            {"from": "def", "to": "abc", "amount": 0},
+                            {"from": "abc", "to": "ghi", "amount": 0},
+                            {"from": "ghi", "to": "abc", "amount": 0},
+                            {"from": "abc", "to": "xyz", "amount": 0},
+                            {"from": "xyz", "to": "abc", "amount": 0},
+                            {"from": "def", "to": "ghi", "amount": 0},
+                            {"from": "ghi", "to": "def", "amount": 0},
+                            {"from": "def", "to": "xyz", "amount": 0},
+                            {"from": "xyz", "to": "def", "amount": 0},
+                            {"from": "ghi", "to": "xyz", "amount": 0},
+                            {"from": "xyz", "to": "ghi", "amount": 0}]}
         return self.do_request('display?focus_node=xyz&neighbor_level=x', expected_code=200, expected_json=exp_message)
 
     @deferred(timeout=10)

@@ -79,7 +79,7 @@ class DisplayEndpoint(resource.Resource):
                     "edges": [{
                         "from": "xyz",
                         "to": "xyz_n1",
-                        "size": 12384
+                        "amount": 12384
                     }, ...]
                 }
 
