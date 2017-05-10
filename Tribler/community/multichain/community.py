@@ -3,7 +3,7 @@ The MultiChain Community is the first step in an incremental approach in buildin
 This reputation system builds a tamper proof interaction history contained in a chain data-structure.
 Every node has a chain and these chains intertwine by blocks shared by chains.
 """
-import logging
+import logging, itertools
 from twisted.internet.defer import inlineCallbacks
 
 from twisted.internet import reactor
@@ -282,6 +282,34 @@ class MultiChainCommunity(Community):
             statistics["total_down"] = 0
         return statistics
 
+    @blocking_call_on_reactor_thread
+    def get_nodes(self, public_key=None, neighbor_radius=1):
+        """
+        Returns a dictionary with the neighboring nodes of a certain focus node within a certain radius, regarding the local multichain database
+
+        :param public_key: the public key of the focus node
+        :param neighbor_radius: the radius within which the neighbors have to be returned
+        :return: a dictionary with nodes
+        """
+        if public_key is None:
+            public_key = self.my_member.public_key
+        # TODO: make call instead of using dummy data
+        #list_of_nodes = self.persistence.get_list_of_nodes(public_key, neighbor_radius)
+        list_of_nodes = ["abc", "def", "ghi"]
+        if public_key not in list_of_nodes:
+            list_of_nodes.append(public_key)
+        number_of_nodes = len(list_of_nodes)
+        nodes = []
+        for current in range(number_of_nodes):
+            current_key = list_of_nodes[current]
+            current_statistics = self.get_statistics(current_key)
+            nodes[current] = dict()
+            nodes[current]["public_key"] = current_key.encode("hex")
+            nodes[current]["total_up"] = current_statistics["total_up"]
+            nodes[current]["total_down"] = current_statistics["total down"]
+        return nodes
+
+    
     @inlineCallbacks
     def unload_community(self):
         self.logger.debug("Unloading the MultiChain Community.")
