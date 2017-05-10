@@ -4,6 +4,7 @@ Handle HTTP requests for the trust display, whilst validating the arguments and 
 import json
 
 from twisted.web import http, resource
+from Tribler.community.multichain.community import MultiChainCommunity
 
 
 class DisplayEndpoint(resource.Resource):
@@ -19,6 +20,15 @@ class DisplayEndpoint(resource.Resource):
         """
         resource.Resource.__init__(self)
         self.session = session
+
+    def get_multichain_community(self):
+        """
+        Search for the multichain community in the dispersy communities.
+        """
+        for community in self.session.get_dispersy_instance().get_communities():
+            if isinstance(community, MultiChainCommunity):
+                return community
+        return None
 
     @staticmethod
     def return_400(request, message="your request seems to be wrong"):
