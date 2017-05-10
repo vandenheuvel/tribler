@@ -11,7 +11,7 @@ class DatabaseQueries(object):
             """
 
     # Query to find how much a node uploaded to others
-    total_self_up_query =    "SELECT sum(up) FROM multi_chain where hex(public_key_requester) = ?"
+    total_self_up_query = "SELECT sum(up) FROM multi_chain where hex(public_key_requester) = ?"
     # Query to find how much a ohters downloaded from a node
     total_other_down_query = "SELECT sum(down) FROM multi_chain where hex(public_key_responder) = ?"
 

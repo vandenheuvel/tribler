@@ -37,13 +37,18 @@ class TestStatisticsDatabase(BaseTestCase):
         self.edge_node_b = NetworkNode("62", self.driver)
         self.fake_node = NetworkNode("0", self.driver)
 
+    # Tests for the neighbor query
+
     def test_get_neighbors(self):
         # Arrange
-        expected_result = ["31", "32", "33", "34"]
+        expected_result_focus = ["31", "32", "33", "34"]
+        expected_result_fake = []
         # Act
-        result_list = self.focus_node.neighbor_keys
+        result_list_focus = self.focus_node.neighbor_keys
+        result_list_fake = self.fake_node.neighbor_keys
         # Assert
-        self.assertEqual(sorted(expected_result), sorted(result_list))
+        self.assertEqual(sorted(expected_result_focus), sorted(result_list_focus))
+        self.assertEqual(sorted(expected_result_fake), sorted(result_list_fake))
 
     def test_get_neighbors_non_existent(self):
         # Arrange
@@ -52,6 +57,8 @@ class TestStatisticsDatabase(BaseTestCase):
         result_list = self.fake_node.neighbor_keys
         # Assert
         self.assertEqual(sorted(expected_result), sorted(result_list))
+
+    # Tests for the total up
 
     def test_total_up_init(self):
         # Act
@@ -83,6 +90,8 @@ class TestStatisticsDatabase(BaseTestCase):
         # Assert
         self.assertEqual(focus_up, 0)
 
+    # Tests for the total down
+
     def test_total_down_init(self):
         # Act
         focus_down = self.focus_node.total_downloaded
@@ -113,11 +122,11 @@ class TestStatisticsDatabase(BaseTestCase):
         # Assert
         self.assertEqual(focus_down, 0)
 
+    # Tests for neighbor up
+
     def test_neighbor_up(self):
-        # Arrange
-        neighbor_key = "31"
         # Act
-        neighbor_up = self.focus_node.neighbor_up(neighbor_key)
+        neighbor_up = self.focus_node.neighbor_up("31")
         # Assert
         self.assertEqual(neighbor_up, 28)
 
@@ -139,11 +148,11 @@ class TestStatisticsDatabase(BaseTestCase):
         # Assert
         self.assertEqual(focus_up, 0)
 
+    # Tests for neighbor down
+
     def test_neighbor_down(self):
-        # Arrange
-        neighbor_key = "31"
         # Act
-        neighbor_down = self.focus_node.neighbor_down(neighbor_key)
+        neighbor_down = self.focus_node.neighbor_down("31")
         # Assert
         self.assertEqual(neighbor_down, 54)
 
