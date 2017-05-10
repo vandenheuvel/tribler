@@ -305,7 +305,7 @@ class MultiChainCommunity(Community):
         for current in range(number_of_nodes):
             current_key = list_of_nodes[current]
             current_statistics = self.get_statistics(current_key)
-            nodes[current] = dict()
+            nodes.append(dict())
             #nodes[current]["public_key"] = current_key.encode("hex")
             #nodes[current]["total_up"] = current_statistics["total_up"]
             #nodes[current]["total_down"] = current_statistics["total down"]
@@ -334,11 +334,11 @@ class MultiChainCommunity(Community):
         number_of_edges = len(list_of_edges)
         edges = []
         for current in range(number_of_edges):
-            edges[2 * current] = dict()
+            edges.append(dict())
             edges[2 * current]["from"] = list_of_edges[current][0]
             edges[2 * current]["to"] = list_of_edges[current][1]
             edges[2 * current]["amount"] = list_of_edges[current][2]
-            edges[2 * current + 1] = dict()
+            edges.append(dict())
             edges[2 * current + 1]["from"] = list_of_edges[current][1]
             edges[2 * current + 1]["to"] = list_of_edges[current][0]
             edges[2 * current + 1]["amount"] = list_of_edges[current][3]
