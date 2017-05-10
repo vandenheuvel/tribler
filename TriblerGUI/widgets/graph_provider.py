@@ -1,7 +1,6 @@
 """
 Provides a class which encapsulates the graph construction logic.
 """
-
 import networkx as nx
 from matplotlib import pyplot
 

@@ -1,7 +1,6 @@
 """
 Provides a class which initializes the Trust Display Qt elements.
 """
-
 from PyQt5.QtWidgets import QWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 
