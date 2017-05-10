@@ -83,8 +83,7 @@ class GraphProvider():
 
             for node in self.peers:
                 distance = pow(cursor_x - node[0], 2) + pow(cursor_y - node[1], 2)
-                print "distance: ", distance
-                if distance < 1:
+                if distance < 0.5:
                     print "you clicked node: ", node
 
         self.canvas.mpl_connect('button_press_event', handle_mouseclick)
