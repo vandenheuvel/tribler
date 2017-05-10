@@ -306,9 +306,12 @@ class MultiChainCommunity(Community):
             current_key = list_of_nodes[current]
             current_statistics = self.get_statistics(current_key)
             nodes[current] = dict()
-            nodes[current]["public_key"] = current_key.encode("hex")
-            nodes[current]["total_up"] = current_statistics["total_up"]
-            nodes[current]["total_down"] = current_statistics["total down"]
+            #nodes[current]["public_key"] = current_key.encode("hex")
+            #nodes[current]["total_up"] = current_statistics["total_up"]
+            #nodes[current]["total_down"] = current_statistics["total down"]
+            nodes[current]["public_key"] = current_key
+            nodes[current]["total_up"] = 0
+            nodes[current]["total_down"] = 0
         return nodes
 
     @blocking_call_on_reactor_thread
@@ -325,9 +328,9 @@ class MultiChainCommunity(Community):
         # TODO: make call instead of using dummy data
         # for pair in itertools.combinations(list_of_nodes, 2):
         #    list_of_edges.append(self.persistence.get_edge(*pair))
-        list_of_edges = [["abc", "def", 34243543, 3424542], ["abc", "ghi", 12342134, 5434323],
-                         ["abc", "xyz", 6789076, 6789672], ["def", "ghi", 67890765, 7686532],
-                         ["def", "xyz", 3456789, 67892323], ["ghi", "xyz", 67897612, 43432322]]
+        list_of_edges = [["abc", "def", 0, 0], ["def", "abc", 0, 0], ["abc", "ghi", 0, 0], ["ghi", "abc", 0, 0],
+                         ["abc", "xyz", 0, 0], ["xyz", "abc", 0, 0], ["def", "ghi", 0, 0], ["ghi", "def", 0, 0],
+                         ["def", "xyz", 0, 0], ["xyz", "def", 0, 0], ["ghi", "xyz", 0, 0], ["xyz", "ghi", 0, 0]]
         number_of_edges = len(list_of_edges)
         edges = []
         for current in range(number_of_edges):
