@@ -286,7 +286,7 @@ class MultiChainCommunity(Community):
     @blocking_call_on_reactor_thread
     def get_nodes(self, public_key=None, neighbor_radius=1):
         """
-        Returns a dictionary with the neighboring nodes of a certain focus node within a certain radius, 
+        Returns a dictionary with the neighboring nodes of a certain focus node within a certain radius,
             regarding the local multichain database
 
         :param public_key: the public key of the focus node
@@ -314,7 +314,7 @@ class MultiChainCommunity(Community):
     @blocking_call_on_reactor_thread
     def get_edges(self, nodes=None):
         """
-        Returns a dictionary with all edges between certain nodes around a certain focus node, 
+        Returns a dictionary with all edges between certain nodes around a certain focus node,
             regarding the local multichain database
 
         :param public_key: the public key of the focus node
