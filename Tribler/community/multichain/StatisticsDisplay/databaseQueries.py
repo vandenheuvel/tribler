@@ -14,26 +14,26 @@ class DatabaseQueries(object):
     total_self_up_query = "SELECT sum(up) FROM multi_chain where hex(public_key_requester) = ?"
     # Query to find how much a ohters downloaded from a node
     total_other_down_query = "SELECT sum(down) FROM multi_chain WHERE hex(public_key_responder = ?)"
-   
+
     # Query to find how much a node downloaded to others
     total_self_down_query = "SELECT sum(down) FROM multi_chain where hex(public_key_requester) = ?"
     # Query to find how much others uploaded to a node
     total_other_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_responder = ?)"
-   
+
     # Query to find how much a node uploaded to a neighbor
     neighbor_self_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_requester) = ?" \
                              "AND hex(public_key_responder) = ?"
     # Query to find how much a neighbor downloaded from a node
     neighbor_other_down_query = "SELECT sum(down) FROM multi_chain WHERE hex(public_key_responder) = ?" \
                                 "AND hex(public_key_requester) = ?"
-   
+
     # Query to find how much a node downloaded from a neighbor
     neighbor_self_down_query = "SELECT sum(down) FROM multi_chain WHERE hex(public_key_requester) = ?" \
                                "AND hex(public_key_responder) = ?"
     # Query to find how much a neighbor uploaded to a node
     neighbor_other_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_responder) = ?" \
                               "AND hex(public_key_requester) = ?"
-   
+
     # Queries to create a dummy database
 
     # Create table for dummy data
