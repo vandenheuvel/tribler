@@ -32,24 +32,25 @@ class TestDisplayEndpoint(AbstractApiTest):
         Test whether the API uses the default neighbor_level if the parameter is set to a string.
         """
         # TODO: The dummy data is now expected, make sure to rewrite test if actual implementation is used
-        exp_message = {"focus_node": "xyz", "neighbor_level": 1, "nodes": [{"public_key": "abc", "total_up": 0,
-                                                                            "total_down": 0}, {"public_key": "def",
-                                                                            "total_up": 0, "total_down": 0},
-                                                                           {"public_key": "ghi", "total_up": 0,
-                                                                            "total_down": 0}, {"public_key": "xyz",
-                                                                            "total_up": 0, "total_down": 0}], "edges":
-                                                                            [{"from": "abc", "to": "def", "size": 0},
-                                                                             {"from": "def", "to": "abc", "size": 0},
-                                                                             {"from": "abc", "to": "ghi", "size": 0},
-                                                                             {"from": "ghi", "to": "abc", "size": 0},
-                                                                             {"from": "abc", "to": "xyz", "size": 0},
-                                                                             {"from": "xyz", "to": "abc", "size": 0},
-                                                                             {"from": "def", "to": "ghi", "size": 0},
-                                                                             {"from": "ghi", "to": "def", "size": 0},
-                                                                             {"from": "def", "to": "xyz", "size": 0},
-                                                                             {"from": "xyz", "to": "def", "size": 0},
-                                                                             {"from": "ghi", "to": "xyz", "size": 0},
-                                                                             {"from": "xyz", "to": "ghi", "size": 0}]}
+        exp_message = {"focus_node": "xyz",
+                       "neighbor_level": 1,
+                       "nodes": [{"public_key": "abc", "total_up": 0, "total_down": 0},
+                                 {"public_key": "def", "total_up": 0, "total_down": 0},
+                                 {"public_key": "ghi", "total_up": 0, "total_down": 0},
+                                 {"public_key": "xyz", "total_up": 0, "total_down": 0}],
+                       "edges":
+                           [{"from": "abc", "to": "def", "size": 0},
+                            {"from": "def", "to": "abc", "size": 0},
+                            {"from": "abc", "to": "ghi", "size": 0},
+                            {"from": "ghi", "to": "abc", "size": 0},
+                            {"from": "abc", "to": "xyz", "size": 0},
+                            {"from": "xyz", "to": "abc", "size": 0},
+                            {"from": "def", "to": "ghi", "size": 0},
+                            {"from": "ghi", "to": "def", "size": 0},
+                            {"from": "def", "to": "xyz", "size": 0},
+                            {"from": "xyz", "to": "def", "size": 0},
+                            {"from": "ghi", "to": "xyz", "size": 0},
+                            {"from": "xyz", "to": "ghi", "size": 0}]}
         return self.do_request('display?focus_node=xyz&neighbor_level=x', expected_code=200, expected_json=exp_message)
 
     @deferred(timeout=10)
@@ -58,22 +59,23 @@ class TestDisplayEndpoint(AbstractApiTest):
         Test whether the API uses the actual neighbor_level if the parameter is set.
         """
         # TODO: The dummy data is now expected, make sure to rewrite test if actual implementation is used
-        exp_message = {"focus_node": "xyz", "neighbor_level": 0, "nodes": [{"public_key": "abc", "total_up": 0,
-                                                                            "total_down": 0}, {"public_key": "def",
-                                                                            "total_up": 0, "total_down": 0},
-                                                                           {"public_key": "ghi", "total_up": 0,
-                                                                            "total_down": 0}, {"public_key": "xyz",
-                                                                            "total_up": 0, "total_down": 0}], "edges":
-                                                                            [{"from": "abc", "to": "def", "size": 0},
-                                                                             {"from": "def", "to": "abc", "size": 0},
-                                                                             {"from": "abc", "to": "ghi", "size": 0},
-                                                                             {"from": "ghi", "to": "abc", "size": 0},
-                                                                             {"from": "abc", "to": "xyz", "size": 0},
-                                                                             {"from": "xyz", "to": "abc", "size": 0},
-                                                                             {"from": "def", "to": "ghi", "size": 0},
-                                                                             {"from": "ghi", "to": "def", "size": 0},
-                                                                             {"from": "def", "to": "xyz", "size": 0},
-                                                                             {"from": "xyz", "to": "def", "size": 0},
-                                                                             {"from": "ghi", "to": "xyz", "size": 0},
-                                                                             {"from": "xyz", "to": "ghi", "size": 0}]}
+        exp_message = {"focus_node": "xyz",
+                       "neighbor_level": 1,
+                       "nodes": [{"public_key": "abc", "total_up": 0, "total_down": 0},
+                                 {"public_key": "def", "total_up": 0, "total_down": 0},
+                                 {"public_key": "ghi", "total_up": 0, "total_down": 0},
+                                 {"public_key": "xyz", "total_up": 0, "total_down": 0}],
+                       "edges":
+                           [{"from": "abc", "to": "def", "size": 0},
+                            {"from": "def", "to": "abc", "size": 0},
+                            {"from": "abc", "to": "ghi", "size": 0},
+                            {"from": "ghi", "to": "abc", "size": 0},
+                            {"from": "abc", "to": "xyz", "size": 0},
+                            {"from": "xyz", "to": "abc", "size": 0},
+                            {"from": "def", "to": "ghi", "size": 0},
+                            {"from": "ghi", "to": "def", "size": 0},
+                            {"from": "def", "to": "xyz", "size": 0},
+                            {"from": "xyz", "to": "def", "size": 0},
+                            {"from": "ghi", "to": "xyz", "size": 0},
+                            {"from": "xyz", "to": "ghi", "size": 0}]}
         return self.do_request('display?focus_node=xyz&neighbor_level=0', expected_code=200, expected_json=exp_message)
