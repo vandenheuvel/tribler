@@ -26,4 +26,6 @@ class TrustPage(QWidget):
         vertical_layout = self.window().network_widget.layout()
         graph_data = GraphProvider()
         self.network_graph = FigureCanvas(graph_data.provide_figure())
+        graph_data.set_canvas(self.network_graph)
+        graph_data.register_click_events()
         vertical_layout.addWidget(self.network_graph)

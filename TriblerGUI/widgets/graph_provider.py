@@ -12,6 +12,10 @@ class GraphProvider():
     Provides the matplotlib figure of the network.
     """
 
+    def __init__(self):
+        self.canvas = None
+        self.peers = None
+
     def provide_figure(self):
         """
         Provide the matplotlib figure computed from the multichain data.
@@ -41,7 +45,7 @@ class GraphProvider():
         relative_angle = (2 * math.pi) / node_count
 
         # Compute position of peers
-        peers = [polar_to_cartesian(center_x, center_y, radius, x * relative_angle) for x in range(node_count)]
+        self.peers = [polar_to_cartesian(center_x, center_y, radius, x * relative_angle) for x in range(node_count)]
 
         def draw_node(pos, color):
             """ Draw a networkx node with a specified color """
@@ -65,7 +69,22 @@ class GraphProvider():
 
         # Draw the first level neighbors and edges to them
         for x in range(node_count):
-            draw_node(peers[x], 'g')
-            draw_edge(focus_node, peers[x], up_down[x][0], up_down[x][1])
-            
+            draw_node(self.peers[x], 'g')
+            draw_edge(focus_node, self.peers[x], up_down[x][0], up_down[x][1])
+
         return fig
+
+    def set_canvas(self, canvas):
+        self.canvas = canvas
+
+    def register_click_events(self):
+        def handle_mouseclick(event):
+            (cursor_x, cursor_y) = (event.xdata, event.ydata)
+
+            for node in self.peers:
+                distance = pow(cursor_x - node[0], 2) + pow(cursor_y - node[1], 2)
+                print "distance: ", distance
+                if distance < 1:
+                    print "you clicked node: ", node
+
+        self.canvas.mpl_connect('button_press_event', handle_mouseclick)
