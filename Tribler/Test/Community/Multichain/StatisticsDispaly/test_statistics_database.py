@@ -50,14 +50,6 @@ class TestStatisticsDatabase(BaseTestCase):
         self.assertEqual(sorted(expected_result_focus), sorted(result_list_focus))
         self.assertEqual(sorted(expected_result_fake), sorted(result_list_fake))
 
-    def test_get_neighbors_non_existent(self):
-        # Arrange
-        expected_result = []
-        # Act
-        result_list = self.fake_node.neighbor_keys
-        # Assert
-        self.assertEqual(sorted(expected_result), sorted(result_list))
-
     # Tests for the total up
 
     def test_total_up_init(self):
