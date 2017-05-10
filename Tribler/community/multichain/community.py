@@ -3,7 +3,8 @@ The MultiChain Community is the first step in an incremental approach in buildin
 This reputation system builds a tamper proof interaction history contained in a chain data-structure.
 Every node has a chain and these chains intertwine by blocks shared by chains.
 """
-import logging, itertools
+import logging
+import itertools
 from twisted.internet.defer import inlineCallbacks
 
 from twisted.internet import reactor
@@ -285,7 +286,8 @@ class MultiChainCommunity(Community):
     @blocking_call_on_reactor_thread
     def get_nodes(self, public_key=None, neighbor_radius=1):
         """
-        Returns a dictionary with the neighboring nodes of a certain focus node within a certain radius, regarding the local multichain database
+        Returns a dictionary with the neighboring nodes of a certain focus node within a certain radius, 
+            regarding the local multichain database
 
         :param public_key: the public key of the focus node
         :param neighbor_radius: the radius within which the neighbors have to be returned
@@ -312,7 +314,8 @@ class MultiChainCommunity(Community):
     @blocking_call_on_reactor_thread
     def get_edges(self, nodes=None):
         """
-        Returns a dictionary with all edges between certain nodes around a certain focus node, regarding the local multichain database
+        Returns a dictionary with all edges between certain nodes around a certain focus node, 
+            regarding the local multichain database
 
         :param public_key: the public key of the focus node
         :param nodes: the dictionary of nodes between which the edges have to be returned
