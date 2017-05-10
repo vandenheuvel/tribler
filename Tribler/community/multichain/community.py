@@ -335,8 +335,19 @@ class MultiChainCommunity(Community):
             edges[current]["size"] = self.compute_edge_size(list_of_edges[current][2], list_of_edges[current][3])
         return edges
 
+    def compute_edge_size(self, up=0, down=0):
+        """
+        Computes an edge size, according to the total upload/download rate over that edge
 
-@inlineCallbacks
+        :param up: the amount of uploaded data
+        :param down: the amount of downloaded data
+        :return: the edge size
+        """
+        # TODO: use more sophisticated metric
+        return up - down
+
+
+    @inlineCallbacks
     def unload_community(self):
         self.logger.debug("Unloading the MultiChain Community.")
         if self.notifier:
