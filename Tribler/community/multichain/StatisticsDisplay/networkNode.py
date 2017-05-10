@@ -22,7 +22,7 @@ class NetworkNode(object):
     def total_up(self):
         """
         Finds the total amount of data uploaded by this node.
-        
+
         :return: See above.
         """
         if self.total_uploaded < 0:
@@ -32,8 +32,8 @@ class NetworkNode(object):
     def total_down(self):
         """
         Finds the total amount of data downloaded by this node.
-        
-        :return: See above. 
+
+        :return: See above.
         """
         if self.total_downloaded < 0:
             self.total_downloaded = self.driver.total_down(self)
@@ -42,7 +42,7 @@ class NetworkNode(object):
     def neighbor_up(self, neighbor_key):
         """
         Finds the amount of data this node uploaded to the neighbor with the given key.
-        
+
         :param neighbor_key: Public key of the neighbor.
         :return: The amount of data uploaded, 0 if the key does not belong to one of the neighbors.
         """
@@ -51,10 +51,8 @@ class NetworkNode(object):
     def neighbor_down(self, neighbor_key):
         """
         Finds the amount of data this node downloaded from the neighbor with the given key.
-        
+
         :param neighbor_key: Public key of the neighbor.
         :return: The amount of data downloaded, 0 if the key does not belong to one of the neighbors.
-        :param neighbor_key: 
-        :return: 
         """
         return self.driver.neighbor_down(self, neighbor_key)

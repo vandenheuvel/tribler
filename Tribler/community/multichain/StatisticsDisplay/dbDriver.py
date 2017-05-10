@@ -18,7 +18,7 @@ class DbDriver(object):
         Setup the driver by creating a connection and a cursor.
         If no input argument is given for the databse location, a new database is created
         in memory containing dummy data.
-        
+
         :param database: Location of the database, memory if none is given.
         """
         self.connection = sqlite3.connect(default_database)
@@ -31,19 +31,20 @@ class DbDriver(object):
     def neighbor_list(self, focus_node):
         """
         Return a list of keys for all neighbors of the focus.
-        
+
         :param focus_node: networkNode of the focus.
         :return: See description.
         """
         ret = []
-        for key in self.cursor.execute(DatabaseQueries.list_neighbor_query, (focus_node.public_key, focus_node.public_key)):
+        for key in self.cursor.execute(DatabaseQueries.list_neighbor_query,
+                                       (focus_node.public_key, focus_node.public_key)):
             ret.append(key[0])
         return ret
 
     def total_up(self, focus_node):
         """
         Gets the total uploaded value from the focus.
-        
+
         :param focus_node: networkNode of the focus.
         :return: Num representing the amount of uploaded data.
         """
@@ -61,7 +62,7 @@ class DbDriver(object):
     def total_down(self, focus_node):
         """
         Gets the total downloaded value from the focus.
-        
+
         :param focus_node: networkNode of the focus.
         :return: Num representing the amount of downloaded data.
         """
@@ -79,7 +80,7 @@ class DbDriver(object):
     def neighbor_up(self, focus_node, neighbor_key):
         """
         Gets the total uploaded from focus_node to neighbor.
-        
+
         :param focus_node: networkNode of the focus.
         :param neighbor_key: pulic key of the neighbor's public key.
         :return: Num with total upload to neighbor.
@@ -98,7 +99,7 @@ class DbDriver(object):
     def neighbor_down(self, focus_node, neighbor_key):
         """
         Gets the total downloaded from focus_node to neighbor.
-        
+
         :param focus_node: networkNode of the focus.
         :param neighbor_key: public key of the neighbor's public key.
         :return: Num with total download from neighbor.
