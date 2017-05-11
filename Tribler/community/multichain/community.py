@@ -299,15 +299,12 @@ class MultiChainCommunity(Community):
             public_key = self.my_member.public_key
         list_of_nodes = self.database.neighbor_list(public_key)
         if public_key not in list_of_nodes:
-            list_of_nodes[public_key] = dict()
-            list_of_nodes[public_key]["up"] = self.database.total_up(public_key)
-            list_of_nodes[public_key]["down"] = self.database.total_down(public_key)
+            list_of_nodes[public_key] = {"up": self.database.total_up(public_key),
+                                         "down": self.database.total_down(public_key)}
         nodes = []
         for current_key in list_of_nodes:
-            nodes.append(dict())
-            nodes[len(nodes) - 1]["public_key"] = current_key
-            nodes[len(nodes) - 1]["total_up"] = self.database.total_up(current_key)
-            nodes[len(nodes) - 1]["total_down"] = self.database.total_down(current_key)
+            nodes.append({"public_key": current_key, "total_up": self.database.total_up(current_key),
+                          "total_down": self.database.total_down(current_key)})
         return nodes
 
     @blocking_call_on_reactor_thread
@@ -330,15 +327,11 @@ class MultiChainCommunity(Community):
         edges = []
         for current in range(number_of_edges):
             if list_of_edges[current][2] > 0:
-                edges.append(dict())
-                edges[len(edges) - 1]["from"] = list_of_edges[current][0]
-                edges[len(edges) - 1]["to"] = list_of_edges[current][1]
-                edges[len(edges) - 1]["amount"] = list_of_edges[current][2]
+                edges.append({"from": list_of_edges[current][0], "to": list_of_edges[current][1],
+                              "amount": list_of_edges[current][2]})
             if list_of_edges[current][3] > 0:
-                edges.append(dict())
-                edges[len(edges) - 1]["from"] = list_of_edges[current][1]
-                edges[len(edges) - 1]["to"] = list_of_edges[current][0]
-                edges[len(edges) - 1]["amount"] = list_of_edges[current][3]
+                edges.append({"from": list_of_edges[current][1], "to": list_of_edges[current][0],
+                              "amount": list_of_edges[current][3]})
         return edges
 
 
