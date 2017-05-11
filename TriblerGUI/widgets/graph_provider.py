@@ -13,17 +13,22 @@ class GraphProvider():
     """
 
     def __init__(self):
-        self.canvas = None
         self.peers = None
 
-    def provide_figure(self):
+    def provide_figure(self, network_model):
         """
         Provide the matplotlib figure computed from the multichain data.
         TODO: add actual multichain data implementation, dummy data is inserted for now.
         
         :return: the matplotlib figure
         """
-        G = nx.Graph()
+        graph = nx.Graph()
+
+        display_information = network_model.retrieve_display_information()
+
+
+
+
 
         """ Dummy data of a focus node and its peers """
         up_down = [(50, 50), (91, 100), (52, 10), (20, 44), (1, 76), (17, 36)]
@@ -49,16 +54,16 @@ class GraphProvider():
 
         def draw_node(pos, color):
             """ Draw a networkx node with a specified color """
-            nx.draw_networkx_nodes(G, [pos], nodelist=[0], node_color=color)
+            nx.draw_networkx_nodes(graph, [pos], nodelist=[0], node_color=color)
 
         def draw_edge(node_a, node_b, up, down):
             """ Draw an edge with labels and separator between nodes a and b, given their exchange up and down """
             ratio = up / (up + down)
-            nx.draw_networkx_edges(G, [node_a, node_b], [(0, 1)])
-            nx.draw_networkx_edge_labels(G, [node_a, node_b], {(0, 1): `up` + "M"}, label_pos=(ratio) / 2, rotate=False)
-            nx.draw_networkx_edge_labels(G, [node_a, node_b], {(1, 0): `down` + "M"}, label_pos=(1 - ratio) / 2,
+            nx.draw_networkx_edges(graph, [node_a, node_b], [(0, 1)])
+            nx.draw_networkx_edge_labels(graph, [node_a, node_b], {(0, 1): `up` + "M"}, label_pos=(ratio) / 2, rotate=False)
+            nx.draw_networkx_edge_labels(graph, [node_a, node_b], {(1, 0): `down` + "M"}, label_pos=(1 - ratio) / 2,
                                          rotate=False)
-            nx.draw_networkx_edge_labels(G, [node_a, node_b], {(0, 1): "|"}, label_pos=ratio)
+            nx.draw_networkx_edge_labels(graph, [node_a, node_b], {(0, 1): "|"}, label_pos=ratio)
 
         # Start drawing the figure
         fig = pyplot.figure()
@@ -74,16 +79,10 @@ class GraphProvider():
 
         return fig
 
-    def set_canvas(self, canvas):
-        self.canvas = canvas
+    def handle_mouseclick(self, event):
+        (cursor_x, cursor_y) = (event.xdata, event.ydata)
 
-    def register_click_events(self):
-        def handle_mouseclick(event):
-            (cursor_x, cursor_y) = (event.xdata, event.ydata)
-
-            for node in self.peers:
-                distance = pow(cursor_x - node[0], 2) + pow(cursor_y - node[1], 2)
-                if distance < 0.5:
-                    print "you clicked node: ", node
-
-        self.canvas.mpl_connect('button_press_event', handle_mouseclick)
+        for node in self.peers:
+            distance = pow(cursor_x - node[0], 2) + pow(cursor_y - node[1], 2)
+            if distance < 0.5:
+                print "you clicked node: ", node
