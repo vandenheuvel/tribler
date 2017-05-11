@@ -2,7 +2,12 @@
 This file contains all the queries used by the database driver.
 """
 
+
 class DatabaseQueries(object):
+    """
+    Data class for all the queries used by the database driver.
+    """    
+    
     # Get all the direct neighbors of a node
     list_neighbor_query = """
             SELECT DISTINCT hex(public_key_responder) FROM multi_chain where hex(public_key_requester) = ?

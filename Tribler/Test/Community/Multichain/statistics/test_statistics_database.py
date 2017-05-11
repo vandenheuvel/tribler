@@ -32,7 +32,7 @@ class TestStatisticsDatabase(BaseTestCase):
         """
         yield super(TestStatisticsDatabase, self).setUp()
         self.driver = DbDriver()
-        self.focus_node = NetworkNode("30", self.driver)  # hardcoded hex of focus node
+        self.focus_node = NetworkNode("30", self.driver)
         self.edge_node_a = NetworkNode("61", self.driver)
         self.edge_node_b = NetworkNode("62", self.driver)
         self.fake_node = NetworkNode("0", self.driver)
@@ -103,6 +103,9 @@ class TestStatisticsDatabase(BaseTestCase):
         self.assertEqual(fake_up, 0)
 
     def test_neighbor_down(self):
+        """
+        The node should return the right amount of data downloaded from a neighbor.
+        """
         focus_down = self.focus_node.neighbor_down("31")
         self.assertEqual(focus_down, 54)
 
