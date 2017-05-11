@@ -70,28 +70,24 @@ class DatabaseDriver(object):
     def neighbor_list(self, focus_pk):
         """
         Return a dictionary containing information about all neighbors of the focus node.
-        
+
         For each neighbor, the dictionary contains a key equal to the primary key of the neighbor.
         The value stored under that key is a dictionary containing how much data has been uploaded
         and downloaded to and from that neighbor.
 
-        :param focus_pk: primary key of the focus
+        :param focus_pk: primary key of the focus node
         :return: dictionary with for each neighbor of the focus a key, value entry: primary key neighbor, dictionary
         containing the amount of data uploaded and downloaded from that neighbor
         """
         neighbors = {}
         for row in self.cursor.execute(link_to_neighbor_query, (focus_pk,)):
-            up = row[1] if row[1] is not None else 0
-            down = row[2] if row[2] is not None else 0
-            neighbors[row[0]] = {"up": up, "down": down}
-        
+            neighbors[row[0]] = {"up": row[1] or 0, "down": row[2] or 0}
+
         for row in self.cursor.execute(link_from_neighbor_query, (focus_pk,)):
-            up = row[1] if row[1] is not None else 0
-            down = row[2] if row[2] is not None else 0
             if row[0] in neighbors:
-                neighbors[row[0]]["up"] += up
-                neighbors[row[0]]["down"] += down
+                neighbors[row[0]]["up"] += row[1] or 0
+                neighbors[row[0]]["down"] += row[2] or 0
             else:
-                neighbors[row[0]] = {"up": up, "down": down}
+                neighbors[row[0]] = {"up": row[1] or 0, "down": row[2] or 0}
 
         return neighbors
