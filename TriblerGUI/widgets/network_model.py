@@ -25,7 +25,7 @@ class NetworkModel():
         self.focus_node = focus_node
         self.neighbor_level = neighbor_level
 
-    def retrieve_display_information(self):
+    def retrieve_display_information(self, callback):
         """
         Retrieve the Trust Display information from the HTTP API.
 
@@ -34,43 +34,97 @@ class NetworkModel():
         """
         url = "display?focus_node={0}".format(self.focus_node)
         url = url + "neighbor_level={0}".format(str(self.neighbor_level))
-        self._request_mgr.perform_request(url, self.process_response)
+        self._request_mgr.perform_request(url, self.get_process_response_callback(callback))
 
     @staticmethod
-    def process_response(response):
-        """
-        Process the JSON dictionary in the HTTP Response for the data used in the visualization.
+    def get_process_response_callback(callback):
+        def process_response(response):
+            """
+            Process the JSON dictionary in the HTTP Response for the data used in the visualization.
+    
+            The JSON will be converted to the following format:
+                {
+                    "focus_node": "xyz",
+                    "neighbor_level: 1
+                    "nodes": [{
+                        "public_key": "xyz",
+                        "page_rank": 5
+                    }, ...],
+                    "edges": [{
+                        "from": "xyz",
+                        "to": "xyz_n1",
+                        "amount_up": 100,
+                        "amount_down": 10,
+                        "ratio": 0.90909,
+                        "log_ratio": 0.66666
+                    }, ...]
+                }
+            
+    
+            :param response: the JSON dictionary passed on by the HTTP Request
+            """
 
-        The JSON will be converted to the following format:
-            {
-                "focus_node": "xyz",
-                "neighbor_level: 1
-                "nodes": [{
-                    "public_key": "xyz",
-                    "page_rank": 5
-                }, ...],
-                "edges": [{
-                    "from": "xyz",
-                    "to": "xyz_n1",
-                    "amount_up": 100,
-                    "amount_down": 10,
-                    "ratio": 0.90909,
-                    "log_ratio": 0.66666
-                }, ...]
-            }
+            # up_down = [(50, 50), (91, 100), (52, 10), (20, 44), (1, 76), (17, 36)]
 
+            dummy = {"edges":[
+                {
+                    "from": "x",
+                    "to": "y",
+                    "amount_up": 50,
+                    "amount_down": 50,
+                    "ratio": float(1)/11,
+                    "log_ratio": log(101) / (log(101) + log(1001))
+                },
+                {
+                    "from": "x",
+                    "to": "z",
+                    "amount_up": 91,
+                    "amount_down": 100,
+                    "ratio": 1.0,
+                    "log_ratio": 1.0
+                },
+                {
+                    "from": "x",
+                    "to": "z",
+                    "amount_up": 52,
+                    "amount_down": 0,
+                    "ratio": 1.0,
+                    "log_ratio": 1.0
+                },
+                {
+                    "from": "x",
+                    "to": "z",
+                    "amount_up": 20,
+                    "amount_down": 44,
+                    "ratio": 1.0,
+                    "log_ratio": 1.0
+                },
+                {
+                    "from": "x",
+                    "to": "z",
+                    "amount_up": 67,
+                    "amount_down": 33,
+                    "ratio": 1.0,
+                    "log_ratio": 1.0
+                }
+            ]}
 
-        :param response: the JSON dictionary passed on by the HTTP Request
-        """
-        focus_node = response["focus_node"]
+            # Don't crash on empty response
+            if not response:
+                callback(dummy)
+                return
 
-        grouped_edges = NetworkModel.group_elements(response["edges"], "from")
+            focus_node = response["focus_node"]
 
-        # TODO: Do the procedure below for each of the nodes in the graph, whilst erasing duplicates.
-        focus_node_edges = NetworkModel.get_combined_edges(grouped_edges, focus_node)
+            grouped_edges = NetworkModel.group_elements(response["edges"], "from")
 
-        # TODO: Send the data to the display to display the data
-        print {"nodes": response["nodes"], "edges": focus_node_edges}
+            # TODO: Do the procedure below for each of the nodes in the graph, whilst erasing duplicates.
+            focus_node_edges = NetworkModel.get_combined_edges(grouped_edges, focus_node)
+
+            # TODO: Send the data to the display to display the data
+            callback({"nodes": response["nodes"], "edges": focus_node_edges})
+
+        return process_response
 
     @staticmethod
     def get_combined_edges(grouped_edges, node_name):

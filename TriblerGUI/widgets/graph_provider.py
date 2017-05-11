@@ -4,7 +4,7 @@ Provides a class which encapsulates the graph construction logic.
 from __future__ import division
 import math
 import networkx as nx
-from matplotlib import pyplot
+
 
 
 class GraphProvider():
@@ -15,7 +15,7 @@ class GraphProvider():
     def __init__(self):
         self.peers = None
 
-    def provide_figure(self, network_model):
+    def provide_figure(self, data):
         """
         Provide the matplotlib figure computed from the multichain data.
         TODO: add actual multichain data implementation, dummy data is inserted for now.
@@ -24,14 +24,7 @@ class GraphProvider():
         """
         graph = nx.Graph()
 
-        display_information = network_model.retrieve_display_information()
-
-
-
-
-
-        """ Dummy data of a focus node and its peers """
-        up_down = [(50, 50), (91, 100), (52, 10), (20, 44), (1, 76), (17, 36)]
+        up_down = [(item["amount_up"], item["amount_down"]) for item in data["edges"]]
         node_count = len(up_down)
 
         # The focus node
@@ -65,10 +58,6 @@ class GraphProvider():
                                          rotate=False)
             nx.draw_networkx_edge_labels(graph, [node_a, node_b], {(0, 1): "|"}, label_pos=ratio)
 
-        # Start drawing the figure
-        fig = pyplot.figure()
-        ax = fig.add_subplot(111)
-
         # Draw the focus nodes
         draw_node(focus_node, 'g')
 
@@ -77,7 +66,7 @@ class GraphProvider():
             draw_node(self.peers[x], 'g')
             draw_edge(focus_node, self.peers[x], up_down[x][0], up_down[x][1])
 
-        return fig
+        return
 
     def handle_mouseclick(self, event):
         (cursor_x, cursor_y) = (event.xdata, event.ydata)
