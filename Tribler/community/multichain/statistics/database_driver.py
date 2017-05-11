@@ -39,14 +39,9 @@ class DatabaseDriver(object):
         :return: number representing the amount of uploaded data
         """
         total = 0
-        self.cursor.execute(total_self_up_query, (focus_pk,))
-        value = self.cursor.fetchone()[0]
-        if value is not None:
-            total += value
-        self.cursor.execute(total_other_down_query, (focus_pk,))
-        value = self.cursor.fetchone()[0]
-        if value is not None:
-            total += value
+        for query in [total_self_up_query, total_other_down_query]:
+            self.cursor.execute(query, (focus_pk,))
+            total += self.cursor.fetchone()[0] or 0
         return total
 
     def total_down(self, focus_pk):
@@ -57,14 +52,9 @@ class DatabaseDriver(object):
         :return: number representing the amount of downloaded data
         """
         total = 0
-        self.cursor.execute(total_self_down_query, (focus_pk,))
-        value = self.cursor.fetchone()[0]
-        if value is not None:
-            total += value
-        self.cursor.execute(total_other_up_query, (focus_pk,))
-        value = self.cursor.fetchone()[0]
-        if value is not None:
-            total += value
+        for query in [total_self_down_query, total_other_up_query]:
+            self.cursor.execute(query, (focus_pk,))
+            total += self.cursor.fetchone()[0] or 0
         return total
 
     def neighbor_list(self, focus_pk):
