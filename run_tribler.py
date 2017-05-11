@@ -1,7 +1,7 @@
 import os
 import sys
 import multiprocessing
-import logging
+import logging  # TODO: Remove this import
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
@@ -11,6 +11,7 @@ if __name__ == "__main__":
 
     app = TriblerApplication("triblerapp", sys.argv)
 
+    # TODO: Remove these logging lines (suppresses Tribler spamming of the console)
     logger = logging.getLogger()
     logger.disabled = True
 
