@@ -24,6 +24,7 @@ from Tribler.community.multichain.block import MultiChainBlock, ValidationResult
 from Tribler.community.multichain.payload import HalfBlockPayload, CrawlRequestPayload
 from Tribler.community.multichain.database import MultiChainDB
 from Tribler.community.multichain.conversion import MultiChainConversion
+from Tribler.community.multichain.statistics.database_driver import DatabaseDriver
 
 HALF_BLOCK = u"half_block"
 CRAWL = u"crawl"
@@ -59,6 +60,7 @@ class MultiChainCommunity(Community):
 
         self.notifier = None
         self.persistence = MultiChainDB(self.dispersy.working_directory)
+        self.database = DatabaseDriver()
 
         # We store the bytes send and received in the tunnel community in a dictionary.
         # The key is the public key of the peer being interacted with, the value a tuple of the up and down bytes
@@ -295,23 +297,17 @@ class MultiChainCommunity(Community):
         """
         if public_key is None:
             public_key = self.my_member.public_key
-        # TODO: make call instead of using dummy data
-        #list_of_nodes = self.persistence.get_list_of_nodes(public_key, neighbor_radius)
-        list_of_nodes = ["abc", "def", "ghi"]
+        list_of_nodes = self.database.neighbor_list(public_key)
         if public_key not in list_of_nodes:
-            list_of_nodes.append(public_key)
-        number_of_nodes = len(list_of_nodes)
+            list_of_nodes[public_key] = dict()
+            list_of_nodes[public_key]["up"] = self.database.total_up(public_key)
+            list_of_nodes[public_key]["down"] = self.database.total_down(public_key)
         nodes = []
-        for current in range(number_of_nodes):
-            current_key = list_of_nodes[current]
-            current_statistics = self.get_statistics(current_key)
+        for current_key in list_of_nodes:
             nodes.append(dict())
-            #nodes[current]["public_key"] = current_key.encode("hex")
-            #nodes[current]["total_up"] = current_statistics["total_up"]
-            #nodes[current]["total_down"] = current_statistics["total down"]
-            nodes[current]["public_key"] = current_key
-            nodes[current]["total_up"] = 0
-            nodes[current]["total_down"] = 0
+            nodes[len(nodes) - 1]["public_key"] = current_key.encode("hex")
+            nodes[len(nodes) - 1]["total_up"] = list_of_nodes[current_key]["up"]
+            nodes[len(nodes) - 1]["total_down"] = list_of_nodes[current_key]["down"]
         return nodes
 
     @blocking_call_on_reactor_thread
