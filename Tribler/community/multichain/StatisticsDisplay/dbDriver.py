@@ -7,7 +7,6 @@ from Tribler.community.multichain.StatisticsDisplay.databaseQueries import Datab
 
 default_database = ":memory:"
 
-
 class DbDriver(object):
     """
     Driver to get statistics from the database.
