@@ -1,12 +1,11 @@
 """
 This file contains the test case for the statistics display.
 
-Both the NetworkNode and the DbDriver are tested in this file.
+Both the network node and the database driver are tested in this file.
 """
 from twisted.internet.defer import inlineCallbacks
 
-from Tribler.community.multichain.statistics.db_driver import DbDriver
-from Tribler.community.multichain.statistics.network_node import NetworkNode
+from Tribler.community.multichain.statistics.database_driver_new import DatabaseDriver
 from Tribler.Test.test_as_server import BaseTestCase
 
 
@@ -23,11 +22,11 @@ class TestStatisticsDatabase(BaseTestCase):
         :return: test class for the database connection.
         """
         yield super(TestStatisticsDatabase, self).setUp()
-        self.driver = DbDriver()
-        self.focus_node = NetworkNode("30", self.driver)
-        self.edge_node_a = NetworkNode("61", self.driver)
-        self.edge_node_b = NetworkNode("62", self.driver)
-        self.fake_node = NetworkNode("0", self.driver)
+        self.driver = DatabaseDriver()
+        self.focus_pk = "30"
+        self.edge_pk_a = "61"
+        self.edge_pk_b = "62"
+        self.fake_pk = "0"
 
     def test_get_neighbors(self):
         """

@@ -3,7 +3,9 @@ This file contains the functions to get the data from the database.
 """
 from sqlite3 import connect
 
-from Tribler.community.multichain.statistics.db_queries import DatabaseQueries
+from Tribler.community.multichain.statistics.database_queries import list_neighbor_query, total_self_up_query, \
+    total_other_down_query, total_self_down_query, total_other_up_query, neighbor_self_up_query, \
+    neighbor_other_down_query, neighbor_self_down_query, neighbor_other_up_query, create_table_query, insert_data_query
 
 default_database = ":memory:"
 
@@ -16,7 +18,7 @@ class DbDriver(object):
     def __init__(self, database=default_database):
         """
         Setup the driver by creating a connection and a cursor.
-        
+
         If no input argument is given for the database location, a new database is created
         in memory containing dummy data.
 
@@ -25,8 +27,8 @@ class DbDriver(object):
         self.connection = connect(database)
         self.cursor = self.connection.cursor()
         if database == default_database:
-            self.cursor.execute(DatabaseQueries.create_table_query)
-            self.cursor.execute(DatabaseQueries.insert_data_query)
+            self.cursor.execute(create_table_query)
+            self.cursor.execute(insert_data_query)
             self.connection.commit()
 
     def neighbor_list(self, focus_node):
@@ -36,11 +38,14 @@ class DbDriver(object):
         :param focus_node: network node of the focus
         :return: see description
         """
-        ret = []
-        for key in self.cursor.execute(DatabaseQueries.list_neighbor_query,
-                                       (focus_node.public_key, focus_node.public_key)):
-            ret.append(key[0])
-        return ret
+        return [neighbor[0] for neighbor in self.cursor.execute(list_neighbor_query,
+                                                                (focus_node.public_key, focus_node.public_key))]
+        #
+        # neighbors = []
+        # for key in self.cursor.execute(list_neighbor_query,
+        #                                (focus_node.public_key, focus_node.public_key)):
+        #     neighbors.append(key[0])
+        # return neighbors
 
     def total_up(self, focus_node):
         """
@@ -50,11 +55,11 @@ class DbDriver(object):
         :return: number representing the amount of uploaded data
         """
         total = 0
-        self.cursor.execute(DatabaseQueries.total_self_up_query, (focus_node.public_key,))
+        self.cursor.execute(total_self_up_query, (focus_node.public_key,))
         val = self.cursor.fetchone()[0]
         if val is not None:
             total += val
-        self.cursor.execute(DatabaseQueries.total_other_down_query, (focus_node.public_key,))
+        self.cursor.execute(total_other_down_query, (focus_node.public_key,))
         val = self.cursor.fetchone()[0]
         if val is not None:
             total += val
@@ -68,11 +73,11 @@ class DbDriver(object):
         :return: number representing the amount of downloaded data
         """
         total = 0
-        self.cursor.execute(DatabaseQueries.total_self_down_query, (focus_node.public_key,))
+        self.cursor.execute(total_self_down_query, (focus_node.public_key,))
         val = self.cursor.fetchone()[0]
         if val is not None:
             total += val
-        self.cursor.execute(DatabaseQueries.total_other_up_query, (focus_node.public_key,))
+        self.cursor.execute(total_other_up_query, (focus_node.public_key,))
         val = self.cursor.fetchone()[0]
         if val is not None:
             total += val
@@ -87,11 +92,11 @@ class DbDriver(object):
         :return: number with total upload to neighbor
         """
         total = 0
-        self.cursor.execute(DatabaseQueries.neighbor_self_up_query, (focus_node.public_key, neighbor_key))
+        self.cursor.execute(neighbor_self_up_query, (focus_node.public_key, neighbor_key))
         val = self.cursor.fetchone()[0]
         if val is not None:
             total += val
-        self.cursor.execute(DatabaseQueries.neighbor_other_down_query, (focus_node.public_key, neighbor_key))
+        self.cursor.execute(neighbor_other_down_query, (focus_node.public_key, neighbor_key))
         val = self.cursor.fetchone()[0]
         if val is not None:
             total += val
@@ -106,11 +111,11 @@ class DbDriver(object):
         :return: number with total download from neighbor
         """
         total = 0
-        self.cursor.execute(DatabaseQueries.neighbor_self_down_query, (focus_node.public_key, neighbor_key))
+        self.cursor.execute(neighbor_self_down_query, (focus_node.public_key, neighbor_key))
         val = self.cursor.fetchone()[0]
         if val is not None:
             total += val
-        self.cursor.execute(DatabaseQueries.neighbor_other_up_query, (focus_node.public_key, neighbor_key))
+        self.cursor.execute(neighbor_other_up_query, (focus_node.public_key, neighbor_key))
         val = self.cursor.fetchone()[0]
         if val is not None:
             total += val

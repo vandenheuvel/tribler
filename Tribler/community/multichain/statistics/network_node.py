@@ -24,7 +24,7 @@ class NetworkNode(object):
         """
         Finds the total amount of data uploaded by this node.
 
-        :return: See above
+        :return: total amount of data uploaded by this node
         """
         if self.total_uploaded < 0:
             self.total_uploaded = self.driver.total_up(self)
@@ -34,7 +34,7 @@ class NetworkNode(object):
         """
         Finds the total amount of data downloaded by this node.
 
-        :return: See above
+        :return: total amount of data downloaded by this node
         """
         if self.total_downloaded < 0:
             self.total_downloaded = self.driver.total_down(self)
