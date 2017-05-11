@@ -14,14 +14,6 @@ class TestStatisticsDatabase(BaseTestCase):
     """
     Test class for the statistics display database connection.
     """
-    def __init__(self, *args, **kwargs):
-        """
-        Default init used for the BaseTestCase.
-
-        :param args: run arguments.
-        :param kwargs: dictionary containing values for the arguments
-        """
-        super(TestStatisticsDatabase, self).__init__(*args, **kwargs)
 
     @inlineCallbacks
     def setUp(self):
