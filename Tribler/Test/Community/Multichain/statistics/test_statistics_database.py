@@ -5,7 +5,7 @@ Both the network node and the database driver are tested in this file.
 """
 from twisted.internet.defer import inlineCallbacks
 
-from Tribler.community.multichain.statistics.database_driver_new import DatabaseDriver
+from Tribler.community.multichain.statistics.database_driver import DatabaseDriver
 from Tribler.Test.test_as_server import BaseTestCase
 
 

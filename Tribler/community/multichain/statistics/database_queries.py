@@ -2,54 +2,19 @@
 This file contains all the queries used by the database driver.
 """
 
-link_to_neighbor_query = "SELECT hex(public_key_responder), sum(up), sum(down) FROM multi_chain WHERE hex(public_key_requester) = ? GROUP BY hex(public_key_responder)"
-
-link_from_neighbor_query = "SELECT hex(public_key_requester), sum(down), sum(up) FROM multi_chain where hex(public_key_responder) = ? GROUP BY hex(public_key_requester)"
+# Find all neighbors and the traffic between the node and the neighbor
+link_to_neighbor_query = "SELECT hex(public_key_responder), sum(up), sum(down) FROM multi_chain " \
+                         "WHERE hex(public_key_requester) = ? GROUP BY hex(public_key_responder)"
+link_from_neighbor_query = "SELECT hex(public_key_requester), sum(down), sum(up) FROM multi_chain " \
+                           "WHERE hex(public_key_responder) = ? GROUP BY hex(public_key_requester)"
 
 # Find how much the node uploaded
-total_self_up_query = "SELECT sum(up) FROM multi_chain where hex(public_key_requester) = ?"
-total_other_down_query = "SELECT sum(down) FROM multi_chain where hex(public_key_responder) = ?"
+total_self_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_requester) = ?"
+total_other_down_query = "SELECT sum(down) FROM multi_chain WHERE hex(public_key_responder) = ?"
 
 # Find how much the node downloaded
-total_self_down_query = "SELECT sum(down) FROM multi_chain where hex(public_key_requester) = ?"
+total_self_down_query = "SELECT sum(down) FROM multi_chain WHERE hex(public_key_requester) = ?"
 total_other_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_responder) = ?"
-
-
-
-
-
-
-
-
-# Find how much the node uploaded to a specific neighbor
-neighbor_self_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_requester) = ?" \
-                         "AND hex(public_key_responder) = ?"
-neighbor_other_down_query = "SELECT sum(down) FROM multi_chain WHERE hex(public_key_responder) = ?" \
-                            "AND hex(public_key_requester) = ?"
-
-# Find how much the node downloaded from a spesific neighbor
-neighbor_self_down_query = "SELECT sum(down) FROM multi_chain WHERE hex(public_key_requester) = ?" \
-                           "AND hex(public_key_responder) = ?"
-neighbor_other_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_responder) = ?" \
-                          "AND hex(public_key_requester) = ?"
-
-
-
-
-
-
-
-
-
-
-
-# Get all the direct neighbors of a node
-list_neighbor_query = """
-        SELECT DISTINCT hex(public_key_responder) FROM multi_chain where hex(public_key_requester) = ?
-        UNION
-        SELECT DISTINCT hex(public_key_requester) FROM multi_chain where hex(public_key_responder) = ?
-        """
-
 
 # Create a database with dummy data
 create_table_query = """
