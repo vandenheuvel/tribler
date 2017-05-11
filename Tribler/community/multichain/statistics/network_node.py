@@ -8,7 +8,7 @@ class NetworkNode(object):
     """
     def __init__(self, public_key, db_driver):
         """
-        Creates a networkNode object.
+        Creates a network node object.
 
         :param public_key: public key of the public key of the node.
         :param db_driver: the database driver to use for querying.

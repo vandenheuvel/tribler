@@ -3,7 +3,7 @@ This file contains the functions to get the data from the database.
 """
 import sqlite3
 
-from Tribler.community.multichain.StatisticsDisplay.databaseQueries import DatabaseQueries
+from Tribler.community.multichain.statistics.db_queries import DatabaseQueries
 
 default_database = ":memory:"
 

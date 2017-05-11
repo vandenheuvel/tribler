@@ -10,33 +10,28 @@ class DatabaseQueries(object):
             SELECT DISTINCT hex(public_key_requester) FROM multi_chain where hex(public_key_responder) = ?
             """
 
-    # Query to find how much a node uploaded to others
+    # Find how much the node uploaded
     total_self_up_query = "SELECT sum(up) FROM multi_chain where hex(public_key_requester) = ?"
-    # Query to find how much a ohters downloaded from a node
     total_other_down_query = "SELECT sum(down) FROM multi_chain where hex(public_key_responder) = ?"
 
-    # Query to find how much a node downloaded to others
+    # Find how much the node downloaded
     total_self_down_query = "SELECT sum(down) FROM multi_chain where hex(public_key_requester) = ?"
-    # Query to find how much others uploaded to a node
     total_other_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_responder) = ?"
 
-    # Query to find how much a node uploaded to a neighbor
+    # Find how much the node uploaded to a specific neighbor
     neighbor_self_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_requester) = ?" \
                              "AND hex(public_key_responder) = ?"
-    # Query to find how much a neighbor downloaded from a node
     neighbor_other_down_query = "SELECT sum(down) FROM multi_chain WHERE hex(public_key_responder) = ?" \
                                 "AND hex(public_key_requester) = ?"
 
-    # Query to find how much a node downloaded from a neighbor
+    # Find how much the node downloaded from a spesific neighbor
     neighbor_self_down_query = "SELECT sum(down) FROM multi_chain WHERE hex(public_key_requester) = ?" \
                                "AND hex(public_key_responder) = ?"
-    # Query to find how much a neighbor uploaded to a node
     neighbor_other_up_query = "SELECT sum(up) FROM multi_chain WHERE hex(public_key_responder) = ?" \
                               "AND hex(public_key_requester) = ?"
 
-    # Queries to create a dummy database
 
-    # Create table for dummy data
+    # Create a database with dummy data
     create_table_query = """
     CREATE TABLE IF NOT EXISTS multi_chain(
      public_key_requester		TEXT NOT NULL,
@@ -62,7 +57,6 @@ class DatabaseQueries(object):
      )
     """
 
-    # Insert the dummy data in the database
     insert_data_query = """
     INSERT INTO multi_chain (public_key_requester, public_key_responder, up, down, total_up_requester, total_down_requester,
     sequence_number_requester, previous_hash_requester, signature_requester, hash_requester, total_up_responder,
