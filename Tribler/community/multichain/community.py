@@ -5,6 +5,7 @@ Every node has a chain and these chains intertwine by blocks shared by chains.
 """
 import logging
 import itertools
+import networkx
 from twisted.internet.defer import inlineCallbacks
 
 from twisted.internet import reactor
@@ -25,6 +26,7 @@ from Tribler.community.multichain.payload import HalfBlockPayload, CrawlRequestP
 from Tribler.community.multichain.database import MultiChainDB
 from Tribler.community.multichain.conversion import MultiChainConversion
 from Tribler.community.multichain.statistics.database_driver import DatabaseDriver
+from Tribler.community.multichain.statistics.page_rank import IncrementalPageRank
 
 HALF_BLOCK = u"half_block"
 CRAWL = u"crawl"
@@ -61,6 +63,8 @@ class MultiChainCommunity(Community):
         self.notifier = None
         self.persistence = MultiChainDB(self.dispersy.working_directory)
         self.database = DatabaseDriver()
+        self.graph = networkx.Graph()
+        self.page_rank = IncrementalPageRank(self.graph)
 
         # We store the bytes send and received in the tunnel community in a dictionary.
         # The key is the public key of the peer being interacted with, the value a tuple of the up and down bytes
@@ -305,6 +309,7 @@ class MultiChainCommunity(Community):
         for current_key in list_of_nodes:
             nodes.append({"public_key": current_key, "total_up": self.database.total_up(current_key),
                           "total_down": self.database.total_down(current_key)})
+            self.page_rank.add_node(current_key)
         return nodes
 
     @blocking_call_on_reactor_thread
@@ -329,10 +334,25 @@ class MultiChainCommunity(Community):
             if list_of_edges[current][2] > 0:
                 edges.append({"from": list_of_edges[current][0], "to": list_of_edges[current][1],
                               "amount": list_of_edges[current][2]})
+                self.page_rank.add_edge(list_of_edges[current][0], list_of_edges[current][1])
             if list_of_edges[current][3] > 0:
                 edges.append({"from": list_of_edges[current][1], "to": list_of_edges[current][0],
                               "amount": list_of_edges[current][3]})
+                self.page_rank.add_edge(list_of_edges[current][1], list_of_edges[current][0])
         return edges
+
+    def get_page_rank(self, public_key):
+        """
+        Return the page rank of a certain node.
+        
+        :param public_key: the public key of the given node
+        :return: the page rank of the given node
+        """
+        self.page_rank.initial_walk()
+        ranks = self.page_rank.get_ranks()
+        if public_key in ranks:
+            return ranks[public_key]
+        return 0
 
 
     @inlineCallbacks
