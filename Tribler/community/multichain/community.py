@@ -305,9 +305,9 @@ class MultiChainCommunity(Community):
         nodes = []
         for current_key in list_of_nodes:
             nodes.append(dict())
-            nodes[len(nodes) - 1]["public_key"] = current_key.encode("hex")
-            nodes[len(nodes) - 1]["total_up"] = list_of_nodes[current_key]["up"]
-            nodes[len(nodes) - 1]["total_down"] = list_of_nodes[current_key]["down"]
+            nodes[len(nodes) - 1]["public_key"] = current_key
+            nodes[len(nodes) - 1]["total_up"] = self.database.total_up(current_key)
+            nodes[len(nodes) - 1]["total_down"] = self.database.total_down(current_key)
         return nodes
 
     @blocking_call_on_reactor_thread
@@ -321,12 +321,11 @@ class MultiChainCommunity(Community):
         :return: a dictionary with edges
         """
         list_of_nodes = [node["public_key"] for node in nodes]
-        # TODO: make call instead of using dummy data
-        # for pair in itertools.combinations(list_of_nodes, 2):
-        #    list_of_edges.append(self.persistence.get_edge(*pair))
-        list_of_edges = [["abc", "def", 1, 0], ["abc", "ghi", 1, 1],
-                         ["abc", "xyz", 1, 1], ["def", "ghi", 0, 1],
-                         ["def", "xyz", 0, 0], ["ghi", "xyz", 1, 1]]
+        list_of_edges = []
+        for pair in itertools.combinations(list_of_nodes, 2):
+            current_neighbors = self.database.neighbor_list(pair[0])
+            list_of_edges.append(
+                [pair[0], pair[1], current_neighbors[pair[1]]["up"] or 0, current_neighbors[pair[1]]["down"] or 0])
         number_of_edges = len(list_of_edges)
         edges = []
         for current in range(number_of_edges):
