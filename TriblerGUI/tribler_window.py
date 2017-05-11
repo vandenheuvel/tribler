@@ -237,7 +237,8 @@ class TriblerWindow(QMainWindow):
             self.discovering_page.is_discovering = True
             self.stackedWidget.setCurrentIndex(PAGE_DISCOVERING)
         else:
-            self.clicked_menu_button_home()
+            # TODO: change this back to: self.clicked_menu_button_home()
+            self.clicked_menu_button_trust()
 
     def process_uri_request(self):
         """
