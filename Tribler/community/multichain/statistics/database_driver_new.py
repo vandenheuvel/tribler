@@ -77,14 +77,18 @@ class DatabaseDriver(object):
         """
         neighbors = {}
         for row in self.cursor.execute(link_to_neighbor_query, (focus_pk,)):
-            neighbors[row[0]] = {"up": row[1], "down": 2}
+            up = row[1] if row[1] is not None else 0
+            down = row[2] if row[2] is not None else 0
+            neighbors[row[0]] = {"up": up, "down": down}
         
         for row in self.cursor.execute(link_from_neighbor_query, (focus_pk,)):
+            up = row[1] if row[1] is not None else 0
+            down = row[2] if row[2] is not None else 0
             if row[0] in neighbors:
-                neighbors[row[0]]["up"] += row[1]
-                neighbors[row[0]]["down"] += row[2]
+                neighbors[row[0]]["up"] += up
+                neighbors[row[0]]["down"] += down
             else:
-                neighbors[row[0]] = {"up": row[1], "down": 2}
+                neighbors[row[0]] = {"up": up, "down": down}
 
         return neighbors
         

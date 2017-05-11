@@ -32,28 +32,28 @@ class TestStatisticsDatabase(BaseTestCase):
         """
         The network node should return the correct list of neighbors.
         """
-        expected_result_focus = ["31", "32", "33", "34"]
-        expected_result_fake = []
+        expected_result_focus = {u"31": {"up": 28, "down": 54},
+                                 u"32": {"up": 126, "down": 27},
+                                 u"33": {"up": 34, "down": 302},
+                                 u"34": {"up": 59, "down": 580}}
+        expected_result_fake = {}
 
-        result_list_focus = self.focus_node.neighbor_keys
-        result_list_fake = self.fake_node.neighbor_keys
+        result_dict_focus = self.driver.neighbor_list(self.focus_pk)
+        result_dict_fake = self.driver.neighbor_list(self.fake_pk)
 
-        self.assertEqual(sorted(expected_result_focus), sorted(result_list_focus))
-        self.assertEqual(sorted(expected_result_fake), sorted(result_list_fake))
+        self.assertDictEqual(expected_result_focus, result_dict_focus)
+        self.assertDictEqual(expected_result_fake, result_dict_fake)
 
     def test_total_up(self):
         """
         The node should return the right amount of uploaded data.
         """
-        focus_up = self.focus_node.total_uploaded
-        self.assertEqual(focus_up, -1)
-
-        focus_up = self.focus_node.total_up()
+        focus_up = self.driver.total_up(self.focus_pk)
         self.assertEqual(focus_up, 247)
 
-        only_up = self.edge_node_b.total_up()
-        only_down = self.edge_node_a.total_up()
-        fake_up = self.fake_node.total_up()
+        only_up = self.driver.total_up(self.edge_pk_b)
+        only_down = self.driver.total_up(self.edge_pk_a)
+        fake_up = self.driver.total_up(self.fake_pk)
 
         self.assertEqual(only_up, 5)
         self.assertEqual(only_down, 2)
@@ -63,48 +63,13 @@ class TestStatisticsDatabase(BaseTestCase):
         """
         The node should return the right amount of downloaded data.
         """
-        focus_down = self.focus_node.total_downloaded
-        self.assertEqual(focus_down, -1)
-
-        focus_down = self.focus_node.total_down()
+        focus_down = self.driver.total_down(self.focus_pk)
         self.assertEqual(focus_down, 963)
 
-        only_down = self.edge_node_a.total_down()
-        only_up = self.edge_node_b.total_down()
-        fake_down = self.fake_node.total_down()
+        only_down = self.driver.total_down(self.edge_pk_a)
+        only_up = self.driver.total_down(self.edge_pk_b)
+        fake_down = self.driver.total_down(self.fake_pk)
 
         self.assertEqual(only_down, 10)
         self.assertEqual(only_up, 1)
         self.assertEqual(fake_down, 0)
-
-    def test_neighbor_up(self):
-        """
-        The node should return the right amount of data uploaded to a neighbor.
-        """
-        neighbor_up = self.focus_node.neighbor_up("31")
-        self.assertEqual(neighbor_up, 28)
-
-        focus_up = self.edge_node_b.neighbor_up("63")
-        self.assertEqual(focus_up, 5)
-
-        only_up = self.edge_node_a.neighbor_up("63")
-        self.assertEqual(only_up, 2)
-
-        fake_up = self.fake_node.neighbor_up("30")
-        self.assertEqual(fake_up, 0)
-
-    def test_neighbor_down(self):
-        """
-        The node should return the right amount of data downloaded from a neighbor.
-        """
-        focus_down = self.focus_node.neighbor_down("31")
-        self.assertEqual(focus_down, 54)
-
-        only_down = self.edge_node_a.neighbor_down("63")
-        self.assertEqual(only_down, 10)
-
-        only_up = self.edge_node_b.neighbor_down("63")
-        self.assertEqual(only_up, 1)
-
-        fake_up = self.fake_node.neighbor_up("30")
-        self.assertEqual(fake_up, 0)

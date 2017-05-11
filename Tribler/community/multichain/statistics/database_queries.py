@@ -2,13 +2,9 @@
 This file contains all the queries used by the database driver.
 """
 
+link_to_neighbor_query = "SELECT hex(public_key_responder), sum(up), sum(down) FROM multi_chain WHERE hex(public_key_requester) = ? GROUP BY hex(public_key_responder)"
 
-
-link_to_neighbor_query = "SELECT DISTINCT hex(public_key_responder), sum(up) AS focus_up, sum(down) AS focus_down" \
-                         "FROM multi_chain where hex(public_key_requester) = ?"
-
-link_from_neighbor_query = "SELECT DISTINCT hex(public_key_requester), sum(down) AS focus_up, sum(up) AS focus_down" \
-                         "FROM multi_chain where hex(public_key_responder) = ?"
+link_from_neighbor_query = "SELECT hex(public_key_requester), sum(down), sum(up) FROM multi_chain where hex(public_key_responder) = ? GROUP BY hex(public_key_requester)"
 
 # Find how much the node uploaded
 total_self_up_query = "SELECT sum(up) FROM multi_chain where hex(public_key_requester) = ?"
