@@ -324,24 +324,26 @@ class MultiChainCommunity(Community):
         :param nodes: the dictionary of nodes between which the edges have to be returned
         :return: a dictionary with edges
         """
-        list_of_nodes = [node["public key"] for node in nodes]
+        list_of_nodes = [node["public_key"] for node in nodes]
         # TODO: make call instead of using dummy data
         # for pair in itertools.combinations(list_of_nodes, 2):
         #    list_of_edges.append(self.persistence.get_edge(*pair))
-        list_of_edges = [["abc", "def", 0, 0], ["abc", "ghi", 0, 0],
-                         ["abc", "xyz", 0, 0], ["def", "ghi", 0, 0],
-                         ["def", "xyz", 0, 0], ["ghi", "xyz", 0, 0]]
+        list_of_edges = [["abc", "def", 1, 0], ["abc", "ghi", 1, 1],
+                         ["abc", "xyz", 1, 1], ["def", "ghi", 0, 1],
+                         ["def", "xyz", 0, 0], ["ghi", "xyz", 1, 1]]
         number_of_edges = len(list_of_edges)
         edges = []
         for current in range(number_of_edges):
-            edges.append(dict())
-            edges[2 * current]["from"] = list_of_edges[current][0]
-            edges[2 * current]["to"] = list_of_edges[current][1]
-            edges[2 * current]["amount"] = list_of_edges[current][2]
-            edges.append(dict())
-            edges[2 * current + 1]["from"] = list_of_edges[current][1]
-            edges[2 * current + 1]["to"] = list_of_edges[current][0]
-            edges[2 * current + 1]["amount"] = list_of_edges[current][3]
+            if list_of_edges[current][2] > 0:
+                edges.append(dict())
+                edges[len(edges) - 1]["from"] = list_of_edges[current][0]
+                edges[len(edges) - 1]["to"] = list_of_edges[current][1]
+                edges[len(edges) - 1]["amount"] = list_of_edges[current][2]
+            if list_of_edges[current][3] > 0:
+                edges.append(dict())
+                edges[len(edges) - 1]["from"] = list_of_edges[current][1]
+                edges[len(edges) - 1]["to"] = list_of_edges[current][0]
+                edges[len(edges) - 1]["amount"] = list_of_edges[current][3]
         return edges
 
 
