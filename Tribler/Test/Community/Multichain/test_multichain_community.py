@@ -538,10 +538,12 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
         """
         node, = self.create_nodes(1)
         (nodes, edges) = node.community.get_graph(None)
-        assert isinstance(nodes, dict), type(nodes)
-        assert len(nodes) > 0
-        assert isinstance(edges, dict), type(edges)
-        assert len(edges) > 0
+        self.assertTrue(isinstance(nodes, dict))
+        self.assertTrue(type(nodes))
+        self.assertTrue(isinstance(edges, dict))
+        self.assertTrue(type(edges))
+        self.assertGreater(len(nodes), 0)
+        self.assertGreater(len(edges), 0)
 
     def test_get_edges_no_public_key(self):
         """
@@ -549,8 +551,9 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
         """
         node, = self.create_nodes(1)
         edges = node.community.get_edges(None)
-        assert isinstance(edges, dict), type(edges)
-        assert len(edges) > 0
+        self.assertTrue(isinstance(edges, dict))
+        self.assertTrue(type(edges))
+        self.assertGreater(len(edges), 0)
 
     def test_get_graph_public_key(self):
         """
@@ -558,10 +561,12 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
         """
         node, = self.create_nodes(1)
         (nodes, edges) = node.community.get_graph()
-        assert isinstance(nodes, dict), type(nodes)
-        assert len(nodes) > 0
-        assert isinstance(edges, dict), type(edges)
-        assert len(edges) > 0
+        self.assertTrue(isinstance(nodes, dict))
+        self.assertTrue(type(nodes))
+        self.assertTrue(isinstance(edges, dict))
+        self.assertTrue(type(edges))
+        self.assertGreater(len(nodes), 0)
+        self.assertGreater(len(edges), 0)
 
     def test_get_edges_public_key(self):
         """
@@ -569,8 +574,9 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
         """
         node, = self.create_nodes(1)
         edges = node.community.get_edges()
-        assert isinstance(edges, dict), type(edges)
-        assert len(edges) > 0
+        self.assertTrue(isinstance(edges, dict))
+        self.assertTrue(type(edges))
+        self.assertGreater(len(edges), 0)
 
     @blocking_call_on_reactor_thread
     def assertBlocksInDatabase(self, node, amount):
