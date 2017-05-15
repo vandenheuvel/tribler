@@ -532,12 +532,12 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
         assert isinstance(statistics, dict), type(statistics)
         assert len(statistics) > 0
 
-    def test_get_nodes_no_public_key(self):
+    def test_get_graph_no_public_key(self):
         """
-        Test the get_nodes method where public_key is None.
+        Test the get_graph method where public_key is None.
         """
         node, = self.create_nodes(1)
-        nodes = node.community.get_nodes(None)
+        (nodes, edges) = node.community.get_graph(None)
         assert isinstance(nodes, dict), type(nodes)
         assert len(nodes) > 0
 
@@ -550,12 +550,12 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
         assert isinstance(edges, dict), type(edges)
         assert len(edges) > 0
 
-    def test_get_nodes_public_key(self):
+    def test_get_graph_public_key(self):
         """
         Test the get_nodes method where public_key is defined.
         """
         node, = self.create_nodes(1)
-        nodes = node.community.get_nodes()
+        (nodes, edges) = node.community.get_graph()
         assert isinstance(nodes, dict), type(nodes)
         assert len(nodes) > 0
 

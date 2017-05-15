@@ -290,14 +290,14 @@ class MultiChainCommunity(Community):
         return statistics
 
     @blocking_call_on_reactor_thread
-    def get_nodes(self, public_key=None, neighbor_radius=1):
+    def get_graph(self, public_key=None, neighbor_radius=1):
         """
-        Return a dictionary with the neighboring nodes of a certain focus node within a certain radius,
+        Return a dictionary with the neighboring nodes and edges of a certain focus node within a certain radius,
             regarding the local multichain database.
 
         :param public_key: the public key of the focus node
         :param neighbor_radius: the radius within which the neighbors have to be returned
-        :return: a dictionary with nodes
+        :return: a tuple of a dictionary with nodes and a dictionary with edges
         """
         if public_key is None:
             public_key = self.my_member.public_key
@@ -310,7 +310,11 @@ class MultiChainCommunity(Community):
             nodes.append({"public_key": current_key, "total_up": self.database.total_up(current_key),
                           "total_down": self.database.total_down(current_key)})
             self.page_rank.add_node(current_key)
-        return nodes
+        edges = self.get_edges(nodes)
+        for dict in nodes:
+            page_rank = self.get_page_rank(dict["public_key"])
+            dict["page_rank"] = page_rank
+        return (nodes, edges)
 
     @blocking_call_on_reactor_thread
     def get_edges(self, nodes=None):

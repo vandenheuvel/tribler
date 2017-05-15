@@ -104,8 +104,7 @@ class DisplayEndpoint(resource.Resource):
             return DisplayEndpoint.return_error(request, http.NOT_FOUND, "multichain community not found")
 
         focus_node = request.args["focus_node"][0]
-        nodes = mc_community.get_nodes(focus_node, neighbor_level)
-        edges = mc_community.get_edges(nodes)
+        (nodes, edges) = mc_community.get_graph(focus_node, neighbor_level)
         return json.dumps({"focus_node": focus_node,
                            "neighbor_level": neighbor_level,
                            "nodes": nodes,
