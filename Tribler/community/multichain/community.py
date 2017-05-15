@@ -317,7 +317,7 @@ class MultiChainCommunity(Community):
     def get_list_of_nodes(self, public_key, neighbor_level):
         """
         Return a list of nodes surrounding a certain focus node.
-        
+
         :param public_key: the public key of the focus node
         :param neighbor_level: the radius within which the neighbors have to be returned
         :return: a list of neighbors within the given radius
