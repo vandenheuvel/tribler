@@ -24,7 +24,8 @@ class DisplayEndpoint(resource.Resource):
         resource.Resource.__init__(self)
         self.session = session
 
-      @staticmethod
+
+    @staticmethod
     def return_error(request, status_code=http.BAD_REQUEST, message="your request seems to be wrong"):
         """
         Return a HTTP Code 400 with the given message.
@@ -99,6 +100,7 @@ class DisplayEndpoint(resource.Resource):
                         "from": "xyz",
                         "to": "xyz_n1",
                         "amount": 12384
+
                     }, ...]
                 }
 
@@ -129,7 +131,6 @@ class DisplayEndpoint(resource.Resource):
         if "neighbor_level" in request.args and len(request.args["neighbor_level"]) > 0 and \
                 request.args["neighbor_level"][0].isdigit():
             neighbor_level = int(request.args["neighbor_level"][0])
-
 
         # TODO: Remove dummy return and change to aggregated data calculation
         return json.dumps({"focus_node": focus_node,
