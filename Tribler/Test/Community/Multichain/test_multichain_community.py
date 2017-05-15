@@ -540,6 +540,8 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
         (nodes, edges) = node.community.get_graph(None)
         assert isinstance(nodes, dict), type(nodes)
         assert len(nodes) > 0
+        assert isinstance(edges, dict), type(edges)
+        assert len(edges) > 0
 
     def test_get_edges_no_public_key(self):
         """
@@ -558,6 +560,8 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
         (nodes, edges) = node.community.get_graph()
         assert isinstance(nodes, dict), type(nodes)
         assert len(nodes) > 0
+        assert isinstance(edges, dict), type(edges)
+        assert len(edges) > 0
 
     def test_get_edges_public_key(self):
         """

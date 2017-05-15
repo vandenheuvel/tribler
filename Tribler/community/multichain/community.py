@@ -311,10 +311,10 @@ class MultiChainCommunity(Community):
                           "total_down": self.database.total_down(current_key)})
             self.page_rank.add_node(current_key)
         edges = self.get_edges(nodes)
-        for dict in nodes:
-            page_rank = self.get_page_rank(dict["public_key"])
-            dict["page_rank"] = page_rank
-        return (nodes, edges)
+        for dic in nodes:
+            page_rank = self.get_page_rank(dic["public_key"])
+            dic["page_rank"] = page_rank
+        return nodes, edges
 
     @blocking_call_on_reactor_thread
     def get_edges(self, nodes=None):
@@ -348,7 +348,7 @@ class MultiChainCommunity(Community):
     def get_page_rank(self, public_key):
         """
         Return the page rank of a certain node.
-        
+
         :param public_key: the public key of the given node
         :return: the page rank of the given node
         """

@@ -1,7 +1,7 @@
 from random import random, choice
 
 
-class IncrementalPageRank:
+class IncrementalPageRank(object):
     def __init__(self, graph, walks_per_node=2, stop_probability=0.1):
         self.graph = graph
 
@@ -31,7 +31,7 @@ class IncrementalPageRank:
         self.size = 0
         for node in self.graph.nodes():
             walks = list()
-            for i in range(self.R):
+            for _ in range(self.R):
                 new_walk = self._walk(node)
                 walks.append(self._walk(node))
                 self.size += len(new_walk)
