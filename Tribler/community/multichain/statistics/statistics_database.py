@@ -19,7 +19,7 @@ class StatisticsDB(MultiChainDB):
         :return: number representing the amount of uploaded data
         """
         block = self.get_latest(public_key)
-        return block.total_up
+        return block.total_up or 0
 
     def total_down(self, public_key):
         """
@@ -29,7 +29,7 @@ class StatisticsDB(MultiChainDB):
         :return: number representing the amount of uploaded data
         """
         block = self.get_latest(public_key)
-        return block.total_down
+        return block.total_down or 0
 
     def neighbor_list(self, public_key):
         """
@@ -45,8 +45,12 @@ class StatisticsDB(MultiChainDB):
         """
         query = u"SELECT link_public_key, sum(up), sum(down) FROM multi_chain " \
                 u"WHERE public_key = ? GROUP BY link_public_key"
+        params = (buffer(public_key),)
+        db_result = self.execute(query, params).fetchall()
+
         neighbors = {}
-        for row in self.execute(query, (public_key,)):
-            neighbors[row[0]] = {"up": row[1] or 0, "down": row[2] or 0}
+        for row in db_result:
+            neighbor_pk = row[0] if isinstance(row[0], str) else str(row[0])
+            neighbors[neighbor_pk] = {"up": row[1] or 0, "down": row[2] or 0}
 
         return neighbors
