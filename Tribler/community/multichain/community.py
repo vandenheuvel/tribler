@@ -359,11 +359,11 @@ class MultiChainCommunity(Community):
         edges = []
         for edge in list_of_edges:
             if edge[2] > 0:
-                edges.append({"from": edge[0], "to": edge[1],
+                edges.append({"source": edge[0], "target": edge[1],
                               "amount": edge[2]})
                 self.page_rank.add_edge(edge[0], edge[1])
             if edge[3] > 0:
-                edges.append({"from": edge[1], "to": edge[0],
+                edges.append({"source": edge[1], "target": edge[0],
                               "amount": edge[3]})
                 self.page_rank.add_edge(edge[1], edge[0])
         return edges

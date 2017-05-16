@@ -89,7 +89,7 @@ class DisplayEndpoint(resource.Resource):
 
                 {
                     "focus_node": "xyz",
-                    "neighbor_level": 1,
+                    "neighbor_level": 1
                     "nodes": [{
                         "public_key": "xyz",
                         "total_up": 12736457,
@@ -107,6 +107,9 @@ class DisplayEndpoint(resource.Resource):
         :param request: the HTTP GET request which specifies the focus node and optionally the neighbor level
         :return: the node data formatted in JSON
         """
+
+        request.setHeader('Access-Control-Allow-Origin', '*')
+
         if "focus_node" not in request.args:
             return DisplayEndpoint.return_error(request, message="focus_node parameter missing")
 
@@ -132,8 +135,10 @@ class DisplayEndpoint(resource.Resource):
                 request.args["neighbor_level"][0].isdigit():
             neighbor_level = int(request.args["neighbor_level"][0])
 
-        # TODO: Remove dummy return and change to aggregated data calculation
+        mc_community = self.get_multi_chain_community()
+        (nodes, edges) = mc_community.get_graph(focus_node, neighbor_level)
+
         return json.dumps({"focus_node": focus_node,
-                           "neighbor_level": neighbor_level,
-                           "nodes": [{"public_key": "xyz", "total_up": 0, "total_down": 0, "page_rank": 0.5}],
-                           "edges": []})
+                          "neighbor_level": neighbor_level,
+                          "nodes": nodes,
+                          "links": edges})

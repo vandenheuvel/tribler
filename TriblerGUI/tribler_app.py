@@ -2,6 +2,7 @@ import os
 
 from PyQt5.QtCore import QEvent
 from TriblerGUI.single_application import QtSingleApplication
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 
 class TriblerApplication(QtSingleApplication):
