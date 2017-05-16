@@ -24,6 +24,7 @@ class DisplayEndpoint(resource.Resource):
         resource.Resource.__init__(self)
         self.session = session
 
+
     @staticmethod
     def return_error(request, status_code=http.BAD_REQUEST, message="your request seems to be wrong"):
         """
@@ -98,7 +99,8 @@ class DisplayEndpoint(resource.Resource):
                     "edges": [{
                         "from": "xyz",
                         "to": "xyz_n1",
-                        "size": 12384
+                        "amount": 12384
+
                     }, ...]
                 }
 
@@ -112,7 +114,8 @@ class DisplayEndpoint(resource.Resource):
             return DisplayEndpoint.return_error(request, message="focus_node parameter empty")
 
         focus_node = request.args["focus_node"][0]
-        if isinstance(focus_node, basestring) and not focus_node.lstrip("-").isdigit():
+
+        if isinstance(focus_node, basestring):
             if request.args["focus_node"][0] == "self":
                 try:
                     mc_community = self.get_multi_chain_community()
