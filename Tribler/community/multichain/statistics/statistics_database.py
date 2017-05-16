@@ -1,5 +1,6 @@
-
-
+"""
+This file contains the functions to get the trust statistics from the database implemented in Tribler.
+"""
 from Tribler.community.multichain.database import MultiChainDB
 
 
@@ -19,7 +20,7 @@ class StatisticsDB(MultiChainDB):
         :return: number representing the amount of uploaded data
         """
         block = self.get_latest(public_key)
-        return block.total_up or 0
+        return block.total_up if block else 0
 
     def total_down(self, public_key):
         """
@@ -29,7 +30,7 @@ class StatisticsDB(MultiChainDB):
         :return: number representing the amount of uploaded data
         """
         block = self.get_latest(public_key)
-        return block.total_down or 0
+        return block.total_down if block else 0
 
     def neighbor_list(self, public_key):
         """
