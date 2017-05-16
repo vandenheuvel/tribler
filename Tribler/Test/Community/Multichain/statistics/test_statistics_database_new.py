@@ -2,7 +2,6 @@
 This file contains the database connection used for the statistics display.
 """
 import os
-
 from twisted.internet.defer import inlineCallbacks
 
 from Tribler.community.multichain.database import DATABASE_DIRECTORY
@@ -12,13 +11,16 @@ from Tribler.Test.test_as_server import AbstractServer
 
 
 class TestStatisticsDatabase(AbstractServer):
+    """
+    Tests for the trust statistics database connection.
+    """
 
     def __init__(self, *args, **kwargs):
         super(TestStatisticsDatabase, self).__init__(*args, **kwargs)
 
     @inlineCallbacks
-    def setUp(self):
-        yield super(TestStatisticsDatabase, self).setUp()
+    def setUp(self, annotate=True):
+        yield super(TestStatisticsDatabase, self).setUp(annotate=annotate)
         path = os.path.join(self.getStateDir(), DATABASE_DIRECTORY)
         if not os.path.exists(path):
             os.makedirs(path)
