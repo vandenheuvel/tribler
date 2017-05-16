@@ -19,7 +19,7 @@ class TestStatisticsDatabase(AbstractServer):
     #     super(TestStatisticsDatabase, self).__init__(*args, **kwargs)
 
     @inlineCallbacks
-    def setUp(self, **kwargs):
+    def setUp(self):
         yield super(TestStatisticsDatabase, self).setUp()
         path = os.path.join(self.getStateDir(), DATABASE_DIRECTORY)
         if not os.path.exists(path):
