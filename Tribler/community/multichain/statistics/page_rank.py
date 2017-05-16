@@ -11,6 +11,7 @@ class IncrementalPageRank(object):
     def __init__(self, graph, walks_per_node=2, stop_probability=0.1):
         """
         Set up the environment by setting a graph, number of walks per node and stop probability.
+
         :param graph: the graph for which page ranks have to be computed
         :param walks_per_node: the number of random walks per node
         :param stop_probability: the probability to stop in each hop
@@ -31,6 +32,7 @@ class IncrementalPageRank(object):
     def add_edge(self, source, destination):
         """
         Add an edge to the graph.
+
         :param source: the source node of the new edge
         :param destination: the destination node of the new edge
         """
@@ -42,6 +44,7 @@ class IncrementalPageRank(object):
     def add_node(self, node):
         """
         Add a node to the graph.
+
         :param node: the name for the new node
         """
         self.new_nodes.add(node)
@@ -81,6 +84,7 @@ class IncrementalPageRank(object):
     def _walk(self, start):
         """
         Perform a random walk, starting from a certain node.
+
         :param start: the start node
         :return: a list that represents the walk
         """
@@ -97,6 +101,7 @@ class IncrementalPageRank(object):
     def count(self):
         """
         For each node, count the number of occurrences in the random walks.
+
         :return: a dictionary in which the number of occurrences can be looked up by node name
         """
         flat = list()
@@ -109,6 +114,7 @@ class IncrementalPageRank(object):
     def get_ranks(self):
         """
         For each node, get its page rank.
+
         :return: a dictionary in which a node's page rank can be looked up by its name
         """
         return {hop: self.counts[hop] / self.size for hop in self.graph.nodes()}

@@ -4,8 +4,8 @@ This reputation system builds a tamper proof interaction history contained in a 
 Every node has a chain and these chains intertwine by blocks shared by chains.
 """
 import logging
-import itertools
-import networkx
+from itertools import combinations
+from networkx import Graph
 from twisted.internet.defer import inlineCallbacks
 
 from twisted.internet import reactor
@@ -63,7 +63,7 @@ class MultiChainCommunity(Community):
         self.notifier = None
         self.persistence = MultiChainDB(self.dispersy.working_directory)
         self.database = DatabaseDriver()
-        self.graph = networkx.Graph()
+        self.graph = Graph()
         self.page_rank = IncrementalPageRank(self.graph)
 
         # We store the bytes send and received in the tunnel community in a dictionary.
@@ -293,7 +293,7 @@ class MultiChainCommunity(Community):
     def get_graph(self, public_key=None, neighbor_level=1):
         """
         Return a dictionary with the neighboring nodes and edges of a certain focus node within a certain radius,
-            regarding the local multichain database.
+        regarding the local multichain database.
 
         :param public_key: the public key of the focus node
         :param neighbor_level: the radius within which the neighbors have to be returned
@@ -304,6 +304,7 @@ class MultiChainCommunity(Community):
         list_of_nodes = self.get_list_of_nodes(public_key, neighbor_level)
         nodes = []
         for current_key in list_of_nodes:
+            # TODO: retrieve more information at once when appropriate queries are present in database_driver
             nodes.append({"public_key": current_key, "total_up": self.database.total_up(current_key),
                           "total_down": self.database.total_down(current_key)})
             self.page_rank.add_node(current_key)
@@ -320,7 +321,7 @@ class MultiChainCommunity(Community):
 
         :param public_key: the public key of the focus node
         :param neighbor_level: the radius within which the neighbors have to be returned
-        :return: a list of neighbors within the given radius
+        :return: a list of neighbors within the given radius, or only the public key itself when radius is zero
         """
         if neighbor_level == 0:
             return {public_key: {"up": self.database.total_up(public_key),
@@ -337,7 +338,7 @@ class MultiChainCommunity(Community):
     def get_edges(self, nodes=None):
         """
         Return a dictionary with all edges between certain nodes around a certain focus node,
-            regarding the local multichain database.
+        regarding the local multichain database.
 
         :param public_key: the public key of the focus node
         :param nodes: the dictionary of nodes between which the edges have to be returned
@@ -345,21 +346,20 @@ class MultiChainCommunity(Community):
         """
         list_of_nodes = [node["public_key"] for node in nodes]
         list_of_edges = []
-        for pair in itertools.combinations(list_of_nodes, 2):
+        for pair in combinations(list_of_nodes, 2):
             current_neighbors = self.database.neighbor_list(pair[0])
             list_of_edges.append(
                 [pair[0], pair[1], current_neighbors[pair[1]]["up"] or 0, current_neighbors[pair[1]]["down"] or 0])
-        number_of_edges = len(list_of_edges)
         edges = []
-        for current in range(number_of_edges):
-            if list_of_edges[current][2] > 0:
-                edges.append({"from": list_of_edges[current][0], "to": list_of_edges[current][1],
-                              "amount": list_of_edges[current][2]})
-                self.page_rank.add_edge(list_of_edges[current][0], list_of_edges[current][1])
-            if list_of_edges[current][3] > 0:
-                edges.append({"from": list_of_edges[current][1], "to": list_of_edges[current][0],
-                              "amount": list_of_edges[current][3]})
-                self.page_rank.add_edge(list_of_edges[current][1], list_of_edges[current][0])
+        for edge in list_of_edges:
+            if edge[2] > 0:
+                edges.append({"from": edge[0], "to": edge[1],
+                              "amount": edge[2]})
+                self.page_rank.add_edge(edge[0], edge[1])
+            if edge[3] > 0:
+                edges.append({"from": edge[1], "to": edge[0],
+                              "amount": edge[3]})
+                self.page_rank.add_edge(edge[1], edge[0])
         return edges
 
     def get_page_rank(self, public_key):
