@@ -4,9 +4,9 @@ This reputation system builds a tamper proof interaction history contained in a 
 Every node has a chain and these chains intertwine by blocks shared by chains.
 """
 import logging
+from copy import deepcopy
 from itertools import combinations
 from networkx import Graph
-from copy import deepcopy
 from twisted.internet.defer import inlineCallbacks
 
 from twisted.internet import reactor
