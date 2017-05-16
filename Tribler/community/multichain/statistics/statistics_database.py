@@ -1,5 +1,6 @@
-
-
+"""
+This file contains the functions to get the trust statistics from the database implemented in Tribler.
+"""
 from Tribler.community.multichain.database import MultiChainDB
 
 
