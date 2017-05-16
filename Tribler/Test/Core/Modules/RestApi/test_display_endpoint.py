@@ -75,7 +75,7 @@ class TestDisplayEndpoint(AbstractApiTest):
         Evaluate whether the API returns a correct response if the focus node is an integer.
         """
         exp_message = {"focus_node": "-1", "neighbor_level": 1, "nodes": [{"public_key": "xyz", "total_up": 0,
-                                                                            "total_down": 0, "page_rank": 0.5}],
+                                                                           "total_down": 0, "page_rank": 0.5}],
                        "edges": []}
         return self.do_request('display?focus_node=-1&neighbor_level=1', expected_code=200, expected_json=exp_message)
 
