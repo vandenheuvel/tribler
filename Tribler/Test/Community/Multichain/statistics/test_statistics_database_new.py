@@ -15,8 +15,8 @@ class TestStatisticsDatabase(AbstractServer):
     Tests for the trust statistics database connection.
     """
 
-    # def __init__(self, *args, **kwargs):
-    #     super(TestStatisticsDatabase, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(TestStatisticsDatabase, self).__init__(*args, **kwargs)
 
     @inlineCallbacks
     def setUp(self, annotate=True):
