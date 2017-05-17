@@ -78,5 +78,6 @@ class TestDisplayEndpoint(AbstractApiTest):
                                                                            "total_down": 0, "page_rank": 0.5}],
                        "edges": []}
         return self.do_request('display?focus_node=-1&neighbor_level=1', expected_code=200, expected_json=exp_message)
+
         # TODO: Add method which tests:
         # Evaluate whether the API returns the information about the own node if self is used as focus_node parameter.
