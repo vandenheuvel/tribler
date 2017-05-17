@@ -10,6 +10,11 @@ class StatisticsDB(MultiChainDB):
     """
 
     def __init__(self, working_directory):
+        """
+        Sets up a database connection to the existing multi chain database.
+
+        :param working_directory: directory of the database
+        """
         super(StatisticsDB, self).__init__(working_directory)
 
     def total_up(self, public_key):
