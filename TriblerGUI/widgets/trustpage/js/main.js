@@ -87,12 +87,11 @@ filterForceNodes(simulation.force("neighbor_y"), function (n, i) {
  */
 function update(graph) {
 
-    console.log("Updating the visualization", graph);
-    console.log("Focus on node", graph.focus_node);
-    console.log("Nodes");
-    graph.nodes.forEach(function(node){
-        console.log(node.public_key);
-    });
+    // console.log("Updating the visualization", graph);
+    console.log("Focus on", graph.focus_node);
+
+    // Restart simulation 
+    simulation.restart();
 
     // Update the state
 
@@ -136,7 +135,6 @@ function update(graph) {
 
     // Create the new links, remove the old
     var linksWithNodes = graph.links.map(function (link) {
-        console.log(link.source, link.target);
         return {
             source: state.nodes[link.source],
             target: state.nodes[link.target]
@@ -240,7 +238,6 @@ function drawNodes(data) {
         .style("font-size", "12")
         .style("fill", "#ffff00")
         .text(function (d) {
-            console.log("Setting label to",d.public_key);
             return d.public_key;
         });
 

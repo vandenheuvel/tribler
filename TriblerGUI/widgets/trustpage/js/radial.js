@@ -42,6 +42,6 @@ function setAlpha(nodes, alpha_0, alpha_1){
     for(var i = 0; i < nodes.length; i++){
 
         nodes[i].alpha = alpha_0 + d_alpha * i;
-        console.log('set a of',i, nodes[i].alpha, alpha_0, alpha_1, nodes[i].public_key)
+        // console.log('set a of',i, nodes[i].alpha, alpha_0, alpha_1, nodes[i].public_key)
     }
 }
