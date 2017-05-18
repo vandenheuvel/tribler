@@ -32,3 +32,17 @@ function listNeighborsOf(edges, neighborPK) {
     }
     return neighbors;
 }
+
+/**
+ * Group the list by given key attribute.
+ *
+ * @param list: the list from which elements have to be grouped
+ * @param key: the attribute on which the list elements have to be grouped
+ * @returns a dictionary with elements grouped by attribute value
+ */
+function groupBy(list, key) {
+  return list.reduce(function(rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
+}
