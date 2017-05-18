@@ -30,20 +30,6 @@ svg.append("g").attr("class", "links");
 svg.append("g").attr("class", "nodes");
 svg.append("g").attr("class", "labels");
 
-// Selector for the nodes
-function getNodes() {
-    return svg
-        .select(".nodes")
-        .selectAll(".node");
-}
-
-// Selector for the links
-function getLinks() {
-    return svg
-        .select(".links")
-        .selectAll(".line")
-}
-
 var state = {
     request_pending: false,
     x: width / 2,
@@ -67,7 +53,9 @@ var simulation = d3.forceSimulation()
     .force("neighbor_y", d3.forceY(getRadialPosition(1)).strength(.5))
 
     // The update function for every tick of the clock
-    .on("tick", tick);
+    .on("tick", tick)
+
+    .alphaDecay(0);
 
 // Only apply the centering force on the focus node
 filterForceNodes(simulation.force("center"), function (n, i) {
@@ -132,8 +120,9 @@ function update(graph) {
     setAlpha(state.focus_node.neighbors, alpha_0, alpha_0 * 5);
 
     // Create the new nodes, remove the old
-    // var nodeSelection = getNodes().data(graph.nodes);
-    var nodes = drawNodes(graph.nodes);
+    var nodes = drawNodes(svg, graph.nodes, function (d) {
+            handle_node_click(d.public_key)
+        });
 
     // Create the new links, remove the old
     var linksWithNodes = graph.links.map(function (link) {
@@ -145,7 +134,7 @@ function update(graph) {
         });
     });
 
-    var links = drawLinks(linksWithNodes);
+    var links = drawLinks(svg, linksWithNodes);
 
     simulation.nodes(graph.nodes)
 
@@ -161,8 +150,8 @@ function xAtRatio(x0, x1, ratio){
  * Update the positions of the links and nodes on every tick of the clock
  */
 function tick() {
-    var linkSource = svg.select(".links").selectAll(".line-source");
-    var linkTarget = svg.select(".links").selectAll(".line-target");
+    var linkSource = svg.select(".links").selectAll(".link-source");
+    var linkTarget = svg.select(".links").selectAll(".link-target");
 
     linkSource
         .attr("x1", function(d) { return d.source.x; })
@@ -176,7 +165,7 @@ function tick() {
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
 
-    getNodes()
+    selectNodes(svg)
         .attr("x", function (d) {
             return d.x;
         })
@@ -198,79 +187,7 @@ function handle_node_click(public_key) {
     }
 }
 
-/**
- * Draw the links
- * @param selection
- * @returns {*}
- */
-function drawLinks(data) {
 
-    getLinks().remove();
-
-    var selection = getLinks().data(data).enter();
-
-    var links = selection
-        .append("svg")
-        .attr("class", "line");
-
-    links.append("line")
-        .attr("class", "line-source")
-        .attr("stroke-width", 2)
-        .style("stroke", "yellow");
-
-    links.append("line")
-        .attr("class", "line-target")
-        .attr("stroke-width", 2)
-        .style("stroke", "red");
-
-    return links;
-}
-
-/**
- * Draw the nodes and their labels
- * @param selection
- * @returns {*}
- */
-function drawNodes(data) {
-
-    // Always remove existing nodes before adding new ones
-    getNodes().remove();
-
-    var selection = getNodes().data(data).enter();
-
-    // Create an <svg.node> element.
-    var groups = selection
-        .append("svg")
-        .attr("overflow", "visible")
-        .attr("class", "node");
-
-    // Append a <circle> element to it.
-    groups
-        .append("circle")
-        .attr("fill", "rgb(230,115,0)")
-        .attr("r", "20")
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .on("click", function (d) {
-            handle_node_click(d.public_key)
-        });
-
-    // Append a <text> element to it
-    groups
-        .append("text")
-        .attr("x", 24)
-        .attr("y", 24)
-        .style("font-family", "sans-serif")
-        .style("font-size", "12")
-        .style("fill", "#ffff00")
-        .text(function (d) {
-            return d.public_key;
-        });
-
-    // Return the group of <svg.node>
-    return groups;
-
-}
 
 /**
  *
