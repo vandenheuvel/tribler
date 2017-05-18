@@ -113,7 +113,7 @@ function update(graph) {
     applyAlphaLinear(state.focus_node.neighbors, 0, 2*pi);
 
     // Draw all nodes
-    var nodes = drawNodes(svg, graph.nodes, function (d) {
+    var nodes = drawNodes(svg, graph, function (d) {
             handle_node_click(d.public_key)
         });
 

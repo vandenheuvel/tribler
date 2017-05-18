@@ -22,7 +22,7 @@ function drawNodes(svg, data, on_click) {
     // Always remove existing nodes before adding new ones
     selectNodes(svg).remove();
 
-    var selection = selectNodes(svg).data(data).enter();
+    var selection = selectNodes(svg).data(data.nodes).enter();
 
     // Create an <svg.node> element.
     var groups = selection
@@ -33,7 +33,7 @@ function drawNodes(svg, data, on_click) {
     // Append a <circle> element to it.
     var circles = groups
         .append("circle")
-        .attr("fill", "rgb(230,115,0)")
+        .attr("fill", function (d) { return getNodeColor(d, data)} )
         .attr("r", "20")
         .attr("cx", 0)
         .attr("cy", 0)
@@ -61,6 +61,16 @@ function drawNodes(svg, data, on_click) {
     return groups;
 
 }
+
+function getNodeColor(d, data) {
+    console.log(data);
+    console.log("rank: " + data.min_page_rank);
+    return nodeColor((d.page_rank - data.min_page_rank) / (data.max_page_rank - data.min_page_rank))
+}
+
+var nodeColor = d3.scaleLinear()
+    .domain([0, 0.5, 1])
+    .range(["red", "yellow", "green"]);
 
 /**
  * Select all <svg.link> elements in .links
