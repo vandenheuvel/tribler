@@ -12,7 +12,7 @@
 
 // Update the visualization
 function onNewData(data) {
-    update(JSON.parse(data));
+    update(processData(data));
 }
 
 // Distance to peers
@@ -88,7 +88,7 @@ filterForceNodes(simulation.force("neighbor_y"), function (n, i) {
  */
 function update(graph) {
 
-    console.log("Updating the visualization");
+    console.log("Updating the visualization", graph);
 
     // Update the state
 
@@ -141,11 +141,13 @@ function update(graph) {
 
     // Create the new links, remove the old
     var linksWithNodes = graph.links.map(function (link) {
+        console.log(link.source, link.target);
         return {
             source: state.nodes[link.source],
             target: state.nodes[link.target]
         }
     });
+
     var linkSelection = getLinks().data(linksWithNodes)
     var links = drawLinks(linkSelection.enter());
     linkSelection.exit().remove();
