@@ -117,17 +117,8 @@ function update(graph) {
             handle_node_click(d.public_key)
         });
 
-    var linksWithNodes = graph.links.map(function (link) {
-        return Object.assign({}, link, {
-            source_pk : link.source,
-            target_pk : link.target,
-            source: state.nodes[link.source],
-            target: state.nodes[link.target]
-        });
-    });
-
     // Draw all links
-    var links = drawLinks(svg, linksWithNodes);
+    var links = drawLinks(svg, graph.links);
 
     // Apply the nodes to the simulation
     simulation.nodes(graph.nodes)

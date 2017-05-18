@@ -13,8 +13,10 @@
  *          "page_rank": 5
  *      }, ...],
  *          "links": [{
- *          "source": "xyz",
- *          "target": "xyz_n1",
+ *          "source_pk": "xyz",
+ *          "source": {source node object},
+ *          "target_pk": "xyz_n1",
+ *          "target": {target node object},
  *          "amount_up": 100,
  *          "amount_down": 10,
  *          "ratio": 0.90909,
@@ -46,6 +48,29 @@ function processData(jsonData) {
     // Sort nodes ascending on up + down
     var nodes = data.nodes.sort(function(nodeOne, nodeTwo) {
         return nodeOne.total_up + nodeOne.total_down - nodeTwo.total_up - nodeTwo.total_down;
+    });
+
+    /**
+     * Finds the first object in a list of objects that matches a given key-value pair
+     * @param list
+     * @param key
+     * @param val
+     * @returns {*}
+     */
+    function find(list, key, val){
+        return list.find(function(item){
+            return (typeof item === "object") && (key in item) && (item[key] === val);
+        });
+    }
+
+    // Add reference to source and target object
+    combinedEdges = combinedEdges.map(function (edge) {
+        return Object.assign({}, edge, {
+            source_pk : edge.source,
+            target_pk : edge.target,
+            source: find(nodes, "public_key", edge.source),
+            target: find(nodes, "public_key", edge.target)
+        });
     });
 
     var sortedPageRank = data.nodes.map(function(node) {return node.page_rank}).sort();
