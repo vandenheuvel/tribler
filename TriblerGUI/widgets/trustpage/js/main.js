@@ -186,7 +186,7 @@ function tick() {
  */
 function handle_node_click(public_key) {
     if(state.request_pending){
-        console.warning("Request pending, ignore new request");
+        console.log("Request pending, ignore new request");
     } else {
         state.request_pending = true;
         get_node_info(public_key, onNewData)
