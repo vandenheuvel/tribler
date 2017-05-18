@@ -16,7 +16,7 @@ function onNewData(data) {
 }
 
 // Distance to peers
-var radius = 100;
+var radius = 200;
 
 // Select the svg DOM element
 var svg = d3.select("#graph"),
@@ -90,7 +90,7 @@ function update(graph) {
     // console.log("Updating the visualization", graph);
     console.log("Focus on", graph.focus_node);
 
-    // Restart simulation 
+    // Restart simulation
     simulation.restart();
 
     // Update the state
@@ -222,7 +222,7 @@ function drawNodes(data) {
     groups
         .append("circle")
         .attr("fill", "rgb(230,115,0)")
-        .attr("r", "10")
+        .attr("r", "20")
         .attr("cx", 0)
         .attr("cy", 0)
         .on("click", function (d) {
@@ -232,8 +232,8 @@ function drawNodes(data) {
     // Append a <text> element to it
     groups
         .append("text")
-        .attr("x", 12)
-        .attr("y", 12)
+        .attr("x", 24)
+        .attr("y", 24)
         .style("font-family", "sans-serif")
         .style("font-size", "12")
         .style("fill", "#ffff00")
