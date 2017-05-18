@@ -10,9 +10,9 @@ from Tribler.Core.Session import Session
 from Tribler.Test.Community.Multichain.test_multichain_utilities import MultiChainTestCase
 from Tribler.Test.test_as_server import AbstractServer
 from Tribler.community.multichain.block import MultiChainBlock, GENESIS_SEQ
-from Tribler.community.multichain.community import (HALF_BLOCK, CRAWL,
+from Tribler.community.multichain.community import (CRAWL, HALF_BLOCK, MultiChainCommunity, MultiChainCommunityCrawler,
                                                     PendingBytes)
-from Tribler.community.multichain.community import (MultiChainCommunity, MultiChainCommunityCrawler)
+from Tribler.community.multichain.statistics.statistics_database import StatisticsTestDB
 from Tribler.community.tunnel.routing import Circuit
 from Tribler.dispersy.message import DelayPacketByMissingMember
 from Tribler.dispersy.requestcache import IntroductionRequestCache
@@ -533,6 +533,10 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
     @blocking_call_on_reactor_thread
     def assertBlocksInDatabase(self, node, amount):
         count = node.community.persistence.execute(u"SELECT COUNT(*) FROM multi_chain").fetchone()[0]
+        # TODO: Remove this if-statement if the test data is not used anymore
+        if isinstance(self._community.persistence, StatisticsTestDB):
+            # The test database starts with 26 * 4 = 104 blocks
+            amount += 104
         assert count == amount, "Wrong number of blocks in database, was {0} but expected {1}".format(count, amount)
 
     @blocking_call_on_reactor_thread
