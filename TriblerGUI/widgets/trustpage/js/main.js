@@ -5,10 +5,8 @@
  * built up and modified by this code.
  */
 
-// TODO: think about how to split this in different javascipt files
 // TODO: start using JSDoc and setup some CI tool to check
 // TODO: choose a testing framework and start writing tests
-
 
 // Update the visualization
 function onNewData(data) {
@@ -104,27 +102,21 @@ function update(graph) {
         });
     });
 
-    // Start in the center
-    var nodeCount = graph.nodes.length - 1;
-    var alpha_0 = Math.PI / 2;
-    var scale = .5;
-    var dAlpha = Math.PI * 2 / nodeCount;
-
     // All nodes start in the center (slightly off)
     graph.nodes.forEach(function (node, i) {
         node.x = width / 2 + Math.random();
         node.y = height / 2 + Math.random();
     });
 
-    // Set the angles of all neighbors
-    setAlpha(state.focus_node.neighbors, alpha_0, alpha_0 * 5);
+    // Position all direct neighbors on a circle
+    const pi = Math.PI;
+    applyAlphaLinear(state.focus_node.neighbors, 0, 2*pi);
 
-    // Create the new nodes, remove the old
+    // Draw all nodes
     var nodes = drawNodes(svg, graph.nodes, function (d) {
             handle_node_click(d.public_key)
         });
 
-    // Create the new links, remove the old
     var linksWithNodes = graph.links.map(function (link) {
         return Object.assign({}, link, {
             source_pk : link.source,
@@ -134,16 +126,25 @@ function update(graph) {
         });
     });
 
+    // Draw all links
     var links = drawLinks(svg, linksWithNodes);
 
+    // Apply the nodes to the simulation
     simulation.nodes(graph.nodes)
 
     // Reset the alpha to 1 (full energy)
     simulation.alpha(1);
 }
 
-function xAtRatio(x0, x1, ratio){
-    return x0 + (x1-x0) * ratio;
+/**
+ * Returns the point x on line x0 to x1 at a given fraction
+ * @param x0
+ * @param x1
+ * @param ratio
+ * @returns x
+ */
+function xAtFraction(x0, x1, ratio){
+    return x0 + (x1 - x0) * ratio;
 }
 
 /**
@@ -153,25 +154,23 @@ function tick() {
     var linkSource = svg.select(".links").selectAll(".link-source");
     var linkTarget = svg.select(".links").selectAll(".link-target");
 
+    // Part of line at the source
     linkSource
         .attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return xAtRatio(d.source.x, d.target.x, 1-d.ratio); })
-        .attr("y2", function(d) { return xAtRatio(d.source.y, d.target.y, 1-d.ratio); });
+        .attr("x2", function(d) { return xAtFraction(d.source.x, d.target.x, 1-d.ratio); })
+        .attr("y2", function(d) { return xAtFraction(d.source.y, d.target.y, 1-d.ratio); });
 
+    // Part of line at the target
     linkTarget
-        .attr("x1", function(d) { return xAtRatio(d.target.x, d.source.x, d.ratio); })
-        .attr("y1", function(d) { return xAtRatio(d.target.y, d.source.y, d.ratio); })
+        .attr("x1", function(d) { return xAtFraction(d.target.x, d.source.x, d.ratio); })
+        .attr("y1", function(d) { return xAtFraction(d.target.y, d.source.y, d.ratio); })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
 
     selectNodes(svg)
-        .attr("x", function (d) {
-            return d.x;
-        })
-        .attr("y", function (d) {
-            return d.y;
-        });
+        .attr("x", function (d) { return d.x; })
+        .attr("y", function (d) { return d.y; });
 }
 
 /**
@@ -187,15 +186,13 @@ function handle_node_click(public_key) {
     }
 }
 
-
-
 /**
- *
+ * Return the cartesian coordinates of a node base on its alpha
  * @param dimension (0: x, 1: y)
  */
 function getRadialPosition(dimension) {
     return function (node) {
-        var pos = radialPosition(state.x, state.y, node.alpha, radius);
+        var pos = polarToCartesian(state.x, state.y, node.alpha, radius);
         return dimension === 0 ? pos.x : pos.y;
     }
 }
