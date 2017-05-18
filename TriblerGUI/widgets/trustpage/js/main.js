@@ -48,7 +48,6 @@ var state = {
     y: height / 2,
     focus_pk: 30,
     focus_node: null,
-    neighbors : [],
     nodes: []
 };
 
@@ -89,10 +88,16 @@ filterForceNodes(simulation.force("neighbor_y"), function (n, i) {
 function update(graph) {
 
     console.log("Updating the visualization", graph);
+    console.log("Focus on node", graph.focus_node);
+    console.log("Nodes");
+    graph.nodes.forEach(function(node){
+        console.log(node.public_key);
+    });
 
     // Update the state
 
     // Make hash of nodes
+    state.nodes = [];
     graph.nodes.forEach(function (node) {
         state.nodes[node.public_key] = node;
     });
@@ -126,9 +131,8 @@ function update(graph) {
     setAlpha(state.focus_node.neighbors, alpha_0, alpha_0 * 5);
 
     // Create the new nodes, remove the old
-    var nodeSelection = getNodes().data(graph.nodes);
-    var nodes = drawNodes(nodeSelection.enter());
-    nodeSelection.exit().remove();
+    // var nodeSelection = getNodes().data(graph.nodes);
+    var nodes = drawNodes(graph.nodes);
 
     // Create the new links, remove the old
     var linksWithNodes = graph.links.map(function (link) {
@@ -203,7 +207,12 @@ function drawLinks(selection) {
  * @param selection
  * @returns {*}
  */
-function drawNodes(selection) {
+function drawNodes(data) {
+
+    // Always remove existing nodes before adding new ones
+    getNodes().remove();
+
+    var selection = getNodes().data(data).enter();
 
     // Create an <svg.node> element.
     var groups = selection
@@ -223,13 +232,15 @@ function drawNodes(selection) {
         });
 
     // Append a <text> element to it
-    groups.append("text")
+    groups
+        .append("text")
         .attr("x", 12)
         .attr("y", 12)
         .style("font-family", "sans-serif")
         .style("font-size", "12")
         .style("fill", "#ffff00")
         .text(function (d) {
+            console.log("Setting label to",d.public_key);
             return d.public_key;
         });
 
