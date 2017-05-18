@@ -73,7 +73,9 @@ function processData(jsonData) {
         });
     });
 
-    var sortedPageRank = data.nodes.map(function(node) {return node.page_rank}).sort();
+    var sortedPageRank = data.nodes.map(function(node) {return node.page_rank}).sort(function(pageRankOne, pageRankTwo) {
+        return pageRankOne - pageRankTwo;
+    });
     return {'focus_node': data.focus_node,
             'min_page_rank': sortedPageRank[0],
             'max_page_rank': sortedPageRank[sortedPageRank.length - 1],
