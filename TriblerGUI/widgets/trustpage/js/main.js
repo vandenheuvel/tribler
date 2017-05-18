@@ -104,8 +104,8 @@ function update(graph) {
     })[0];
 
     // List the neighbors in each node
-    graph.nodes.forEach(function(node){
-        node.neighbors = listNeighborsOf(graph.links, node.public_key).map(function(pk){
+    graph.nodes.forEach(function (node) {
+        node.neighbors = listNeighborsOf(graph.links, node.public_key).map(function (pk) {
             return state.nodes[pk];
         });
     });
@@ -115,24 +115,15 @@ function update(graph) {
     var alpha_0 = Math.PI / 2;
     var scale = .5;
     var dAlpha = Math.PI * 2 / nodeCount;
+
     // All nodes start in the center (slightly off)
-
-
-    var x = 0;
     graph.nodes.forEach(function (node, i) {
         node.x = width / 2 + Math.random();
         node.y = height / 2 + Math.random();
-        // if (node.public_key != state.focus_pk) {
-        //     node.alpha = node.alpha = alpha_0 - scale * (dAlpha * ++x);
-        //     node.parent = state.focus_node;
-        // }
     });
 
-    setAlpha(state.focus_node.neighbors, alpha_0, alpha_0*5);
-
-    console.log(state.focus_node.neighbors.map(function(n){
-        return n.alpha;
-    }))
+    // Set the angles of all neighbors
+    setAlpha(state.focus_node.neighbors, alpha_0, alpha_0 * 5);
 
     // Create the new nodes, remove the old
     var nodeSelection = getNodes().data(graph.nodes);
@@ -154,8 +145,8 @@ function update(graph) {
 
     simulation.nodes(graph.nodes)
 
-    // simulation.force("link")
-    //     .links(focusToNeighbors);
+    // Reset the alpha to 1 (full energy)
+    simulation.alpha(1);
 }
 
 /**
