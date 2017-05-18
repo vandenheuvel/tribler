@@ -121,7 +121,7 @@ function update(graph) {
     var links = drawLinks(svg, graph);
 
     // Apply the nodes to the simulation
-    simulation.nodes(graph.nodes)
+    simulation.nodes(graph.nodes);
 
     // Reset the alpha to 1 (full energy)
     simulation.alpha(1);

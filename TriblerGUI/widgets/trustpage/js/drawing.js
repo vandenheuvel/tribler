@@ -51,7 +51,7 @@ function drawNodes(svg, data, on_click) {
         .attr("x", 24)
         .attr("y", 24)
         .style("font-family", "sans-serif")
-        .style("font-size", "12")
+        .style("font-size", "14")
         .style("fill", "#ffff00")
         .text(function (d) {
             return d.public_key;
@@ -107,17 +107,18 @@ function drawLinks(svg, data) {
     links.append("line")
         .attr("class", "link-source")
         .attr("stroke-width", function (d) { return getStrokeWidth(d, data) })
-        .style("stroke", "blue");
+        .style("stroke", "white")
 
     links.append("line")
         .attr("class", "link-target")
         .attr("stroke-width", function (d) { return getStrokeWidth(d, data) })
-        .style("stroke", "purple");
+        .style("stroke", "grey");
 
     return links;
 }
 
 // TODO: devision by 0 possible here...
+// TODO: implement this in process_data.js
 function getStrokeWidth(d, data) {
     var min_transmission = data.links[0].amount_up + data.links[0].amount_down;
     var max_transmission = data.links[data.links.length-1].amount_up + data.links[data.links.length-1].amount_down;
