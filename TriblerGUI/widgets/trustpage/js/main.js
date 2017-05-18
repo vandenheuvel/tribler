@@ -118,7 +118,7 @@ function update(graph) {
         });
 
     // Draw all links
-    var links = drawLinks(svg, graph.links);
+    var links = drawLinks(svg, graph);
 
     // Apply the nodes to the simulation
     simulation.nodes(graph.nodes)
