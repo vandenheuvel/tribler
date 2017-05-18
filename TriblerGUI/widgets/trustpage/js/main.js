@@ -41,7 +41,7 @@ function getNodes() {
 function getLinks() {
     return svg
         .select(".links")
-        .selectAll("line")
+        .selectAll(".line")
 }
 
 var state = {
@@ -137,15 +137,15 @@ function update(graph) {
 
     // Create the new links, remove the old
     var linksWithNodes = graph.links.map(function (link) {
-        return {
+        return Object.assign({}, link, {
+            source_pk : link.source,
+            target_pk : link.target,
             source: state.nodes[link.source],
             target: state.nodes[link.target]
-        }
+        });
     });
 
-    var linkSelection = getLinks().data(linksWithNodes)
-    var links = drawLinks(linkSelection.enter());
-    linkSelection.exit().remove();
+    var links = drawLinks(linksWithNodes);
 
     simulation.nodes(graph.nodes)
 
@@ -153,23 +153,28 @@ function update(graph) {
     simulation.alpha(1);
 }
 
+function xAtRatio(x0, x1, ratio){
+    return x0 + (x1-x0) * ratio;
+}
+
 /**
  * Update the positions of the links and nodes on every tick of the clock
  */
 function tick() {
-    getLinks()
-        .attr("x1", function (d) {
-            return d.source.x;
-        })
-        .attr("y1", function (d) {
-            return d.source.y;
-        })
-        .attr("x2", function (d) {
-            return d.target.x;
-        })
-        .attr("y2", function (d) {
-            return d.target.y;
-        });
+    var linkSource = svg.select(".links").selectAll(".line-source");
+    var linkTarget = svg.select(".links").selectAll(".line-target");
+
+    linkSource
+        .attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return xAtRatio(d.source.x, d.target.x, 1-d.ratio); })
+        .attr("y2", function(d) { return xAtRatio(d.source.y, d.target.y, 1-d.ratio); });
+
+    linkTarget
+        .attr("x1", function(d) { return xAtRatio(d.target.x, d.source.x, d.ratio); })
+        .attr("y1", function(d) { return xAtRatio(d.target.y, d.source.y, d.ratio); })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
 
     getNodes()
         .attr("x", function (d) {
@@ -198,11 +203,25 @@ function handle_node_click(public_key) {
  * @param selection
  * @returns {*}
  */
-function drawLinks(selection) {
+function drawLinks(data) {
+
+    getLinks().remove();
+
+    var selection = getLinks().data(data).enter();
+
     var links = selection
-        .append("line")
+        .append("svg")
+        .attr("class", "line");
+
+    links.append("line")
+        .attr("class", "line-source")
         .attr("stroke-width", 2)
-        .style("stroke", "rgb(255,255,255)");
+        .style("stroke", "yellow");
+
+    links.append("line")
+        .attr("class", "line-target")
+        .attr("stroke-width", 2)
+        .style("stroke", "red");
 
     return links;
 }
