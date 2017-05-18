@@ -21,10 +21,10 @@ function listNeighborsOf(edges, neighborPK) {
     var neighbors = [];
     for (var i = 0; i < edges.length; i++) {
         var n = null;
-        if (edges[i].source == neighborPK)
-            n = edges[i].target;
-        else if (edges[i].target == neighborPK)
-            n = edges[i].source;
+        if (edges[i].source_pk == neighborPK)
+            n = edges[i].target_pk;
+        else if (edges[i].target_pk == neighborPK)
+            n = edges[i].source_pk;
 
         if (n && neighbors.indexOf(n) == -1) {
             neighbors.push(n);
