@@ -14,21 +14,19 @@ from twisted.internet.task import LoopingCall
 
 from Tribler.Core.CacheDB.sqlitecachedb import forceDBThread
 from Tribler.Core.simpledefs import NTFY_TUNNEL, NTFY_REMOVE
-from Tribler.dispersy.authentication import MemberAuthentication
-from Tribler.dispersy.authentication import NoAuthentication
+from Tribler.community.multichain.conversion import MultiChainConversion
+from Tribler.community.multichain.database import MultiChainDB
+from Tribler.community.multichain.payload import HalfBlockPayload, CrawlRequestPayload
+from Tribler.community.multichain.statistics.page_rank import IncrementalPageRank
+from Tribler.dispersy.authentication import NoAuthentication, MemberAuthentication
 from Tribler.dispersy.community import Community
 from Tribler.dispersy.conversion import DefaultConversion
 from Tribler.dispersy.destination import CandidateDestination
 from Tribler.dispersy.distribution import DirectDistribution
 from Tribler.dispersy.message import Message, DelayPacketByMissingMember
 from Tribler.dispersy.resolution import PublicResolution
-
 from Tribler.dispersy.util import blocking_call_on_reactor_thread
 from Tribler.community.multichain.block import MultiChainBlock, ValidationResult, GENESIS_SEQ, UNKNOWN_SEQ
-from Tribler.community.multichain.payload import HalfBlockPayload, CrawlRequestPayload
-from Tribler.community.multichain.conversion import MultiChainConversion
-from Tribler.community.multichain.statistics.statistics_database import StatisticsTestDB
-from Tribler.community.multichain.statistics.page_rank import IncrementalPageRank
 
 HALF_BLOCK = u"half_block"
 CRAWL = u"crawl"
@@ -64,9 +62,7 @@ class MultiChainCommunity(Community):
 
         self.notifier = None
 
-        # TODO: Set self.persistence to the StatisticsDb (original was MultiChainDB)
-        self.persistence = StatisticsTestDB(self.dispersy.working_directory)
-        # self.persistence = StatisticsDb(self.dispersy.working_directory)
+        self.persistence = MultiChainDB(self.dispersy.working_directory)
         self.graph = Graph()
         self.page_rank = IncrementalPageRank(self.graph)
         self.ranks = {}
