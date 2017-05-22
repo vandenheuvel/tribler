@@ -1,8 +1,19 @@
 """
 This module validates the functions defined in the Display Endpoint
 """
+<<<<<<< HEAD
+=======
+from json import dumps, loads
+>>>>>>> Put all current database code in the same file
 from twisted.internet.defer import inlineCallbacks
+from twisted.web import http
 
+<<<<<<< HEAD
+=======
+from Tribler.Core.exceptions import OperationNotEnabledByConfigurationException
+from Tribler.Core.Modules.restapi.display_endpoint import DisplayEndpoint
+from Tribler.Test.Core.base_test import MockObject
+>>>>>>> Put all current database code in the same file
 from Tribler.community.multichain.community import MultiChainCommunity
 from Tribler.dispersy.dispersy import Dispersy
 from Tribler.dispersy.endpoint import ManualEnpoint
@@ -79,3 +90,4 @@ class TestDisplayEndpoint(AbstractApiTest):
 
         # TODO: Add method which tests:
         # Evaluate whether the API returns the information about the own node if self is used as focus_node parameter.
+
