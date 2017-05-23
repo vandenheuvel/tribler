@@ -122,8 +122,6 @@ class DisplayEndpoint(resource.Resource):
                     self.get_multi_chain_community().persistence.use_dummy_data(use_random=False)
                 elif dataset == "random":
                     self.get_multi_chain_community().persistence.use_dummy_data(use_random=True)
-        else:
-            dataset = ""
 
         if "focus_node" not in request.args:
             return DisplayEndpoint.return_error(request, message="focus_node parameter missing")
@@ -134,7 +132,7 @@ class DisplayEndpoint(resource.Resource):
         focus_node = request.args["focus_node"][0]
         if isinstance(focus_node, basestring):
             if request.args["focus_node"][0] == "self":
-                if dataset in ["static", "random"]:
+                if self.get_multi_chain_community().persistence.dummy_setup:
                     focus_node = "0"
                 else:
                     try:

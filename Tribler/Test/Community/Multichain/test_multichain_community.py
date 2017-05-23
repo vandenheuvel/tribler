@@ -12,7 +12,6 @@ from Tribler.Test.Community.Multichain.test_multichain_utilities import MultiCha
 from Tribler.community.multichain.block import MultiChainBlock, GENESIS_SEQ
 from Tribler.community.multichain.community import (MultiChainCommunity, MultiChainCommunityCrawler, HALF_BLOCK, CRAWL,
                                                     PendingBytes)
-from Tribler.community.multichain.statistics.statistics_database import StatisticsTestDB
 from Tribler.community.tunnel.routing import Circuit
 
 from Tribler.Test.test_as_server import AbstractServer
