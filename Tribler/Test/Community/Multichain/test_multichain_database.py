@@ -19,13 +19,14 @@ class TestDatabase(MultiChainTestCase):
     @blocking_call_on_reactor_thread
     @inlineCallbacks
     def setUp(self, **kwargs):
-        yield super(TestDatabase, self).setUp()
+        yield super(TestDatabase, self).setUp(**kwargs)
         path = os.path.join(self.getStateDir(), DATABASE_DIRECTORY)
         if not os.path.exists(path):
             os.makedirs(path)
         self.db = MultiChainDB(self.getStateDir())
         self.block1 = TestBlock()
         self.block2 = TestBlock()
+        self.block3 = TestBlock()
 
     @blocking_call_on_reactor_thread
     def test_add_block(self):
@@ -195,3 +196,79 @@ class TestDatabase(MultiChainTestCase):
         self.assertEqual(block_dict["up"], self.block1.up)
         self.assertEqual(block_dict["down"], self.block1.down)
         self.assertEqual(block_dict["insert_time"], self.block1.insert_time)
+
+    @blocking_call_on_reactor_thread
+    def test_total_up(self):
+        """
+        The database should return the correct amount of uploaded data.
+        """
+        self.block2.total_up = 0
+
+        self.db.add_block(self.block1)
+        self.db.add_block(self.block2)
+
+        self.assertEqual(self.block1.total_up, self.db.total_up(self.block1.public_key))
+        self.assertEqual(0, self.db.total_up(self.block2.public_key))
+        self.assertEqual(0, self.db.total_up(self.block3.public_key))
+
+    @blocking_call_on_reactor_thread
+    def test_total_down(self):
+        """
+        The database should return the correct amount of downloaded data.
+        """
+        self.block2.total_down = 0
+
+        self.db.add_block(self.block1)
+        self.db.add_block(self.block2)
+
+        self.assertEqual(self.block2.total_down, self.db.total_down(self.block2.public_key))
+        self.assertEqual(0, self.db.total_down(self.block2.public_key))
+        self.assertEqual(0, self.db.total_down(self.block3.public_key))
+
+    @blocking_call_on_reactor_thread
+    def test_neighbors(self):
+        """
+        The database should return the correct list of neighbors and the traffic to and from them.
+        """
+        focus_block1 = TestBlock()
+        focus_block2 = TestBlock()
+
+        # All blocks have the same public key
+        self.block2.public_key = self.block1.public_key
+        self.block3.public_key = self.block1.public_key
+
+        self.block1.link_public_key = focus_block1.public_key
+        self.block2.link_public_key = focus_block1.public_key
+        self.block3.link_public_key = focus_block2.public_key
+
+        # Add all blocks + one redundant block
+        self.db.add_block(self.block1)
+        self.db.add_block(self.block2)
+        self.db.add_block(self.block3)
+        self.db.add_block(focus_block1)
+
+        expected_result = {focus_block1.public_key:
+                               {"up": self.block1.up + self.block2.up, "down": self.block1.down + self.block2.down},
+                           focus_block2.public_key: {"up": self.block3.up, "down": self.block3.down}}
+
+        self.assertDictEqual(expected_result, self.db.neighbor_list(self.block1.public_key))
+
+    @blocking_call_on_reactor_thread
+    def test_random_dummy_data(self):
+        """
+        The database should contain 104 rows when random dummy data is used.
+        """
+        self.db.use_dummy_data(use_random=True)
+
+        num_rows = self.db.execute(u"SELECT count (*) FROM multi_chain").fetchone()[0]
+        self.assertEqual(num_rows, 104)
+
+    @blocking_call_on_reactor_thread
+    def test_static_dummy_dta(self):
+        """
+        The database should contain the fixed dataset when non-random dummy data is used.
+        """
+        self.db.use_dummy_data(use_random=False)
+
+        num_rows = self.db.execute(u"SELECT count (*) FROM multi_chain").fetchone()[0]
+        self.assertEqual(num_rows, 56)

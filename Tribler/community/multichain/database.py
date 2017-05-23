@@ -241,7 +241,7 @@ class MultiChainDB(Database):
         seq_num = 0
 
         if use_random:
-            blocks = [[edge[0], edge[1], randint(101, 200), randint(121, 200)]
+            blocks = [[str(edge[0]), str(edge[1]), randint(101, 200), randint(121, 200)]
                       for edge in random_regular_graph(4, 26).edges()]
         else:
             blocks = [
