@@ -66,6 +66,7 @@ class MultiChainDB(Database):
         """
         super(MultiChainDB, self).__init__(path.join(working_directory, DATABASE_PATH))
         self.open()
+        self.dummy_setup = False
 
     def add_block(self, block):
         """
@@ -232,6 +233,9 @@ class MultiChainDB(Database):
         Creates a new database and fills it with dummy data.
         :param use_random: true if you want randomly generated data
         """
+        if self.dummy_setup:
+            return
+
         self.close()
 
         self._connection = connect(":memory:")
@@ -284,3 +288,5 @@ class MultiChainDB(Database):
                                             self.total_down(block[1]) + block[2], block[1], seq_num + 1, block[0],
                                             seq_num, '', '', None]))
             seq_num += 2
+
+        self.dummy_setup = True

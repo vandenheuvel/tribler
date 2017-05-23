@@ -262,6 +262,7 @@ class TestDatabase(MultiChainTestCase):
 
         num_rows = self.db.execute(u"SELECT count (*) FROM multi_chain").fetchone()[0]
         self.assertEqual(num_rows, 104)
+        self.assertTrue(self.db.dummy_setup)
 
     @blocking_call_on_reactor_thread
     def test_static_dummy_dta(self):
@@ -272,3 +273,10 @@ class TestDatabase(MultiChainTestCase):
 
         num_rows = self.db.execute(u"SELECT count (*) FROM multi_chain").fetchone()[0]
         self.assertEqual(num_rows, 56)
+        self.assertTrue(self.db.dummy_setup)
+
+        self.db.use_dummy_data(use_random=True)
+
+        num_rows = self.db.execute(u"SELECT count (*) FROM multi_chain").fetchone()[0]
+        self.assertEqual(num_rows, 56)
+        self.assertTrue(self.db.dummy_setup)
