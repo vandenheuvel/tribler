@@ -556,10 +556,6 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
     @blocking_call_on_reactor_thread
     def assertBlocksInDatabase(self, node, amount):
         count = node.community.persistence.execute(u"SELECT COUNT(*) FROM multi_chain").fetchone()[0]
-        # TODO: Remove this if-statement if the test data is not used anymore
-        if isinstance(self._community.persistence, StatisticsTestDB):
-            # The test database starts with 26 * 4 = 104 blocks
-            amount += 104
         assert count == amount, "Wrong number of blocks in database, was {0} but expected {1}".format(count, amount)
 
     @blocking_call_on_reactor_thread
