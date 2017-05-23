@@ -236,6 +236,8 @@ class MultiChainDB(Database):
         if self.dummy_setup:
             return
 
+        self.dummy_setup = True
+
         self.close()
 
         self._connection = connect(":memory:")
@@ -288,5 +290,3 @@ class MultiChainDB(Database):
                                             self.total_down(block[1]) + block[2], block[1], seq_num + 1, block[0],
                                             seq_num, '', '', None]))
             seq_num += 2
-
-        self.dummy_setup = True
