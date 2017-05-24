@@ -42,7 +42,7 @@ function processData(jsonData) {
     var groupedLinks = groupBy(data.links, "from");
     var combinedLinks = [];
     var public_keys = [];
-    
+
     // Calculate all combined links
     data.nodes.forEach(function(node) {
         combinedLinks = combinedLinks.concat(getCombinedLinks(groupedLinks, node.public_key));
@@ -64,7 +64,7 @@ function processData(jsonData) {
         node.public_key_string = node.public_key;
         node.public_key = i;
     });
-    
+
     /**
      * Finds the first object in a list of objects that matches a given key-value pair
      * @param list
@@ -106,8 +106,8 @@ function processData(jsonData) {
  * Combine the directed links between the given node and other nodes to one link per pair.
  *
  * The attributes of the combined links are calculated as follows:
- *  - from: node_name
- *  - to: to attribute from outgoing link from node_name
+ *  - source: node_name
+ *  - target: to attribute from outgoing link from node_name
  *  - amount_up: amount from the outgoing link from node_name
  *  - amount_down: amount from the ingoing link to node_name if any
  *  - ratio: amount_up / (amount_up + amount_down)
@@ -125,23 +125,27 @@ function getCombinedLinks(groupedLinks, nodeName) {
     }
 
     groupedLinks[nodeName].forEach(function (link) {
-        var inverseLink = groupedLinks[link.to].find(function(inv) {
-            return inv.to === nodeName;
-        });
+        if (groupedLinks[link.to] !== undefined) {
+            var inverseLink = groupedLinks[link.to].find(function (inv) {
+                return inv.to === nodeName;
+            });
+            groupedLinks[link.to].splice(groupedLinks[link['to']].indexOf(inverseLink), 1)
+        }
         var up = link.amount,
             down = 0,
-            ratio = 0,
-            logRatio = 0;
+            ratio = 1,
+            logRatio = 1;
         if (inverseLink !== undefined) {
             down = inverseLink["amount"]
         }
-        if (up !== 0 || down !== 0) {
+        if (down !== 0) {
             ratio = up / (up + down);
             logRatio = Math.log(up + 1) / (Math.log(up + 1) + Math.log(down + 1))
         }
         combinedLinks.push({'source': nodeName, 'target': link['to'], 'amount_up': up, 'amount_down': down,
             'ratio': ratio, 'log_ratio': logRatio});
-        groupedLinks[link.to].splice(groupedLinks[link['to']].indexOf(inverseLink), 1)
     });
     return combinedLinks
 }
+
+module.exports = {"getCombinedLinks": getCombinedLinks};
