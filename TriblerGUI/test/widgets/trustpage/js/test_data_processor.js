@@ -148,6 +148,46 @@ describe('data_processor.js', function () {
 
     });
 
+    describe('addMinMaxTransmission', function(){
+        it('should return zero when no links are present', function(){
+            var data = getTestData();
+            var response = {
+                nodes: [data.node1],
+                edges: [],
+                focus_node : "aaa"
+            };
+
+            var result = processor.convertResponse(response, [
+                processor.mapNodes,
+                processor.mapEdges,
+                processor.combineLinks,
+                processor.addMinMaxTransmission
+            ]);
+
+            assert.equal(result.min_transmission, 0);
+            assert.equal(result.max_transmission, 0);
+        });
+
+        it('should return the correct values', function(){
+            var data = getTestData();
+            var response = {
+                nodes: [data.node1, data.node2, data.node3],
+                edges: [data.edge2to1, data.edge1to2, data.edge1to3],
+                focus_node : "aaa"
+            };
+
+            var result = processor.convertResponse(response, [
+                processor.mapNodes,
+                processor.mapEdges,
+                processor.combineLinks,
+                processor.addMinMaxTransmission
+            ]);
+
+            assert.equal(result.min_transmission, 5);
+            assert.equal(result.max_transmission, 20);
+        });
+    });
+
     describe('makeLocalKeyMap', function () {
         it('should return an empty array when no nodes are provided', function () {
             var result = processor.makeLocalKeyMap({}, {nodes: []});
@@ -224,8 +264,10 @@ describe('data_processor.js', function () {
         return {
             node1: {public_key: 'aaa', total_up: 5, total_down: 10, page_rank: 0.5},
             node2: {public_key: 'bbb', total_up: 110, total_down: 50, page_rank: 0.5},
+            node3: {public_key: 'ccc', total_up: 40, total_down: 50, page_rank: 0.5},
             edge1to2: {from: "aaa", to: "bbb", amount: 4},
-            edge2to1: {from: "bbb", to: "aaa", amount: 16}
+            edge2to1: {from: "bbb", to: "aaa", amount: 16},
+            edge1to3: {from: "aaa", to: "bbb", amount: 5},
         }
     }
 

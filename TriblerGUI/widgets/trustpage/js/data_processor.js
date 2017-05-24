@@ -23,6 +23,7 @@ function processData(response) {
         mapNodes,
         mapEdges,
         combineLinks,
+        addMinMaxTransmission,
         makeLocalKeyMap,
         focusNodePublicKey,
         sortNodes,
@@ -141,6 +142,33 @@ function combineLinks(response, interim) {
     // Add reference to source and target object
     return {
         links: combinedLinks
+    };
+}
+
+/**
+ * Calculate the smallest and largest transmission from the focus node to its neighbors.
+ *
+ * @param {GraphResponseData} response - The response
+ * @param {Object} interim - The interim result (expects interim.links)
+ * @returns {{min_transmission: number, max_transmission: number}}
+ */
+function addMinMaxTransmission(response, interim) {
+
+    var min = -1,
+        max = -1,
+        pk = response.focus_node;
+
+    interim.links.forEach(function (link) {
+        if (link.target_pk === pk || link.source_pk === pk) {
+            var total = link.amount_up + link.amount_down;
+            if (min === -1 || total < min) min = total;
+            if (max === -1 || total > max) max = total;
+        }
+    });
+
+    return {
+        min_transmission: min >= 0 ? min : 0,
+        max_transmission: max >= 0 ? max : 0
     };
 }
 
@@ -278,14 +306,16 @@ function groupBy(list, key) {
 
 /**
  * @typedef {Object} GraphData
- * @property {String} focus_pk      - the public key of the focus node
- * @property {GraphNode} focus_node - the focus node object
- * @property {number} min_page_rank - the smallest page rank score in the set of nodes
- * @property {number} max_page_rank - the highest page rank score in the set of nodes
- * @property {String[]} local_keys  - a map from GraphNode.local key (array index) to public_key
- * @property {GraphNode[]} nodes    - the array of nodes (sorted ascending on .total_up + .total_down)
- * @property {GraphEdge[]} edges    - the directed edges
- * @property {GraphLink[]} links    - the combined links (sorted ascending on .amount_up + .amount_down)
+ * @property {String} focus_pk         - the public key of the focus node
+ * @property {GraphNode} focus_node    - the focus node object
+ * @property {number} min_page_rank    - the smallest page rank score in the set of nodes
+ * @property {number} max_page_rank    - the highest page rank score in the set of nodes
+ * @property {number} min_transmission - the smallest transmission (up+down) from the focus node
+ * @property {number} max_transmission - the largest transmission (up+down) from the focus node
+ * @property {String[]} local_keys     - a map from GraphNode.local key (array index) to public_key
+ * @property {GraphNode[]} nodes       - the array of nodes (sorted ascending on .total_up + .total_down)
+ * @property {GraphEdge[]} edges       - the directed edges
+ * @property {GraphLink[]} links       - the combined links (sorted ascending on .amount_up + .amount_down)
  */
 
 /**
@@ -335,6 +365,7 @@ if (typeof module !== 'undefined') {
         mapNodes: mapNodes,
         mapEdges: mapEdges,
         combineLinks: combineLinks,
+        addMinMaxTransmission: addMinMaxTransmission,
         makeLocalKeyMap: makeLocalKeyMap,
         focusNodePublicKey: focusNodePublicKey,
         sortNodes: sortNodes,
