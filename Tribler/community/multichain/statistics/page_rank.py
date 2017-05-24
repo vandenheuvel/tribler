@@ -52,6 +52,7 @@ class IncrementalPageRank(object):
         self.add_node(source)
         self.add_node(destination)
         self.graph.add_edge(source, destination, weight=weight)
+
     def add_node(self, node):
         """
         Add a node to the graph.
