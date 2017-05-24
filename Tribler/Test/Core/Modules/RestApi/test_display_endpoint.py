@@ -3,7 +3,9 @@ This module validates the functions defined in the Display Endpoint
 """
 from json import dumps, loads
 from twisted.internet.defer import inlineCallbacks
+from twisted.web import http
 
+from Tribler.Core.exceptions import OperationNotEnabledByConfigurationException
 from Tribler.Core.Modules.restapi.display_endpoint import DisplayEndpoint
 from Tribler.Test.Core.base_test import MockObject
 from Tribler.community.multichain.community import MultiChainCommunity
@@ -63,6 +65,7 @@ class TestDisplayEndpoint(AbstractApiTest):
         display_endpoint.get_multi_chain_community = lambda: self.mc_community
         request = MockObject()
         request.setHeader = lambda header, flags: None
+        request.setResponseCode = lambda status_code: None
         request.args = {"dataset": [str(dataset)], "focus_node": [str(focus_node)],
                         "neighbor_level": [str(neighbor_level)]}
         return display_endpoint, request
@@ -155,3 +158,16 @@ class TestDisplayEndpoint(AbstractApiTest):
         del request.args["dataset"]
         response = display_endpoint.render_GET(request)
         self.assertEqual(loads(response)["focus_node"], "0")
+
+    @deferred(timeout=10)
+    def test_mc_community_exception(self):
+        """
+        Evaluate whether the API returns the correct error when the multichain community can't be found.
+        """
+        mocked_session = MockObject()
+        display_endpoint = DisplayEndpoint(mocked_session)
+        display_endpoint.get_multi_chain_community = lambda:\
+            (_ for _ in ()).throw(OperationNotEnabledByConfigurationException("multichain is not enabled"))
+
+        exp_message = {"error": "multichain is not enabled"}
+        return self.do_request('display?focus_node=self', expected_code=http.NOT_FOUND, expected_json=exp_message)

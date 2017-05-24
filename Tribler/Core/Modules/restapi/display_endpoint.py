@@ -132,14 +132,14 @@ class DisplayEndpoint(resource.Resource):
         focus_node = request.args["focus_node"][0]
         if isinstance(focus_node, basestring):
             if request.args["focus_node"][0] == "self":
-                if self.get_multi_chain_community().persistence.dummy_setup:
-                    focus_node = "0"
-                else:
-                    try:
+                try:
+                    if self.get_multi_chain_community().persistence.dummy_setup:
+                        focus_node = "0"
+                    else:
                         mc_community = self.get_multi_chain_community()
-                    except OperationNotEnabledByConfigurationException as exc:
-                        return DisplayEndpoint.return_error(request, status_code=http.NOT_FOUND, message=exc.args)
-                    focus_node = hexlify(mc_community.my_member.public_key)
+                        focus_node = hexlify(mc_community.my_member.public_key)
+                except OperationNotEnabledByConfigurationException as exc:
+                    return DisplayEndpoint.return_error(request, status_code=http.NOT_FOUND, message=exc.args)
             else:
                 focus_node = request.args["focus_node"][0]
         else:
