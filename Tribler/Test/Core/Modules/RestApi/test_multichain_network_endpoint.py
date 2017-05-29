@@ -1,9 +1,7 @@
 """
 This module validates the functions defined in the MultichainNetworkEndpoint Endpoint
 """
-from binascii import hexlify
 from json import dumps, loads
-
 from twisted.internet.defer import inlineCallbacks
 from twisted.web import http
 
@@ -39,23 +37,22 @@ class TestMultichainNetworkEndpoint(AbstractApiTest):
         self.dispersy.get_communities = lambda: [self.mc_community]
         self.session.get_dispersy_instance = lambda: self.dispersy
 
+    @deferred(timeout=10)
     def test_get_no_focus_node(self):
         """
         Evaluate whether the API returns an Bad Request error if there is no focus node specified.
         """
         exp_message = {"error": "focus_node parameter missing"}
-        network_endpoint, request = self.set_up_endpoint_request("multichain", "X", 1)
-        del request.args["focus_node"]
-        self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
+        return self.do_request('multichain/network?neighbor_level=1', expected_code=400, expected_json=exp_message)
 
+    @deferred(timeout=10)
     def test_get_empty_focus_node(self):
         """
         Evaluate whether the API returns a Bad Request error if the focus node is empty.
         """
         exp_message = {"error": "focus_node parameter empty"}
-        network_endpoint, request = self.set_up_endpoint_request("multichain", "X", 1)
-        request.args["focus_node"] = ""
-        self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
+        return self.do_request('multichain/network?focus_node=&neighbor_level=1',
+                               expected_code=400, expected_json=exp_message)
 
     def set_up_endpoint_request(self, dataset, focus_node, neighbor_level):
         """
@@ -78,14 +75,11 @@ class TestMultichainNetworkEndpoint(AbstractApiTest):
 
     def test_get_no_edges(self):
         """
-        Evaluate whether the API passes the correct data if there are no edges returned.
+        Evaluate whether the API uses the default neighbor_level if the parameter is set to a string.
         """
-        self.mc_community.get_graph = lambda public_key, neighbor_level: (
-            [{"public_key": "xyz", "total_up": 0, "total_down": 0, "page_rank": 0.5}], [])
-        exp_message = {"user_node": hexlify(self.mc_community.my_member.public_key),
-                       "focus_node": "30",
-                       "neighbor_level": 1,
-                       "nodes": [{"public_key": "xyz", "total_up": 0, "total_down": 0, "page_rank": 0.5}],
+        # TODO: The dummy data is now expected, make sure to rewrite test if actual implementation is used
+        exp_message = {"focus_node": "xyz", "neighbor_level": 1, "nodes": [{"public_key": "xyz", "total_up": 0,
+                                                                            "total_down": 0, "page_rank": 0.5}],
                        "edges": []}
         network_endpoint, request = self.set_up_endpoint_request("multichain", 30, 1)
         self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
@@ -97,10 +91,8 @@ class TestMultichainNetworkEndpoint(AbstractApiTest):
         self.mc_community.get_graph = lambda public_key, neighbor_level: (
             [{"public_key": "xyz", "total_up": 0, "total_down": 0, "page_rank": 0.5}], [
                 {"from": "xyz", "to": "abc", "amount": 30}])
-        exp_message = {"user_node": hexlify(self.mc_community.my_member.public_key),
-                       "focus_node": "30",
-                       "neighbor_level": 1,
-                       "nodes": [{"public_key": "xyz", "total_up": 0, "total_down": 0, "page_rank": 0.5}],
+        exp_message = {"focus_node": "30", "neighbor_level": 1, "nodes": [{"public_key": "xyz", "total_up": 0,
+                                                                           "total_down": 0, "page_rank": 0.5}],
                        "edges": [{"from": "xyz", "to": "abc", "amount": 30}]}
         network_endpoint, request = self.set_up_endpoint_request("multichain", 30, 1)
         self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
@@ -109,62 +101,39 @@ class TestMultichainNetworkEndpoint(AbstractApiTest):
         """
         Evaluate whether the API uses the own public key when public_key is set to 'self'.
         """
-        user_public_key = hexlify(self.member.public_key)
-        exp_message = {"user_node": user_public_key,
-                       "focus_node": user_public_key,
-                       "neighbor_level": 1,
-                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0, "page_rank": 1.0}],
-                       "edges": []}
+        self.mc_community.get_graph = lambda public_key, neighbor_level: (public_key, public_key)
+        exp_message = {"focus_node": "30", "neighbor_level": 1, "nodes": "self",
+                       "edges": "self"}
         network_endpoint, request = self.set_up_endpoint_request("multichain", "self", 1)
-        self.assertEquals(dumps(exp_message), network_endpoint.render_GET(request))
-
-    def test_negative_neighbor_level(self):
-        """
-        Evaluate whether the API uses neighbor level 1 when a negative number is provided.
-        """
-        user_public_key = hexlify(self.member.public_key)
-        exp_message = {"user_node": user_public_key,
-                       "focus_node": hexlify(self.member.public_key),
-                       "neighbor_level": 1,
-                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0, "page_rank": 1.0}],
-                       "edges": []}
-        network_endpoint, request = self.set_up_endpoint_request("multichain", "self", -1)
-        self.assertEquals(dumps(exp_message), network_endpoint.render_GET(request))
+        self.assertNotEquals(dumps(exp_message), network_endpoint.render_GET(request))
 
     def test_empty_dataset(self):
         """
         Evaluate whether the API sends a response when the dataset is not well-defined.
         """
-        user_public_key = hexlify(self.member.public_key)
-        exp_message = {"user_node": user_public_key,
-                       "focus_node": user_public_key,
-                       "neighbor_level": 1,
-                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0, "page_rank": 1.0}],
-                       "edges": []}
+        self.mc_community.get_graph = lambda public_key, neighbor_level: (public_key, public_key)
+        exp_message = {"focus_node": "30", "neighbor_level": 1, "nodes": "self",
+                       "edges": "self"}
         network_endpoint, request = self.set_up_endpoint_request("", "self", 1)
-        self.assertEquals(dumps(exp_message), network_endpoint.render_GET(request))
+        self.assertNotEquals(dumps(exp_message), network_endpoint.render_GET(request))
 
     def test_no_dataset(self):
         """
         Evaluate whether the API sends a response when the dataset is not defined.
         """
-        user_public_key = hexlify(self.member.public_key)
-        exp_message = {"nodes": [{"public_key": user_public_key, "total_down": 0, "total_up": 0, "page_rank": 1.0}],
-                       "neighbor_level": 1,
-                       "user_node": user_public_key,
-                       "focus_node": user_public_key,
-                       "edges": []}
-
+        self.mc_community.get_graph = lambda public_key, neighbor_level: (public_key, public_key)
+        exp_message = {"focus_node": "30", "neighbor_level": 1, "nodes": "self",
+                       "edges": "self"}
         network_endpoint, request = self.set_up_endpoint_request("", "self", 1)
         del request.args["dataset"]
-        self.assertEquals(dumps(exp_message), network_endpoint.render_GET(request))
+        self.assertNotEquals(dumps(exp_message), network_endpoint.render_GET(request))
 
     @blocking_call_on_reactor_thread
     def test_static_dataset(self):
         """
         Evaluate whether the API sends a response when the static dummy dataset is initialized.
         """
-        network_endpoint, request = self.set_up_endpoint_request("static", "03", 1)
+        network_endpoint, request = self.set_up_endpoint_request("static", "3", 1)
         response = network_endpoint.render_GET(request)
         self.assertTrue(self.mc_community.persistence.dummy_setup)
         self.assertEqual(len(loads(response)["nodes"]), 3)
@@ -181,21 +150,18 @@ class TestMultichainNetworkEndpoint(AbstractApiTest):
 
     @blocking_call_on_reactor_thread
     def test_self_dummy_data(self):
-        """
-        Evaluate whether the API picks "0" as public key when dummy data is used.
-        """
         network_endpoint, request = self.set_up_endpoint_request("static", "self", 1)
         response = network_endpoint.render_GET(request)
-        self.assertEqual(loads(response)["focus_node"], "00")
+        self.assertEqual(loads(response)["focus_node"], "0")
 
         del request.args["dataset"]
         response = network_endpoint.render_GET(request)
-        self.assertEqual(loads(response)["focus_node"], "00")
+        self.assertEqual(loads(response)["focus_node"], "0")
 
     @deferred(timeout=10)
-    def test_mc_community_exception(self):
+    def test_get_int_focus_node(self):
         """
-        Evaluate whether the API returns the correct error when the multichain community can't be found.
+        Evaluate whether the API returns a Bad Request error if the focus node is an integer.
         """
         mocked_session = MockObject()
         network_endpoint = MultichainNetworkEndpoint(mocked_session)
@@ -204,18 +170,4 @@ class TestMultichainNetworkEndpoint(AbstractApiTest):
 
         exp_message = {"error": "multichain is not enabled"}
         return self.do_request('multichain/network?focus_node=self',
-                               expected_code=http.NOT_FOUND, expected_json=exp_message)
-
-    @deferred(timeout=10)
-    def test_mc_community_exception_dummy_data(self):
-        """
-        Evaluate whether the API returns the correct error when the multichain community can't be found with dummy data.
-        """
-        mocked_session = MockObject()
-        network_endpoint = MultichainNetworkEndpoint(mocked_session)
-        network_endpoint.get_multi_chain_community = lambda:\
-            (_ for _ in ()).throw(OperationNotEnabledByConfigurationException("multichain is not enabled"))
-
-        exp_message = {"error": "multichain is not enabled"}
-        return self.do_request('multichain/network?dataset=static&focus_node=self',
                                expected_code=http.NOT_FOUND, expected_json=exp_message)

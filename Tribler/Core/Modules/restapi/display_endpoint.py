@@ -150,15 +150,5 @@ class DisplayEndpoint(resource.Resource):
         if "neighbor_level" in request.args and len(request.args["neighbor_level"]) > 0 and \
                 request.args["neighbor_level"][0].isdigit():
             neighbor_level = int(request.args["neighbor_level"][0])
-
-<<<<<<< HEAD
-        # TODO: Remove dummy return and change to aggregated data calculation
-=======
         mc_community = self.get_multi_chain_community()
         nodes, edges = mc_community.get_graph(focus_node, neighbor_level)
-
->>>>>>> Trust display using QtWebEngine, HTML, Javascript and D3.js
-        return json.dumps({"focus_node": focus_node,
-                           "neighbor_level": neighbor_level,
-                           "nodes": [{"public_key": "xyz", "total_up": 0, "total_down": 0, "page_rank": 0.5}],
-                           "edges": []})
