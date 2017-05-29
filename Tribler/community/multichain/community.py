@@ -298,7 +298,7 @@ class MultiChainCommunity(Community):
         Return a dictionary with the neighboring nodes and edges of a certain focus node within a certain radius,
         regarding the local multichain database.
 
-        :param public_key: the public key of the focus node
+        :param public_key: the public key of the focus node in raw format
         :param neighbor_level: the radius within which the neighbors have to be returned
         :return: a tuple of a dictionary with nodes and a dictionary with edges
         """
