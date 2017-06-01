@@ -267,7 +267,9 @@ class TestDatabase(MultiChainTestCase):
 
         # All blocks have the same public key
         self.block2.public_key = self.block1.public_key
+        self.block2.sequence_number = self.block1.sequence_number + 1
         self.block3.public_key = self.block1.public_key
+        self.block2.sequence_number = self.block1.sequence_number + 2
 
         self.block1.link_public_key = focus_block1.public_key
         self.block2.link_public_key = focus_block1.public_key
