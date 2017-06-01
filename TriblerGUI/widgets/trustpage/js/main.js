@@ -40,16 +40,22 @@ var state = {
     nodes: []
 };
 
-
 // Append groups for links, nodes, labels.
 // Order is important: drawed last is on top.
 
-for(var i = 1; i <= neighbor_level; i++)
-drawNeighborRing(svg, state.x, state.y, radius_step * i);
+for (var i = 1; i <= neighbor_level; i++)
+    drawNeighborRing(svg, state.x, state.y, radius_step * i);
 
 svg.append("g").attr("class", "links");
 svg.append("g").attr("class", "nodes");
 svg.append("g").attr("class", "labels");
+
+// The label that appears when the user hovers over a node or link
+hoverInfoLabel = d3.select("body").append("div")
+    .attr("class", "hoverInfoLabel")
+    .attr("id", "hoverInfoLabel")
+    .style("opacity", 0);
+hoverInfoLabel.append("table").attr("class", "hoverInfoTable");
 
 // Fetch the data
 get_node_info(state.focus_pk, neighbor_level, onNewData);
@@ -120,7 +126,7 @@ function update(graph) {
 
     // Make a tree from the graph
     state.tree = graphToTree(graph.focus_node);
-    state.tree.nodes.forEach(function(treeNode){
+    state.tree.nodes.forEach(function (treeNode) {
         treeNode.graphNode.treeNode = treeNode;
     });
 
@@ -130,23 +136,27 @@ function update(graph) {
     // Maintain orientation between previous and current focus node
     if (state.previous_focus_pk) {
         var target_angle = state.previous_angle + Math.PI;
-        var previous_focus = state.tree.nodes.find(function(node){
+        var previous_focus = state.tree.nodes.find(function (node) {
             return node.graphNode.public_key === state.previous_focus_pk;
         });
-        var correction = target_angle - previous_focus.alpha;
-
-        state.tree.nodes.forEach(function (node) {
-            node.alpha += correction;
-        });
+        if (previous_focus) {
+            var correction = target_angle - previous_focus.alpha;
+            state.tree.nodes.forEach(function (node) {
+                node.alpha += correction;
+            });
+        }
     }
 
     // Draw all nodes
     var nodes = drawNodes(svg, graph, function (d) {
         handle_node_click(d.public_key)
-    });
+    }, hoverInfoLabel);
+
+    // Do not display the label after the graph is updated
+    hoverInfoLabel.style("display", "none");
 
     // Draw all links
-    var links = drawLinks(svg, graph);
+    var links = drawLinks(svg, graph, hoverInfoLabel);
 
     // Add the center-fix node to the nodes
     state.centerFix.local_key = graph.nodes.length;

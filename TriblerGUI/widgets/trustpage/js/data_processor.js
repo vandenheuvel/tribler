@@ -159,11 +159,9 @@ function addMinMaxTransmission(response, interim) {
         pk = response.focus_node;
 
     interim.links.forEach(function (link) {
-        if (link.target_pk === pk || link.source_pk === pk) {
             var total = link.amount_up + link.amount_down;
             if (min === -1 || total < min) min = total;
             if (max === -1 || total > max) max = total;
-        }
     });
 
     return {
