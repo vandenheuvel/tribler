@@ -18,7 +18,8 @@ var config = {
             characters : 3
         },
         circle : {
-            radius : 20,
+            minRadius : 15,
+            maxRadius : 25,
             cx : 0,
             cy : 0,
             cursor : "pointer"
