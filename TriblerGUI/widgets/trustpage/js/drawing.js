@@ -84,7 +84,7 @@ function drawNodes(svg, data, on_click, hoverInfoLabel) {
         .style("cursor", config.node.circle.cursor)
         .on("click", on_click)
         .on("mouseover", function (d) {
-            mouseOverNode(d, hoverInfoLabel);
+            mouseOverNode(d, data, hoverInfoLabel);
         })
         .on("mousemove", function () {
             hoverInfoLabel
@@ -114,24 +114,32 @@ function getNodeRadius(node, data) {
 
 /**
  * Show the node information when the mouse enters a node
- * @param node the node to get the information of
+ * @param nodeData the node to get the information of
+ * @param data the JSON data of the graph
  * @param hoverInfoLabel the label to display the information in
  */
-function mouseOverNode(node, hoverInfoLabel) {
+function mouseOverNode(nodeData, data, hoverInfoLabel) {
     // The quantity descriptions and their corresponding values
     var quantities = [
-        ["Public key" , "..." + node.public_key.substr(node.public_key.length - config.node.hoverLabel.publicKeyCharacters)],
-        ["Page rank score" , node.page_rank.toFixed(config.node.hoverLabel.pageRankDecimals)],
-        ["Total uploaded" ,  node.total_up + " bytes"],
-        ["Total downloaded" ,  node.total_down + " bytes"]
+        ["Public key" , "..." + nodeData.public_key.substr(nodeData.public_key.length - config.node.hoverLabel.publicKeyCharacters)],
+        ["Page rank score" , nodeData.page_rank.toFixed(config.node.hoverLabel.pageRankDecimals)],
+        ["Total uploaded" ,  nodeData.total_up + " bytes"],
+        ["Total downloaded" ,  nodeData.total_down + " bytes"]
     ];
 
     // Update the label with the information corresponding to the node
     setHoverInfoLabelContents(quantities, hoverInfoLabel);
+    hoverInfoLabel.style("background-color", getNodeColor(nodeData, data));
+    showHoverInfoLabel(hoverInfoLabel);
+}
 
-    // Compensate for user window width resizing
+/**
+ * Make the information label visible
+ * @param hoverInfoLabel the label to make visible
+ */
+function showHoverInfoLabel(hoverInfoLabel) {
     hoverInfoLabel
-        .style("opacity", config.node.hoverLabel.opacityOnNode)
+        .style("opacity", config.node.hoverLabel.opacity)
         .style("display", "block");
 }
 
@@ -210,21 +218,20 @@ function drawLinks(svg, data, hoverInfoLabel) {
 
     // The source part of the link
     links.append("line")
-        .attr("class", "link-source")
-        .style("stroke", config.link.colorLinkSource);
+        .attr("class", "link-source");
 
     // The target part of the link
     links.append("line")
-        .attr("class", "link-target")
-        .style("stroke", config.link.colorLinkTarget);
+        .attr("class", "link-target");
 
     // Functionality for the composed link
     links
+        .style("stroke", config.link.color)
         .attr("stroke-width", function (d) {
             return getStrokeWidth(d, data);
         })
         .on("mouseover", function (d) {
-            mouseOverLink(d, hoverInfoLabel);
+            mouseOverLink(d, this, hoverInfoLabel);
         })
         .on("mousemove", function () {
             hoverInfoLabel
@@ -246,9 +253,10 @@ function drawLinks(svg, data, hoverInfoLabel) {
 /**
  * Show the link information when the mouse enters a link
  * @param linkData the link to get the information of
+ * @param linkObject the link object of the html
  * @param hoverInfoLabel the label to display the information in
  */
-function mouseOverLink(linkData, hoverInfoLabel) {
+function mouseOverLink(linkData, linkObject, hoverInfoLabel) {
     // The quantity descriptions and the corresponding values
     var quantities = [
         ["Uploaded by ..." + linkData.target_pk.substr(-config.node.hoverLabel.publicKeyCharacters), linkData.amount_up + " bytes"],
@@ -257,10 +265,8 @@ function mouseOverLink(linkData, hoverInfoLabel) {
 
     // Update the label with the information corresponding to the link
     setHoverInfoLabelContents(quantities, hoverInfoLabel);
-
-    hoverInfoLabel
-        .style("opacity", config.node.hoverLabel.opacityOnEdge)
-        .style("display", "block")
+    hoverInfoLabel.style("background-color", d3.select(linkObject).style("stroke"));
+    showHoverInfoLabel(hoverInfoLabel);
 }
 
 /**
