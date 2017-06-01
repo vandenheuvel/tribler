@@ -46,4 +46,18 @@ describe("drawing.js", function () {
                 drawing.getStrokeWidth(null, data));
         });
     });
+
+    describe("getNodeRadius", function () {
+        it("the minimal node size is returned when the node has the least amount of traffic", function () {
+            var data = {
+                "traffic_slope": 1,
+                "traffic_min": 1
+            };
+            var node = {
+                "total_up": 0,
+                "total_down": 1
+            };
+            assert.equal(config.node.circle.minRadius, drawing.getNodeRadius(node, data))
+        });
+    });
 });

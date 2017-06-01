@@ -188,6 +188,44 @@ describe('data_processor.js', function () {
         });
     });
 
+    describe('addTrafficFunction', function () {
+       it('should return values for empy list of nodes', function () {
+          var data = getTestData();
+          var response = {
+              nodes: [],
+              edges: []
+          };
+
+          var result = processor.convertResponse(response, [
+              processor.mapNodes,
+              processor.mapEdges,
+              processor.addTrafficFunction
+          ]);
+
+          assert.equal(result.traffic_slope, 1);
+          assert.equal(result.traffic_min, 0);
+       });
+
+       it('should return correct values', function () {
+           var data = getTestData();
+           data.node1.total_down = 95;
+            var response = {
+                nodes: [data.node1, data.node3],
+                edges: []
+            };
+
+            var result = processor.convertResponse(response, [
+                processor.mapNodes,
+                processor.mapEdges,
+                processor.combineLinks,
+                processor.addTrafficFunction
+            ]);
+
+            assert.equal(result.traffic_min, 90);
+            assert.equal(result.traffic_slope, 1/10);
+       });
+    });
+
     describe('makeLocalKeyMap', function () {
         it('should return an empty array when no nodes are provided', function () {
             var result = processor.makeLocalKeyMap({}, {nodes: []});
