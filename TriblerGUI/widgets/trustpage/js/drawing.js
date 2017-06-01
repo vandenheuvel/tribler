@@ -55,7 +55,9 @@ function drawNodes(svg, data, on_click, hoverInfoLabel) {
     // Transition the radius of the circles
     circles.transition()
         .duration(1000)
-        .attr("r", config.node.circle.radius);
+        .attr("r", function (d) {
+            return getNodeRadius(d, data)
+        });
 
     // Append a <text> element to it
     groups
@@ -74,7 +76,9 @@ function drawNodes(svg, data, on_click, hoverInfoLabel) {
     groups
         .append("circle")
         .style("fill-opacity", "0")
-        .attr("r", config.node.circle.radius)
+        .attr("r", function (d) {
+            return getNodeRadius(d, data)
+        })
         .attr("cx", config.node.circle.cx)
         .attr("cy", config.node.circle.cy)
         .style("cursor", config.node.circle.cursor)
@@ -94,6 +98,18 @@ function drawNodes(svg, data, on_click, hoverInfoLabel) {
 
     // Return the group of <svg.node>
     return groups;
+}
+
+/**
+ * Compute the radius of the node.
+ * @param node the node to compute the size of
+ * @param data data to get information from
+ * @returns the radius of the node
+ */
+function getNodeRadius(node, data) {
+    var nodeTraffic = node.total_up + node.total_down - data.traffic_min;
+    var slope = (config.node.circle.maxRadius - config.node.circle.minRadius) * data.traffic_slope;
+    return config.node.circle.minRadius + (slope * nodeTraffic)
 }
 
 /**
@@ -298,5 +314,8 @@ function drawNeighborRing(svg, center_x, center_y, radius) {
 }
 
 if (typeof module !== "undefined") {
-    module.exports = {getStrokeWidth: getStrokeWidth};
+    module.exports = {
+        getStrokeWidth: getStrokeWidth,
+        getNodeRadius: getNodeRadius
+    };
 }

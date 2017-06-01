@@ -24,6 +24,7 @@ function processData(response) {
         mapEdges,
         combineLinks,
         addMinMaxTransmission,
+        addTrafficFunction,
         focusNodePublicKey,
         sortNodes,
         makeLocalKeyMap, // after sorting
@@ -171,6 +172,34 @@ function addMinMaxTransmission(response, interim) {
 }
 
 /**
+ * Calculate the parameters for the linear line describing the node size based on the amount of total traffic.
+ *
+ * @param {GraphResponseData} response - The response
+ * @param {Object} interim - The interim result
+ * @returns {{traffic_min: number, traffic_slope: number}}
+ */
+function addTrafficFunction(response, interim) {
+    var min = Number.MAX_VALUE,
+        max = 0;
+
+    interim.nodes.forEach(function (node) {
+       var sum = node.total_up + node.total_down;
+       if (sum < min) min = sum;
+       if (sum > max) max = sum;
+    });
+
+    min = min === Number.MAX_VALUE ? 0 : Math.max(min, 0);
+    max = Math.max(max, 1);
+
+    var slope = 1 / (max - min);
+
+    return {
+        traffic_min: min,
+        traffic_slope: 1 / (max - min)
+    };
+}
+
+/**
  * Make a map from local_keys (integers 0 to n-1) to public keys (where n is the number of nodes).
  * (Manipulates the interim)
  *
@@ -310,6 +339,8 @@ function groupBy(list, key) {
  * @property {number} max_page_rank    - the highest page rank score in the set of nodes
  * @property {number} min_transmission - the smallest transmission (up+down) from the focus node
  * @property {number} max_transmission - the largest transmission (up+down) from the focus node
+ * @property {number} traffic_min      - the minimal amount of traffic a single node in the set has
+ * @property {number} traffic_slope    - the slope of the traffic function
  * @property {String[]} local_keys     - a map from GraphNode.local key (array index) to public_key
  * @property {GraphNode[]} nodes       - the array of nodes (sorted ascending on .total_up + .total_down)
  * @property {GraphEdge[]} edges       - the directed edges
@@ -364,6 +395,7 @@ if (typeof module !== 'undefined') {
         mapEdges: mapEdges,
         combineLinks: combineLinks,
         addMinMaxTransmission: addMinMaxTransmission,
+        addTrafficFunction: addTrafficFunction,
         makeLocalKeyMap: makeLocalKeyMap,
         focusNodePublicKey: focusNodePublicKey,
         sortNodes: sortNodes,
