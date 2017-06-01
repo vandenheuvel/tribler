@@ -4,8 +4,7 @@
 
 var config = {
     link : {
-        colorLinkSource : "#ffff00",
-        colorLinkTarget : "#ff0000",
+        color : "#FFFF00",
         strokeWidthMin : 6,
         strokeWidthMax : 10
     },
@@ -31,8 +30,7 @@ var config = {
         hoverLabel : {
             publicKeyCharacters : 5,
             pageRankDecimals : 4,
-            opacityOnNode : 1,
-            opacityOnEdge : 0.8
+            opacity : 0.85
         }
     },
     radius_step: 120
