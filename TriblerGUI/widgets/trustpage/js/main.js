@@ -206,6 +206,16 @@ function xAtFraction(x0, x1, ratio) {
 }
 
 /**
+ * Calculate the distance in pixels between nodes
+ * @param nodeA
+ * @param nodeB
+ * @returns {number} - the distance in pixels
+ */
+function nodeDistance(nodeA, nodeB) {
+    return Math.sqrt(Math.pow(nodeB.x - nodeA.x, 2) + Math.pow(nodeB.y - nodeA.y, 2));
+}
+
+/**
  * Update the positions of the links and nodes on every tick of the clock
  */
 function tick() {
@@ -213,25 +223,21 @@ function tick() {
     var linkSource = svg.select(".links").selectAll(".link-source");
     var linkTarget = svg.select(".links").selectAll(".link-target");
 
-    function isChildLink(d) {
-        return (d.source.treeNode.parent == d.target.treeNode || d.target.treeNode.parent == d.source.treeNode);
-    }
-
     // Part of line at the source
     linkSource
         .attr("x1", function (d) { return d.source.x; })
         .attr("y1", function (d) { return d.source.y; })
-        .attr("x2", function (d) { return xAtFraction(d.source.x, d.target.x, 1 - d.ratio); })
-        .attr("y2", function (d) { return xAtFraction(d.source.y, d.target.y, 1 - d.ratio); })
-        .style("opacity", function (d) { return isChildLink(d) ? 1 : .1; });
+        .attr("x2", function (d) { return xAtFraction(d.source.x, d.target.x, 1 - d.ratio - 1 / Math.max(1, nodeDistance(d.source, d.target))); })
+        .attr("y2", function (d) { return xAtFraction(d.source.y, d.target.y, 1 - d.ratio - 1 / Math.max(1, nodeDistance(d.source, d.target))); })
 
     // Part of line at the target
     linkTarget
-        .attr("x1", function (d) { return xAtFraction(d.target.x, d.source.x, d.ratio); })
-        .attr("y1", function (d) { return xAtFraction(d.target.y, d.source.y, d.ratio); })
+        .attr("x1", function (d) { return xAtFraction(d.target.x, d.source.x, d.ratio - 1 / Math.max(1, nodeDistance(d.source, d.target))); })
+        .attr("y1", function (d) { return xAtFraction(d.target.y, d.source.y, d.ratio - 1 / Math.max(1, nodeDistance(d.source, d.target))); })
         .attr("x2", function (d) { return d.target.x; })
         .attr("y2", function (d) { return d.target.y; })
-        .style("opacity", function (d) { return isChildLink(d) ? 1 : .1; });
+        // .style("opacity", function(d){return d.source.highlight || d.target.highlight ? 1 : getLinkOpacity(d)})
+
 
     selectNodes(svg)
         .attr("x", function (d) { return d.x; })
