@@ -3,29 +3,35 @@
  */
 
 var config = {
-    link : {
-        color : "#FFFF00",
-        strokeWidthMin : 6,
-        strokeWidthMax : 10
+    byteUnits: ["B", "kB", "MB", "GB", "TB", "PB"],
+    background: "#202020",
+    link: {
+        color: "#22FFD5",
+        highlightColor: "#DD002A",
+        strokeWidthMin: 2,
+        strokeWidthMax: 10,
+        opacityMinimum: 0.05,
+        opacityDecrementPerLevel: 0.02
     },
-    node : {
-        publicKeyLabel : {
-            color : "#000000",
-            fontSize : "14",
-            fontFamily : "sans-serif",
-            fontWeight : "bold",
-            characters : 3
+    node: {
+        publicKeyLabel: {
+            color: "#202020",
+            fontSize: "10px",
+            fontFamily: "sans-serif",
+            fontWeight: "bold",
+            characters: 3
         },
         circle : {
             minRadius : 15,
             maxRadius : 25,
             cx : 0,
             cy : 0,
-            cursor : "pointer"
+            cursor : "pointer",
+            strokeWidth: 3
         },
-        color : {
-            domain : [0, 0.5, 1],
-            range : ["red", "yellow", "green"]
+        color: {
+            domain: [0, 0.5, 1],
+            range: ["#FF1D3E", "#F9FF15", "#0CFF18"]
         },
         hoverLabel : {
             publicKeyCharacters : 5,
