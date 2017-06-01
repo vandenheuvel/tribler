@@ -21,9 +21,10 @@ function selectNodes(svg) {
  * @param svg the svg from the body
  * @param data the JSON data of the graph
  * @param on_click the function that responds to the click
+ * @param hoverInfoLabel the label to display the information in
  * @returns D3 Selection of <svg.node> elements
  */
-function drawNodes(svg, data, on_click) {
+function drawNodes(svg, data, on_click, hoverInfoLabel) {
 
     // Always remove existing nodes before adding new ones
     var all = selectNodes(svg).data(data.nodes, function (d) {
@@ -41,7 +42,7 @@ function drawNodes(svg, data, on_click) {
         .attr("overflow", "visible")
         .attr("class", "node");
 
-    // Append a <circle> element to it.
+    // Append a <circle> element to it
     var circles = groups
         .append("circle")
         .attr("fill", function (d) {
@@ -49,34 +50,91 @@ function drawNodes(svg, data, on_click) {
         })
         .attr("r", "0")
         .attr("cx", config.node.circle.cx)
-        .attr("cy", config.node.circle.cy)
-        .style("cursor", config.node.circle.cursor)
-        .on("click", on_click)
-        .on("mouseenter", function () {
-            d3.select(this).transition().ease(d3.easeElasticOut).delay(0).duration(300).attr("r", 25);
-        }).on("mouseout", function () {
-            d3.select(this).transition().ease(d3.easeElasticOut).delay(0).duration(300).attr("r", 20);
-        });
+        .attr("cy", config.node.circle.cy);
 
     // Transition the radius of the circles
     circles.transition()
         .duration(1000)
-        .attr("r", config.node.circle.radius)
+        .attr("r", config.node.circle.radius);
 
     // Append a <text> element to it
     groups
         .append("text")
-        .attr("x", config.node.publicKeyLabel.x)
-        .attr("y", config.node.publicKeyLabel.y)
+        .attr("dominant-baseline", "central")
+        .attr("text-anchor", "middle")
         .style("font-family", config.node.publicKeyLabel.fontFamily)
         .style("font-size", config.node.publicKeyLabel.fontSize)
+        .style("font-weight", config.node.publicKeyLabel.fontWeight)
         .style("fill", config.node.publicKeyLabel.color)
         .text(function (d) {
-            return d.public_key.substr(-5);
+            return d.public_key.substr(-config.node.publicKeyLabel.characters);
+        });
+
+    // Transparent circle to capture mouse events
+    groups
+        .append("circle")
+        .style("fill-opacity", "0")
+        .attr("r", config.node.circle.radius)
+        .attr("cx", config.node.circle.cx)
+        .attr("cy", config.node.circle.cy)
+        .style("cursor", config.node.circle.cursor)
+        .on("click", on_click)
+        .on("mouseover", function (d) {
+            mouseOverNode(d, hoverInfoLabel);
+        })
+        .on("mousemove", function () {
+            hoverInfoLabel
+                .style("left", d3.event.pageX + "px")
+                .style("top", d3.event.pageY + "px");
+        })
+        .on("mouseout", function () {
+            d3.select(".hoverInfoLabel").select("table.hoverInfoTable").selectAll("tr").remove();
+            hoverInfoLabel.style("opacity", 0);
         });
 
     // Return the group of <svg.node>
     return groups;
+}
+
+/**
+ * Show the node information when the mouse enters a node
+ * @param node the node to get the information of
+ * @param hoverInfoLabel the label to display the information in
+ */
+function mouseOverNode(node, hoverInfoLabel) {
+    // The quantity descriptions and their corresponding values
+    var quantities = [
+        ["Public key" , "..." + node.public_key.substr(node.public_key.length - config.node.hoverLabel.publicKeyCharacters)],
+        ["Page rank score" , node.page_rank.toFixed(config.node.hoverLabel.pageRankDecimals)],
+        ["Total uploaded" ,  node.total_up + " bytes"],
+        ["Total downloaded" ,  node.total_down + " bytes"]
+    ];
+
+    // Update the label with the information corresponding to the node
+    setHoverInfoLabelContents(quantities, hoverInfoLabel);
+
+    // Compensate for user window width resizing
+    hoverInfoLabel
+        .style("opacity", config.node.hoverLabel.opacityOnNode)
+        .style("display", "block");
+}
+
+/**
+ * Get the color of a node based on the page rank score of the node
+ * @param quantities array with the quantities to display and their values
+ * @param hoverInfoLabel the label to display the information in
+ */
+function setHoverInfoLabelContents(quantities, hoverInfoLabel) {
+    var table = d3.select(".hoverInfoLabel").select("table.hoverInfoTable");
+
+    var rows = table
+        .selectAll("tr")
+        .data(quantities)
+        .enter().append("tr");
+
+    // Set the quantity description in the first column, the quantity value in the second column
+    var cell1 = rows.append("td").attr("class","quantity").html(function(d){return d[0]});
+    var cell2 = rows.append("td").html(function(d){return d[1]});
 }
 
 /**
@@ -112,12 +170,13 @@ function selectLinks(svg) {
 
 /**
  * Draw the links upon given data
+ * A link between two nodes is composed of two parts, representing the amount of data uploaded and downloaded
  * @param svg the svg from the body
  * @param data the JSON data of the graph
+ * @param hoverInfoLabel the label to display the information in
  * @returns D3 Selection of <svg.link> elements
  */
-function drawLinks(svg, data) {
-
+function drawLinks(svg, data, hoverInfoLabel) {
     selectLinks(svg).remove();
 
     // All lines, identified by source and target public_key
@@ -133,30 +192,59 @@ function drawLinks(svg, data) {
         .attr("class", "link")
         .style("opacity", "0");
 
+    // The source part of the link
     links.append("line")
         .attr("class", "link-source")
-        .attr("stroke-width", function (d) {
-            return getStrokeWidth(d, data)
-        })
         .style("stroke", config.link.colorLinkSource);
 
+    // The target part of the link
     links.append("line")
         .attr("class", "link-target")
-        .attr("stroke-width", function (d) {
-            return getStrokeWidth(d, data)
-        })
         .style("stroke", config.link.colorLinkTarget);
 
-    links.append("line")
-        .attr("class", "link-velocity")
-        .attr("stroke-width", 2)
-        .style("stroke", "white");
+    // Functionality for the composed link
+    links
+        .attr("stroke-width", function (d) {
+            return getStrokeWidth(d, data);
+        })
+        .on("mouseover", function (d) {
+            mouseOverLink(d, hoverInfoLabel);
+        })
+        .on("mousemove", function () {
+            hoverInfoLabel
+                .style("left", d3.event.pageX + "px")
+                .style("top", d3.event.pageY + "px");
+        })
+        .on("mouseout", function () {
+            d3.select(".hoverInfoLabel").select("table.hoverInfoTable").selectAll("tr").remove();
+            hoverInfoLabel.style("opacity", 0);
+        });
 
     links.transition()
         .duration(1000)
         .style('opacity', '1');
 
     return links;
+}
+
+/**
+ * Show the link information when the mouse enters a link
+ * @param linkData the link to get the information of
+ * @param hoverInfoLabel the label to display the information in
+ */
+function mouseOverLink(linkData, hoverInfoLabel) {
+    // The quantity descriptions and the corresponding values
+    var quantities = [
+        ["Uploaded by ..." + linkData.target_pk.substr(-config.node.hoverLabel.publicKeyCharacters), linkData.amount_up + " bytes"],
+        ["Downloaded by ..." + linkData.source_pk.substr(-config.node.hoverLabel.publicKeyCharacters), linkData.amount_down + " bytes"]
+    ];
+
+    // Update the label with the information corresponding to the link
+    setHoverInfoLabelContents(quantities, hoverInfoLabel);
+
+    hoverInfoLabel
+        .style("opacity", config.node.hoverLabel.opacityOnEdge)
+        .style("display", "block")
 }
 
 /**
@@ -167,10 +255,9 @@ function drawLinks(svg, data) {
  * @returns the width of the link
  */
 function getStrokeWidth(link, data) {
-
     // The difference between the minimum and maximum data links
     var transmissionDifference = data.max_transmission - data.min_transmission;
-    
+
     // The difference between the minimum and maximum stroke width
     var widthDifference = config.link.strokeWidthMax - config.link.strokeWidthMin;
 
@@ -197,7 +284,6 @@ function getStrokeWidth(link, data) {
  * @returns D3 Selection of a <circle.neighbor-ring> element
  */
 function drawNeighborRing(svg, center_x, center_y, radius) {
-
     return svg.append("circle")
         .attr("class", "neighbor-ring")
         .attr("r", 0)
@@ -209,7 +295,6 @@ function drawNeighborRing(svg, center_x, center_y, radius) {
         .transition()
         .duration(1000)
         .attr("r", radius)
-
 }
 
 if (typeof module !== "undefined") {
