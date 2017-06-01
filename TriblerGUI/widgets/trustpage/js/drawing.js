@@ -17,6 +17,22 @@ function selectNodes(svg) {
 }
 
 /**
+ * Format a byte value depending on its size.
+ *
+ * @param bytes
+ */
+function formatBytes(bytes) {
+
+    var sizes = config.byteUnits;
+
+    var i = 0;
+
+    while (bytes >= Math.pow(10, (i + 1) * 3) && (i + 1) < sizes.length) i++;
+
+    return parseFloat(Math.round((1.0 * bytes) / Math.pow(10, (i - 1) * 3)) / 1000).toPrecision(4) + " " + sizes[i];
+}
+
+/**
  * Draw the nodes and their labels
  * @param svg the svg from the body
  * @param data the JSON data of the graph
@@ -49,6 +65,8 @@ function drawNodes(svg, data, on_click, hoverInfoLabel) {
             return getNodeColor(d, data)
         })
         .attr("r", "0")
+        .style("stroke", config.background)
+        .attr("stroke-width", config.node.circle.strokeWidth)
         .attr("cx", config.node.circle.cx)
         .attr("cy", config.node.circle.cy);
 
@@ -77,7 +95,7 @@ function drawNodes(svg, data, on_click, hoverInfoLabel) {
         .append("circle")
         .style("fill-opacity", "0")
         .attr("r", function (d) {
-            return getNodeRadius(d, data)
+            return getNodeRadius(d, data) + config.node.circle.strokeWidth;
         })
         .attr("cx", config.node.circle.cx)
         .attr("cy", config.node.circle.cy)
@@ -85,15 +103,27 @@ function drawNodes(svg, data, on_click, hoverInfoLabel) {
         .on("click", on_click)
         .on("mouseover", function (d) {
             mouseOverNode(d, data, hoverInfoLabel);
+            var public_key = d.public_key;
+            selectLinks(svg)
+                .transition()
+                .duration(300)
+                .style("opacity", function (d) {
+                    return (d.source.public_key === public_key || d.target.public_key === public_key) ? 1 : 0.1
+                })
         })
         .on("mousemove", function () {
             hoverInfoLabel
                 .style("left", d3.event.pageX + "px")
                 .style("top", d3.event.pageY + "px");
         })
-        .on("mouseout", function () {
+        .on("mouseout", function (d) {
             d3.select(".hoverInfoLabel").select("table.hoverInfoTable").selectAll("tr").remove();
             hoverInfoLabel.style("opacity", 0);
+            selectLinks(svg)
+                .transition()
+                .delay(500)
+                .duration(300)
+                .style("opacity", function (d) {return getLinkOpacity(d)})
         });
 
     // Return the group of <svg.node>
@@ -121,10 +151,10 @@ function getNodeRadius(node, data) {
 function mouseOverNode(nodeData, data, hoverInfoLabel) {
     // The quantity descriptions and their corresponding values
     var quantities = [
-        ["Public key" , "..." + nodeData.public_key.substr(nodeData.public_key.length - config.node.hoverLabel.publicKeyCharacters)],
-        ["Page rank score" , nodeData.page_rank.toFixed(config.node.hoverLabel.pageRankDecimals)],
-        ["Total uploaded" ,  nodeData.total_up + " bytes"],
-        ["Total downloaded" ,  nodeData.total_down + " bytes"]
+        ["Public key", "..." + nodeData.public_key.substr(nodeData.public_key.length - config.node.hoverLabel.publicKeyCharacters)],
+        ["Page rank score", nodeData.page_rank.toFixed(config.node.hoverLabel.pageRankDecimals)],
+        ["Total uploaded", formatBytes(nodeData.total_up)],
+        ["Total downloaded", formatBytes(nodeData.total_down)]
     ];
 
     // Update the label with the information corresponding to the node
@@ -157,8 +187,8 @@ function setHoverInfoLabelContents(quantities, hoverInfoLabel) {
         .enter().append("tr");
 
     // Set the quantity description in the first column, the quantity value in the second column
-    var cell1 = rows.append("td").attr("class","quantity").html(function(d){return d[0]});
-    var cell2 = rows.append("td").html(function(d){return d[1]});
+    var cell1 = rows.append("td").attr("class", "quantity").html(function (d) {return d[0]});
+    var cell2 = rows.append("td").html(function (d) {return d[1]});
 }
 
 /**
@@ -218,11 +248,13 @@ function drawLinks(svg, data, hoverInfoLabel) {
 
     // The source part of the link
     links.append("line")
-        .attr("class", "link-source");
+        .attr("class", "link-source")
+        .style("stroke", config.link.color);
 
     // The target part of the link
     links.append("line")
-        .attr("class", "link-target");
+        .attr("class", "link-target")
+        .style("stroke", config.link.color);
 
     // Functionality for the composed link
     links
@@ -245,9 +277,28 @@ function drawLinks(svg, data, hoverInfoLabel) {
 
     links.transition()
         .duration(1000)
-        .style('opacity', '1');
+        .style("opacity", function (d) {
+            return getLinkOpacity(d);
+        });
 
     return links;
+}
+
+/**
+ * Calculate the link opacity.
+ *
+ * For parent-child links the opacity decreases with the distance to
+ * the focus node. For other links the opacity is always at a minimum.
+ *
+ * @param link
+ * @returns {number} opacity
+ */
+function getLinkOpacity(link) {
+    var t1 = link.source.treeNode,
+        t2 = link.target.treeNode,
+        minDepth = Math.min(t1.depth, t2.depth),
+        opacityByDepth = 1 - minDepth * config.link.opacityDecrementPerLevel;
+    return (t1.parent === t2 || t2.parent === t1) ? Math.max(opacityByDepth, config.link.opacityMinimum) : config.link.opacityMinimum;
 }
 
 /**
@@ -259,8 +310,8 @@ function drawLinks(svg, data, hoverInfoLabel) {
 function mouseOverLink(linkData, linkObject, hoverInfoLabel) {
     // The quantity descriptions and the corresponding values
     var quantities = [
-        ["Uploaded by ..." + linkData.target_pk.substr(-config.node.hoverLabel.publicKeyCharacters), linkData.amount_up + " bytes"],
-        ["Downloaded by ..." + linkData.source_pk.substr(-config.node.hoverLabel.publicKeyCharacters), linkData.amount_down + " bytes"]
+        ["Uploaded by ..." + linkData.target_pk.substr(-config.node.hoverLabel.publicKeyCharacters), formatBytes(linkData.amount_up)],
+        ["Uploaded by ..." + linkData.source_pk.substr(-config.node.hoverLabel.publicKeyCharacters), formatBytes(linkData.amount_down)]
     ];
 
     // Update the label with the information corresponding to the link
@@ -322,6 +373,7 @@ function drawNeighborRing(svg, center_x, center_y, radius) {
 if (typeof module !== "undefined") {
     module.exports = {
         getStrokeWidth: getStrokeWidth,
-        getNodeRadius: getNodeRadius
+        getNodeRadius: getNodeRadius,
+        formatBytes: formatBytes
     };
 }

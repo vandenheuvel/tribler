@@ -7,6 +7,29 @@ config = require("TriblerGUI/widgets/trustpage/js/style_config.js");
 drawing = require("TriblerGUI/widgets/trustpage/js/drawing.js");
 
 describe("drawing.js", function () {
+    describe('formatBytes', function () {
+        it('should return correct formats', function () {
+            var data = [
+                [0, "0.000 B"],
+                [999, "999.0 B"],
+                [1000, "1.000 kB"],
+                [1001, "1.001 kB"],
+                [9999, "9.999 kB"],
+                [20000, "20.00 kB"],
+                [200000, "200.0 kB"],
+                [1000000, "1.000 MB"],
+                [1001000, "1.001 MB"],
+                [9999000, "9.999 MB"],
+                [1000000000, "1.000 GB"],
+                [1001000000, "1.001 GB"],
+            ];
+
+            data.forEach(function (set) {
+                assert.equal(drawing.formatBytes(set[0]), set[1]);
+            });
+        });
+    });
+
     describe("getStrokeWidth", function () {
         var data = {
             "min_transmission": 40,
