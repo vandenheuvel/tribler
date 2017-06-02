@@ -288,6 +288,23 @@ class TestDatabase(MultiChainTestCase):
         self.assertDictEqual(expected_result, self.db.neighbor_list(self.block1.public_key))
 
     @blocking_call_on_reactor_thread
+    def test_neighbors_symmetric(self):
+        """
+        The database should return the correct list of neighbors and the traffic to and from them.
+        """
+        self.block1.link_public_key = self.block2.public_key
+        self.block2.link_public_key = self.block1.public_key
+
+        self.db.add_block(self.block1)
+        self.db.add_block(self.block2)
+        self.block2.up = self.block1.down
+        self.block2.down = self.block1.up
+
+        expected_result = {self.block1.public_key: {"up": self.block1.down, "down": self.block1.up}}
+
+        self.assertDictEqual(expected_result, self.db.neighbor_list(self.block2.public_key))
+
+    @blocking_call_on_reactor_thread
     def test_random_dummy_data(self):
         """
         The database should contain 104 rows when random dummy data is used.
