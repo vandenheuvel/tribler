@@ -543,10 +543,27 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
         Test the get_graph method with cached ranks.
         """
         node, = self.create_nodes(1)
+        self.called = False
+
+        def self_called_true():
+            self.called = True
+        node.community.page_rank.update_walk = self_called_true
         node.community.ranks = {node.community.my_member.public_key: 1}
         nodes, _ = node.community.get_graph()
         self.assertGreater(len(nodes), 0)
+        self.assertTrue(self.called)
 
+    def test_get_page_rank_no_ranks(self):
+        """
+        Test the get_page_rank without any prior ranks assigned.
+        """
+        node, = self.create_nodes(1)
+
+        def self_called_true():
+            self.called = True
+        node.community.page_rank.initial_walk = self_called_true
+        node.community.get_page_ranks()
+        self.assertTrue(self.called)
 
     @blocking_call_on_reactor_thread
     def assertBlocksInDatabase(self, node, amount):
