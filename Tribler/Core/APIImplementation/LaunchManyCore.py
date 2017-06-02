@@ -227,8 +227,8 @@ class TriblerLaunchMany(TaskManager):
                 keypair = self.session.multichain_keypair
                 dispersy_member = self.dispersy.get_member(private_key=keypair.key_to_bin())
 
-                from Tribler.community.multichain.community import MultiChainCommunity
-                self.dispersy.define_auto_load(MultiChainCommunity,
+                from Tribler.community.multichain.community import MultiChainCommunityCrawler
+                self.dispersy.define_auto_load(MultiChainCommunityCrawler,
                                                dispersy_member,
                                                load=True,
                                                kargs=multichain_kwargs)
