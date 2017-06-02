@@ -31,12 +31,6 @@ var state = {
     previous_angle: 0,
     previous_focus_pk: null,
     focus_node: null,
-    centerFix: {
-        fixed_x: width / 2,
-        fixed_y: height / 2,
-        local_key: 0,
-        inCenter: true
-    },
     nodes: []
 };
 
@@ -60,34 +54,14 @@ hoverInfoLabel.append("table").attr("class", "hoverInfoTable");
 // Fetch the data
 get_node_info(state.focus_pk, neighbor_level, onNewData);
 
-// Set up the force simulation
-var simulation = d3.forceSimulation()
-
-// Link force to keep distance between nodes
-    .force("link", d3.forceLink()
-        .id(function (d) {
-            return d.local_key;
-        })
-        .distance(function (d) {
-            return d.dist;
-        }).strength(0.05))
-
-    // Centering force (used for focus node)
-    .force("center", d3.forceCenter(state.x, state.y))
-
-    // Torque force to keep nodes at correct angle
-    .force("torque", radialForce().strength(20))
-
-    // The update function for every tick of the clock
-    .on("tick", tick)
-
-    // Make sure the simulation never dies out
-    .alphaDecay(0);
-
-// Only apply the centering force on the center fix
-filterForceNodes(simulation.force("center"), function (n, i) {
-    return n.inCenter;
+var simulation = new RadialSimulation({
+    center_x : state.x,
+    center_y : state.y,
+    radius_step : config.radius_step
 });
+
+simulation.initialize()
+    .onTick(tick);
 
 /**
  * Update the visualization for the provided data set
@@ -121,9 +95,6 @@ function update(graph) {
         }
     });
 
-    // Restart simulation
-    simulation.restart();
-
     // Make a tree from the graph
     state.tree = graphToTree(graph.focus_node);
     state.tree.nodes.forEach(function (treeNode) {
@@ -131,7 +102,7 @@ function update(graph) {
     });
 
     // Position all nodes on a circle
-    applyRecursiveAlphaByDescendants(state.tree.root, 0, 2 * Math.PI, state.centerFix);
+    applyRecursiveAlphaByDescendants(state.tree.root, 0, 2 * Math.PI, simulation.getCenterFix());
 
     // Maintain orientation between previous and current focus node
     if (state.previous_focus_pk) {
@@ -158,41 +129,9 @@ function update(graph) {
     // Draw all links
     var links = drawLinks(svg, graph, hoverInfoLabel);
 
-    // Add the center-fix node to the nodes
-    state.centerFix.local_key = graph.nodes.length;
-
-    // Apply the nodes to the simulation
-    simulation.nodes(graph.nodes.concat([state.centerFix]));
-
-    // Apply the torque force only to the tree nodes
-    simulation.force('torque').initialize(state.tree.nodes);
-
-    // Reset the alpha to 1 (full energy)
-    simulation.alpha(1);
-
-    applyForcingLinks(state.tree.nodes, state.centerFix);
+    simulation.update(state.tree.nodes);
 
 }
-
-/**
- * Apply force links from the center to all nodes to keep them at their
- * respective distance.
- */
-function applyForcingLinks(treeNodes, centerFix) {
-
-    // Apply a distance force that puts a node on the correct circle
-    var forcingLinks = treeNodes.map(function (treeNode) {
-        return {
-            source: centerFix.local_key,
-            target: treeNode.graphNode.local_key,
-            dist: treeNode.depth * radius_step
-        };
-    });
-
-    simulation.force("link")
-        .links(forcingLinks);
-}
-
 
 /**
  * Returns the point x on line x0 to x1 at a given fraction
