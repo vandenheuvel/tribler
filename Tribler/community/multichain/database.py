@@ -16,6 +16,13 @@ DATABASE_DIRECTORY = path.join(u"sqlite")
 DATABASE_PATH = path.join(DATABASE_DIRECTORY, u"multichain.db")
 # Version to keep track if the db schema needs to be updated.
 LATEST_DB_VERSION = 3
+
+# Script to creat indexes
+create_index_script = u"""
+CREATE INDEX IF NOT EXISTS idx_mc_public_key ON multi_chain(public_key);
+CREATE INDEX IF NOT EXISTS idx_mc_link_public_key ON multi_chain(link_public_key);
+"""
+
 # Schema for the MultiChain DB.
 schema = u"""
 CREATE TABLE IF NOT EXISTS multi_chain(
@@ -38,7 +45,7 @@ CREATE TABLE IF NOT EXISTS multi_chain(
 
 CREATE TABLE option(key TEXT PRIMARY KEY, value BLOB);
 INSERT INTO option(key, value) VALUES('database_version', '""" + str(LATEST_DB_VERSION) + u"""');
-"""
+""" + create_index_script
 
 upgrade_to_version_2_script = u"""
 DROP TABLE IF EXISTS multi_chain;
@@ -67,6 +74,7 @@ class MultiChainDB(Database):
         super(MultiChainDB, self).__init__(path.join(working_directory, DATABASE_PATH))
         self.open()
         self.dummy_setup = False
+        self.executescript(create_index_script)
 
     def add_block(self, block):
         """

@@ -332,8 +332,7 @@ class MultiChainCommunity(Community):
         """
         if neighbor_level == 0:
             total_up, total_down = self.persistence.total_traffic(public_key)
-            return {public_key: {"up": total_up,
-                                 "down": total_down}}
+            return {public_key: {"up": total_up, "down": total_down}}
         list_of_nodes = self.get_list_of_nodes(public_key, neighbor_level - 1)
         return_list = deepcopy(list_of_nodes)
         for key in list_of_nodes:
