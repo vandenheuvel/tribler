@@ -218,8 +218,10 @@ class MultiChainDB(Database):
         containing the amount of data uploaded and downloaded from that neighbor
         """
         query = u"SELECT link_public_key, sum(up), sum(down) FROM multi_chain " \
-                u"WHERE public_key = ? GROUP BY link_public_key"
-        params = (buffer(public_key),)
+                u"WHERE public_key = ? GROUP BY link_public_key " \
+                u"UNION SELECT public_key, sum(down), sum(up) FROM multi_chain " \
+                u"WHERE link_public_key = ? GROUP BY public_key"
+        params = (buffer(public_key), buffer(public_key))
         db_result = self.execute(query, params).fetchall()
 
         neighbors = {}
