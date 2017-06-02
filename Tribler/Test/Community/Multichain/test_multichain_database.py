@@ -239,6 +239,8 @@ class TestDatabase(MultiChainTestCase):
         self.block1.down = 15
         self.block1.link_public_key = self.block2.public_key
         self.block1.link_sequence_number = (self.block2.sequence_number - 1)
+        self.block2.total_up = 0
+        self.block2.total_down = 0
 
         self.block2.up = 2
         self.block2.down = 3
