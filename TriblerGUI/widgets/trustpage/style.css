@@ -33,6 +33,17 @@ svg {
 	display: table;
 }
 
+.settingsForum {
+	position: absolute;
+	right: 18px;
+	bottom: 18px;
+	color: #FFFFFF;
+}
+
+#showLabels {
+	vertical-align: text-top;
+}
+
 .tooltip {
 	position: absolute;
 	top: 18px;
