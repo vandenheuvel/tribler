@@ -11,6 +11,9 @@
 <body>
 <!-- THE GRAPH -->
 <svg id="graph" width="600" height="600" viewBox="0 0 600 600"></svg>
+<form class="settingsForum" action="">
+    <input name="hoverLabelVisible" id="showLabels" type="checkbox" onclick="settingsChanged(this)" checked>Show labels
+</form>
 <div class="tooltip">
     <div id="tooltip-content">
         <p id="header">Nodes</p>
@@ -26,6 +29,7 @@
     </div>
 </div>
 <!-- MAIN -->
+<script src="js/settings.js"></script>
 <script src="js/style_config.js"></script>
 <script src="js/drawing.js"></script>
 <script src="js/request_data.js"></script>

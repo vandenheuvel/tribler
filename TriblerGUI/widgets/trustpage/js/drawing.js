@@ -102,7 +102,9 @@ function drawNodes(svg, data, on_click, hoverInfoLabel) {
         .style("cursor", config.node.circle.cursor)
         .on("click", on_click)
         .on("mouseover", function (d) {
-            mouseOverNode(d, data, hoverInfoLabel);
+            if (settings.hoverLabelVisible) {
+                mouseOverNode(d, data, hoverInfoLabel);
+            }
             var public_key = d.public_key;
             selectLinks(svg)
                 .transition()
@@ -263,7 +265,9 @@ function drawLinks(svg, data, hoverInfoLabel) {
             return getStrokeWidth(d, data);
         })
         .on("mouseover", function (d) {
-            mouseOverLink(d, this, hoverInfoLabel);
+            if (settings.hoverLabelVisible) {
+                mouseOverLink(d, this, hoverInfoLabel);
+            }
         })
         .on("mousemove", function () {
             hoverInfoLabel
