@@ -11,7 +11,11 @@ var config = {
         strokeWidthMin: 2,
         strokeWidthMax: 10,
         opacityMinimum: 0.05,
-        opacityDecrementPerLevel: 0.02
+        opacityDecrementPerLevel: 0.02,
+        highlightDimmedOpacity: 0.1,
+        highlightInDuration: 200,
+        highlightOutDuration: 200,
+        highlightOutDelay: 300
     },
     node: {
         publicKeyLabel: {
