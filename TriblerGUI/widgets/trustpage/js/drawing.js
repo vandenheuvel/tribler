@@ -104,12 +104,9 @@ function drawNodes(svg, data, on_click, hoverInfoLabel) {
         .on("mouseover", function (d) {
             mouseOverNode(d, data, hoverInfoLabel);
             var public_key = d.public_key;
-            selectLinks(svg)
-                .transition()
-                .duration(300)
-                .style("opacity", function (d) {
-                    return (d.source.public_key === public_key || d.target.public_key === public_key) ? 1 : 0.1
-                })
+            applyLinkHighlight(function (d) {
+                return d.source.public_key === public_key || d.target.public_key === public_key;
+            })
         })
         .on("mousemove", function () {
             hoverInfoLabel
@@ -119,15 +116,37 @@ function drawNodes(svg, data, on_click, hoverInfoLabel) {
         .on("mouseout", function (d) {
             d3.select(".hoverInfoLabel").select("table.hoverInfoTable").selectAll("tr").remove();
             hoverInfoLabel.style("opacity", 0);
-            selectLinks(svg)
-                .transition()
-                .delay(500)
-                .duration(300)
-                .style("opacity", function (d) {return getLinkOpacity(d)})
+            unapplyLinkHighlight();
         });
 
     // Return the group of <svg.node>
     return groups;
+}
+
+/**
+ * Highlights all links for which the filter function returns true, dims the others
+ * @param filterFunction
+ */
+function applyLinkHighlight(filterFunction) {
+    selectLinks(svg)
+        .transition()
+        .duration(config.link.highlightInDuration)
+        .style("opacity", function (d) {
+            return filterFunction(d) ? 1 : config.link.highlightDimmedOpacity
+        });
+}
+
+/**
+ * Restores the original opacity of all links
+ */
+function unapplyLinkHighlight() {
+    selectLinks(svg)
+        .transition()
+        .delay(config.link.highlightOutDelay)
+        .duration(config.link.highlightOutDuration)
+        .style("opacity", function (d) {
+            return getLinkOpacity(d);
+        });
 }
 
 /**
@@ -264,6 +283,9 @@ function drawLinks(svg, data, hoverInfoLabel) {
         })
         .on("mouseover", function (d) {
             mouseOverLink(d, this, hoverInfoLabel);
+            applyLinkHighlight(function (link) {
+                return link === d;
+            })
         })
         .on("mousemove", function () {
             hoverInfoLabel
@@ -273,6 +295,7 @@ function drawLinks(svg, data, hoverInfoLabel) {
         .on("mouseout", function () {
             d3.select(".hoverInfoLabel").select("table.hoverInfoTable").selectAll("tr").remove();
             hoverInfoLabel.style("opacity", 0);
+            unapplyLinkHighlight();
         });
 
     links.transition()
