@@ -87,7 +87,7 @@ function drawNodes(svg, data, on_click, hoverInfoLabel) {
         .style("font-weight", config.node.publicKeyLabel.fontWeight)
         .style("fill", config.node.publicKeyLabel.color)
         .text(function (d) {
-            return d.public_key.substr(-config.node.publicKeyLabel.characters);
+            return getNodeName(d);
         });
 
     // Transparent circle to capture mouse events
@@ -150,6 +150,15 @@ function unapplyLinkHighlight() {
 }
 
 /**
+ * Get the name of the node, either the public key or a user name.
+ * @param {GraphNode} node
+ * @returns {string} name of the node
+ */
+function getNodeName(node){
+    return node.is_user ? config.node.userLabelText : node.public_key.substr(-config.node.publicKeyLabel.characters);
+}
+
+/**
  * Compute the radius of the node.
  * @param node the node to compute the size of
  * @param data data to get information from
@@ -170,7 +179,7 @@ function getNodeRadius(node, data) {
 function mouseOverNode(nodeData, data, hoverInfoLabel) {
     // The quantity descriptions and their corresponding values
     var quantities = [
-        ["Public key", "..." + nodeData.public_key.substr(nodeData.public_key.length - config.node.hoverLabel.publicKeyCharacters)],
+        ["Public key", getNodeName(nodeData)],
         ["Page rank score", nodeData.page_rank.toFixed(config.node.hoverLabel.pageRankDecimals)],
         ["Total uploaded", formatBytes(nodeData.total_up)],
         ["Total downloaded", formatBytes(nodeData.total_down)]
@@ -333,8 +342,8 @@ function getLinkOpacity(link) {
 function mouseOverLink(linkData, linkObject, hoverInfoLabel) {
     // The quantity descriptions and the corresponding values
     var quantities = [
-        ["Uploaded by ..." + linkData.target_pk.substr(-config.node.hoverLabel.publicKeyCharacters), formatBytes(linkData.amount_up)],
-        ["Uploaded by ..." + linkData.source_pk.substr(-config.node.hoverLabel.publicKeyCharacters), formatBytes(linkData.amount_down)]
+        ["Uploaded by " + getNodeName(linkData.source), formatBytes(linkData.amount_up)],
+        ["Uploaded by " + getNodeName(linkData.target), formatBytes(linkData.amount_down)]
     ];
 
     // Update the label with the information corresponding to the link

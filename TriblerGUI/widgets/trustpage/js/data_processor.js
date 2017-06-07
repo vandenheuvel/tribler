@@ -21,6 +21,7 @@ function processData(response) {
      */
     var converters = [
         mapNodes,
+        markUserNode,
         mapEdges,
         combineLinks,
         addMinMaxTransmission,
@@ -37,7 +38,7 @@ function processData(response) {
 
 /**
  * Convert the response object into a different object by combining the
- * result of an array of converters..
+ * result of an array of converters.
  *
  * @param {GraphResponseData} response - The response
  * @param {Converter[]} converters
@@ -71,6 +72,20 @@ function mapNodes(response) {
     return {
         nodes: nodes
     }
+}
+
+/**
+ * Add a property to each node telling whether it represents the user
+ * @param {GraphResponseData} response - The response
+ * @param {Object} interim - The interim result (expects interim.nodes)
+ * @returns {{}}
+ */
+function markUserNode(response, interim) {
+    interim.nodes.forEach(function (node) {
+        node.is_user = node.public_key === response.user_node;
+    });
+
+    return {};
 }
 
 /**
@@ -354,6 +369,7 @@ function groupBy(list, key) {
  * @property {number} total_up   - the focus node object
  * @property {number} total_down - the smallest page rank score in the set of nodes
  * @property {number} page_rank  - the highest page rank score in the set of nodes
+ * @property {boolean} is_user   - true if this node represents the user
  */
 
 /**
