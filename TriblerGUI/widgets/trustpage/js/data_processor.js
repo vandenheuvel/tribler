@@ -364,12 +364,13 @@ function groupBy(list, key) {
 
 /**
  * @typedef {Object} GraphNode
- * @property {String} public_key - the public key of the focus node
- * @property {number} local_key  - the local key of the focus node (corresponds with GraphData.local_keys)
- * @property {number} total_up   - the focus node object
- * @property {number} total_down - the smallest page rank score in the set of nodes
- * @property {number} page_rank  - the highest page rank score in the set of nodes
- * @property {boolean} is_user   - true if this node represents the user
+ * @property {String} public_key     - the public key of this node
+ * @property {number} local_key      - the local key of this node (corresponds with GraphData.local_keys)
+ * @property {number} total_up       - the total upload by this node
+ * @property {number} total_down     - the total download by this node
+ * @property {number} page_rank      - the page rank score of this node
+ * @property {boolean} is_user       - true if this node represents the user
+ * @property {GraphNode[]} neighbors - the list of neighbors of this node
  */
 
 /**
@@ -387,8 +388,8 @@ function groupBy(list, key) {
  * @property {String} source_pk - The public key of the source node
  * @property {GraphNode} target - The target node
  * @property {String} target_pk - The public key of the target node
- * @property {number} amount_up   - The amount of MB sent from source to target
- * @property {number} amount_down - The amount of MB sent from target to source
+ * @property {number} amount_up   - The amount of bytes sent from source to target
+ * @property {number} amount_down - The amount of bytes sent from target to source
  * @property {number} ratio       - amount_up / (amount_up + amount_down)
  * @property {number} log_ratio   - log(amount_up+1) / (log(amount_up+1) + log(amount_down+1))
  */
