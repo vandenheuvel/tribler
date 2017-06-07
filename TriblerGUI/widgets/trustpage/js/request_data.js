@@ -73,6 +73,7 @@ function get_node_info(public_key, neighbor_level, callback) {
 
 /**
  * @typedef {Object} GraphResponseData
+ * @property {String} user_node          - The public key of the user
  * @property {String} focus_node         - The public key of the focus node
  * @property {number} neighbor_level     - The neighbor level
  * @property {GraphResponseNode[]} nodes - The nodes
