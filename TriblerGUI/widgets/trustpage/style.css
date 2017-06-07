@@ -9,6 +9,74 @@ html, body {
     -webkit-user-select: none;
 }
 
+.linkSizelegendTitle {
+	font-weight: bold;
+}
+
+.nodeSizelegendTitle {
+	font-weight: bold;
+}
+
+.nodeColorlegendTitle {
+	font-weight: bold;
+	transform: translate(0, -20);
+}
+
+.linkSizeswatch {
+	stroke: #22FFD5;
+}
+
+.legendSizeNode {
+	fill: #FFFFFF
+}
+
+.nodeSizeswatch {
+	fill: #FBB423
+}
+
+svg#legend {
+    float: left;
+    display: inline;
+    margin: 0 auto;
+    width: 430px;
+    height: 280px;
+    /*height: 100%;*/
+    /*width: 100%;*/
+}
+
+#showLegendButtonDiv {
+    display: inline;
+	background: #E67300;
+	height: 290px;
+	width: 35px;
+	float: right;
+
+	text-align: center;
+	vertical-align: middle;
+	line-height: 280px;
+}
+
+#showLegendButtonDiv:hover {
+    cursor: pointer;
+}
+
+#legendContainer {
+    display: inline;
+	background: #202020;
+    border-style: solid;
+    border-color: #E67300;
+	position: absolute;
+	bottom: 10px;
+	/*left: -435px;*/
+    left: 10px;
+
+    width: 465px;
+    height: 290px;
+
+    zoom: 100%;
+    /*-moz-transform: scale(0.5);*/
+}
+
 .line {
     box-shadow: 10px 10px 5px #888888;
 }
@@ -17,7 +85,7 @@ html, body {
     padding: 0 10px 0 0;
 }
 
-svg {
+svg#graph {
     display: block;
     margin: 0 auto;
     height: 100%;

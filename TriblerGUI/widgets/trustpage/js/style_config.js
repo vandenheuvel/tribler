@@ -52,7 +52,14 @@ var config = {
         strokeColor: "#333333"
     },
     radius_step: 120,
-    neighbor_level: 2
+    neighbor_level: 2,
+    legend: {
+        textColor: "#FFFFFF",
+        maxWidth: 1600,
+        maxHeight: 900,
+        minScale: 0.75,
+        scaleFactor: 95
+    }
 };
 
 if (typeof module !== "undefined") {

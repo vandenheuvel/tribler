@@ -39,6 +39,9 @@ var simulation = new RadialSimulation({
 simulation.initialize()
     .onTick(radialView.tick);
 
+// Set the scale of the legend
+resizeWindow();
+
 /**
  * Update the visualization for the provided data set
  * @param {GraphData} graph
@@ -99,6 +102,9 @@ function update(graph) {
 
     // Update the simulation
     simulation.update(state.tree.nodes);
+
+    // Draw the legend
+    drawLegend(graph);
 }
 
 /**
