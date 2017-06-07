@@ -6,22 +6,17 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.internet.task import deferLater
 
 from Tribler.Core.Session import Session
-
 from Tribler.Test.Community.Multichain.test_multichain_utilities import MultiChainTestCase
-
+from Tribler.Test.test_as_server import AbstractServer
 from Tribler.community.multichain.block import MultiChainBlock, GENESIS_SEQ
 from Tribler.community.multichain.community import (MultiChainCommunity, MultiChainCommunityCrawler, HALF_BLOCK, CRAWL,
                                                     PendingBytes)
 from Tribler.community.tunnel.routing import Circuit
-
-from Tribler.Test.test_as_server import AbstractServer
-
 from Tribler.dispersy.message import DelayPacketByMissingMember
+from Tribler.dispersy.requestcache import IntroductionRequestCache
+from Tribler.dispersy.tests.debugcommunity.node import DebugNode
 from Tribler.dispersy.tests.dispersytestclass import DispersyTestFunc
 from Tribler.dispersy.util import blocking_call_on_reactor_thread
-from Tribler.dispersy.tests.debugcommunity.node import DebugNode
-from Tribler.dispersy.candidate import Candidate
-from Tribler.dispersy.requestcache import IntroductionRequestCache
 
 
 class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
@@ -547,10 +542,27 @@ class TestMultiChainCommunity(MultiChainTestCase, DispersyTestFunc):
         Test the get_graph method with cached ranks.
         """
         node, = self.create_nodes(1)
+        self.called = False
+
+        def self_called_true():
+            self.called = True
+        node.community.page_rank.update_walk = self_called_true
         node.community.ranks = {node.community.my_member.public_key: 1}
         nodes, _ = node.community.get_graph()
         self.assertGreater(len(nodes), 0)
+        self.assertTrue(self.called)
 
+    def test_get_page_rank_no_ranks(self):
+        """
+        Test the get_page_rank without any prior ranks assigned.
+        """
+        node, = self.create_nodes(1)
+
+        def self_called_true():
+            self.called = True
+        node.community.page_rank.initial_walk = self_called_true
+        node.community.get_page_ranks()
+        self.assertTrue(self.called)
 
     @blocking_call_on_reactor_thread
     def assertBlocksInDatabase(self, node, amount):

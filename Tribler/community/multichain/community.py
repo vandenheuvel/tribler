@@ -312,8 +312,9 @@ class MultiChainCommunity(Community):
                           "total_down": self.persistence.total_down(current_key)})
             self.page_rank.add_node(hexlify(current_key))
         edges = self.get_edges(list_of_nodes)
-        if len(self.ranks) == 0:
-            self.get_page_ranks()
+        for edge in edges:
+            self.page_rank.add_edge(edge['from'], edge['to'], edge['amount'])
+        self.get_page_ranks()
         for dic in nodes:
             dic["page_rank"] = 0
             if dic["public_key"] in self.ranks:
@@ -377,7 +378,10 @@ class MultiChainCommunity(Community):
         If the page ranks are not yet cached in self.ranks, then fetch and store them.
 
         """
-        self.page_rank.initial_walk()
+        if self.ranks:
+            self.page_rank.update_walk()
+        else:
+            self.page_rank.initial_walk()
         self.page_rank.count()
         self.ranks = self.page_rank.get_ranks()
 
