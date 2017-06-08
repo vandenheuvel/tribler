@@ -35,7 +35,9 @@ function RadialView(svg, settings) {
         self.inspector = new RadialInspector(d3.select("#inspector"), config.inspector);
 
         self.nodes.bind("click", function (node) {
-            handle_node_click(node.public_key)
+            handle_node_click(node.public_key);
+            self.nodes.unapplyHighlight();
+            self.links.unapplyHighlight();
         });
 
         self.nodes.bind("mouseover", function (targetNode) {
@@ -49,7 +51,7 @@ function RadialView(svg, settings) {
                 });
 
                 // Highlight target node
-                self.nodes.applyHighlight(function(node){
+                self.nodes.applyHighlight(function (node) {
                     return node.public_key === targetNode.public_key;
                 });
             }, self.config.hover_in_delay);
@@ -71,8 +73,8 @@ function RadialView(svg, settings) {
                 self.links.applyHighlight(function (link) { return link === targetLink; });
 
                 // Highlight nodes of target link
-                self.nodes.applyHighlight(function(node){
-                    return targetLink.source === node || targetLink.target === node;
+                self.nodes.applyHighlight(function (node) {
+                    return targetLink.source.public_key === node.public_key || targetLink.target.public_key === node.public_key;
                 });
             }, self.config.hover_in_delay);
         });
@@ -85,6 +87,7 @@ function RadialView(svg, settings) {
             }, self.config.hover_out_delay);
         });
 
+
     };
 
     /**
@@ -95,6 +98,9 @@ function RadialView(svg, settings) {
         self.nodes.onNewData(newGraphData);
         self.links.onNewData(newGraphData);
         self.inspector.onNewData(newGraphData);
+
+        d3.select('#locate-me-button')
+            .attr('class', newGraphData.focus_node.is_user ? '' : 'visible');
     };
 
     /**

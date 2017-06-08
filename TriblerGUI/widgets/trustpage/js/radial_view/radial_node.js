@@ -145,6 +145,55 @@ function RadialNodes(svg, options) {
     };
 
     /**
+     * Apply a marker to nodes with the provided keys
+     * @param {String[]} keys - the public keys of the nodes to be marked
+     */
+    self.applyMarker = function (keys) {
+
+        self.selectAll().each(function (node) {
+            if (keys.indexOf(node.public_key) < 0) return;
+
+            var element = d3.select(this),
+                color_range = config.node.color.range;
+            console.log('Found', element);
+
+            element.append("svg")
+                .attr("class", "marker")
+                .attr("overflow", "visible")
+
+                .append("circle")
+                .attr("fill", "transparent")
+                .attr("stroke", function (node) { return node.is_user ? color_range[2] : color_range[0]; })
+                .attr("stroke-width", 2)
+
+                // Fade-in and reduce radius
+                .style("opacity", 0)
+                .attr("r", self.config.marker.startRadius)
+                .transition()
+                .duration(self.config.marker.fadeInDuration)
+                .style("opacity", 1)
+                .attr("r", self.config.marker.radius);
+        });
+
+    };
+
+    /**
+     * Remove the marker from certain nodes
+     * @param {String[]} keys - the public keys of the nodes to be unmarked
+     */
+    self.removeMarker = function (keys) {
+        self.selectAll().each(function (node) {
+            if (keys.indexOf(node.public_key) < 0) return;
+
+            d3.select(this).select('.marker')
+                .transition()
+                .duration(self.config.marker.fadeOutDuration)
+                .style("opacity", 0)
+                .remove();
+        });
+    };
+
+    /**
      * Highlights all links for which the filter function returns true, dims the others.
      * @param filterFunction
      */

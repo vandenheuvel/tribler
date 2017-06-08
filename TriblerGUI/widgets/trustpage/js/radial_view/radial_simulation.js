@@ -14,10 +14,10 @@ function RadialSimulation(options) {
     var defaults = {
         center_x: 0,
         center_y: 0,
-        alpha_decay: 0,
-        radial_force_strength: 0.2,
+        alpha_decay: 0.01,
+        radial_force_strength: 0.1,
         radial_force_min_distance: 30,
-        link_strength: 0.3,
+        link_strength: 0.1,
         radius_step: 80
     };
 
@@ -91,6 +91,9 @@ function RadialSimulation(options) {
      * @returns {RadialSimulation}
      */
     self.update = function (treeNodes) {
+
+        // Reset alpha
+        self.simulation.alpha(1);
 
         // Restart simulation
         self.simulation.restart();

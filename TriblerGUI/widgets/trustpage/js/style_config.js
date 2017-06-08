@@ -7,6 +7,11 @@ var config = {
     background: "#202020",
     hoverInDelay: 0,
     hoverOutDelay: 500,
+    steppingAnimation: {
+        delayStepAfterHighlight: 500,
+        delayUnhighlightAfterResponse : 300,
+        delayHighlightAfterResponse: 750
+    },
     link: {
         color: "#22FFD5",
         highlightColor: "#DD002A",
@@ -27,11 +32,17 @@ var config = {
             fontWeight: "bold",
             characters: 3
         },
+        marker : {
+            radius: 40,
+            startRadius: 60,
+            fadeInDuration: 500,
+            fadeOutDuration: 500
+        },
         circle: {
             minRadius: 15,
             maxRadius: 25,
             cursor: "pointer",
-            strokeWidth: 3,
+            strokeWidth: 2,
             strokeColor: "#202020"
         },
         color: {
