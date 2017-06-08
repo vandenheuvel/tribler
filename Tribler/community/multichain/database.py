@@ -212,29 +212,44 @@ class MultiChainDB(Database):
         result = self.execute(query, (buffer(public_key), buffer(public_key))).fetchone()
         return result[0] or 0, result[1] or 0
 
-    def neighbor_list(self, public_key):
+    def get_graph_edges(self, public_key, neighbor_level=1):
         """
-        Return a dictionary containing information about all neighbors of the focus node.
-        For each neighbor, the dictionary contains a key equal to the primary key of the neighbor.
-        The value stored under that key is a dictionary containing how much data has been uploaded
-        and downloaded to and from that neighbor.
-        :param public_key: primary key of the focus node
-        :return: dictionary with for each neighbor of the focus a key, value entry: primary key neighbor, dictionary
-        containing the amount of data uploaded and downloaded from that neighbor
+        Get all edges for the graph focused on the given public key with the given neighbor level as depth.
+
+        The data will have the following format:
+        [(from_pk, to_pk, amount_up, amount_down, total_up, total_down), ...]
+
+        Please note that the total_up and total_down are from the node corresponding to the from_pk information. These
+        values might not be the most recent one, as it is taken from a block which might not be the most recent one
+        available in the database. To get the maximum total_up and total_down, make sure to take the maximum for a given
+        node over different rows.
+
+        :param public_key: the public key of which the neighbors have to be retrieved
+        :param neighbor_level: the depth of the resulting graph
+        :return: a list with tuples as described above
         """
-        query = u"SELECT link_public_key, sum(up), sum(down) FROM multi_chain " \
-                u"WHERE public_key = ? GROUP BY link_public_key " \
-                u"UNION SELECT public_key, sum(down), sum(up) FROM multi_chain " \
-                u"WHERE link_public_key = ? GROUP BY public_key"
-        params = (buffer(public_key), buffer(public_key))
-        db_result = self.execute(query, params).fetchall()
+        # Select the first layer of neighbors.
+        query = u"""SELECT DISTINCT public_key, link_public_key FROM multi_chain
+                WHERE link_public_key = ? OR public_key = ?"""
 
-        neighbors = {}
-        for row in db_result:
-            neighbor_pk = row[0] if isinstance(row[0], str) else str(row[0])
-            neighbors[neighbor_pk] = {"up": row[1] or 0, "down": row[2] or 0}
+        # Recursively query the higher order neighbors (i.e. neighbors further away from the public_key).
+        for level in range(1, neighbor_level):
+            query = u"""SELECT DISTINCT mc.public_key, mc.link_public_key FROM multi_chain mc,
+                    (%(last_level)s) level%(level)d
+                    WHERE level%(level)d.public_key = mc.public_key
+                    OR level%(level)d.public_key = mc.link_public_key
+                    OR level%(level)d.link_public_key = mc.public_key
+                    OR level%(level)d.link_public_key = mc.link_public_key
+                    """ % {"level": level, "last_level": query}
 
-        return neighbors
+        # Retrieve the edges for the correct node pairs.
+        query = u"""SELECT mc.public_key, mc.link_public_key, sum(up), sum(down), mc.total_up, mc.total_down
+                FROM multi_chain mc, (%(query)s) other
+                WHERE mc.public_key = other.public_key AND mc.link_public_key = other.link_public_key
+                GROUP BY mc.public_key, mc.link_public_key""" % {"query": query}
+
+        # Execute the query.
+        return self.execute(query, (buffer(public_key), buffer(public_key))).fetchall()
 
     def use_dummy_data(self, use_random=True):
         """
