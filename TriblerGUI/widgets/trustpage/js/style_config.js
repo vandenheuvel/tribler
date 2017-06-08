@@ -26,25 +26,33 @@ var config = {
             fontWeight: "bold",
             characters: 3
         },
-        circle : {
-            minRadius : 15,
-            maxRadius : 25,
-            cx : 0,
-            cy : 0,
-            cursor : "pointer",
-            strokeWidth: 3
+        circle: {
+            minRadius: 15,
+            maxRadius: 25,
+            cx: 0,
+            cy: 0,
+            cursor: "pointer",
+            strokeWidth: 3,
+            strokeColor: "#202020"
         },
         color: {
             domain: [0, 0.5, 1],
             range: ["#FF1D3E", "#F9FF15", "#0CFF18"]
         },
-        hoverLabel : {
-            publicKeyCharacters : 5,
-            pageRankDecimals : 4,
-            opacity : 0.85
+        hoverLabel: {
+            publicKeyCharacters: 5,
+            pageRankDecimals: 4,
+            opacity: 0.85
         }
     },
-    radius_step: 120
+    tooltip: {
+        background: "#FFFFFF"
+    },
+    neighbor_ring: {
+        strokeColor: "#333333"
+    },
+    radius_step: 120,
+    neighbor_level: 2
 };
 
 if (typeof module !== "undefined") {
