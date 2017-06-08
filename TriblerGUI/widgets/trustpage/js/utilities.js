@@ -12,28 +12,6 @@ function filterForceNodes(force, filter) {
 }
 
 /**
- * List the neighbors of a node with a provided public key
- * @param edges
- * @param neighborPK
- * @returns {Array}
- */
-function listNeighborsOf(edges, neighborPK) {
-    var neighbors = [];
-    for (var i = 0; i < edges.length; i++) {
-        var n = null;
-        if (edges[i].source_pk == neighborPK)
-            n = edges[i].target_pk;
-        else if (edges[i].target_pk == neighborPK)
-            n = edges[i].source_pk;
-
-        if (n && neighbors.indexOf(n) == -1) {
-            neighbors.push(n);
-        }
-    }
-    return neighbors;
-}
-
-/**
  * Group the list by given key attribute.
  *
  * @param list: the list from which elements have to be grouped
@@ -41,8 +19,58 @@ function listNeighborsOf(edges, neighborPK) {
  * @returns a dictionary with elements grouped by attribute value
  */
 function groupBy(list, key) {
-  return list.reduce(function(rv, x) {
-    (rv[x[key]] = rv[x[key]] || []).push(x);
-    return rv;
-  }, {});
+    return list.reduce(function (rv, x) {
+        (rv[x[key]] = rv[x[key]] || []).push(x);
+        return rv;
+    }, {});
+}
+
+/**
+ * Format a byte value depending on its size.
+ *
+ * @param bytes
+ */
+function formatBytes(bytes) {
+
+    var sizes = config.byteUnits;
+
+    var i = 0;
+
+    while (bytes >= Math.pow(10, (i + 1) * 3) && (i + 1) < sizes.length) i++;
+
+    return parseFloat(Math.round((1.0 * bytes) / Math.pow(10, (i - 1) * 3)) / 1000).toPrecision(4) + " " + sizes[i];
+}
+
+/**
+ * Returns the point x on line x0 to x1 at a given fraction
+ * @param x0
+ * @param x1
+ * @param ratio
+ * @returns x
+ */
+function xAtFraction(x0, x1, ratio) {
+    return x0 + (x1 - x0) * ratio;
+}
+
+/**
+ * Calculate the distance between 2 positions in 2D
+ * @param {{x: number, y : number}} positionA
+ * @param {{x: number, y : number}} positionB
+ * @returns {number} - the distance
+ */
+function distance2D(positionA, positionB) {
+    return Math.sqrt(Math.pow(positionB.x - positionA.x, 2) + Math.pow(positionB.y - positionA.y, 2));
+}
+
+/**
+ * Export functions so Mocha can test it
+ */
+if (typeof module !== 'undefined') {
+    module.exports = {
+        filterForceNodes: filterForceNodes,
+        groupBy: groupBy,
+        formatBytes: formatBytes,
+        xAtFraction: xAtFraction,
+        distance2D: distance2D
+    };
 }
