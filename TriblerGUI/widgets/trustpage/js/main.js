@@ -11,6 +11,14 @@ function onNewData(data) {
     update(processData(data));
 }
 
+var navigation = new RadialNavigation(get_node_info);
+navigation.bind('before-step', onStep);
+navigation.bind('response', onNewData);
+
+// Distance to peers
+var radius_step = config.radius_step,
+    neighbor_level = 2;
+
 // Select the svg DOM element
 var svg = d3.select("#graph");
 
@@ -24,11 +32,15 @@ var state = {
     previous_angle: 0,
     previous_focus_pk: null,
     focus_node: null,
+    user_pk : null,
     nodes: []
 };
 
 // Fetch the data
-get_node_info(state.focus_pk, config.neighbor_level, onNewData);
+navigation.setNeighborLevel(neighbor_level);
+navigation.step(state.focus_pk);
+
+var animation = new RadialSteppingAnimation(radialView.nodes, navigation, config.steppingAnimation);
 
 var simulation = new RadialSimulation({
     center_x : radialView.getCenterX(),
@@ -46,6 +58,8 @@ simulation.initialize()
 function update(graph) {
 
     console.log(graph);
+
+    state.user_pk = state.user_pk || graph.focus_pk;
 
     // Copy positions from old nodes to new ones;
     state.nodes.forEach(function (node) {
@@ -110,16 +124,35 @@ function handle_node_click(public_key) {
         console.log("Request pending, ignore new request");
     } else {
         if (public_key !== state.focus_pk) {
-            state.request_pending = true;
-
-            // Store the previous focus node and its angle
-            var lk = state.data.local_keys.indexOf(public_key);
-            var newNode = state.data.nodes[lk];
-            var newTreeNode = find(state.tree.nodes, 'graphNode', newNode);
-            state.previous_focus_pk = state.focus_pk;
-            state.previous_angle = newTreeNode.alpha;
-
-            get_node_info(public_key, config.neighbor_level, onNewData)
+            animation.stop();
+            navigation.step(public_key);
         }
     }
+}
+
+/**
+ * This is called when stepping. Then the previous angle is remembered, so orientation is preserved.
+ * @param public_key
+ */
+function onStep(public_key){
+    state.request_pending = true;
+
+    // Subsequent requests
+    if(state.data) {
+        // Store the previous focus node and its angle
+        var localKey = state.data.local_keys.indexOf(public_key);
+        var newNode = state.data.nodes[localKey];
+        var newTreeNode = find(state.tree.nodes, 'graphNode', newNode);
+        if(newTreeNode) {
+            state.previous_focus_pk = state.focus_pk;
+            state.previous_angle = newTreeNode.alpha;
+        }
+    }
+}
+
+/**
+ * Play the back-to-you animation
+ */
+function backToYou() {
+    animation.rewindHistory();
 }
