@@ -309,8 +309,8 @@ class MultiChainCommunity(Community):
         nodes = []
         for current_key in list_of_nodes:
             # TODO: retrieve more information at once when appropriate queries are present in database_driver
-            nodes.append({"public_key": hexlify(current_key), "total_up": self.persistence.total_up(current_key),
-                          "total_down": self.persistence.total_down(current_key)})
+            total_up, total_down = self.persistence.total_traffic(current_key)
+            nodes.append({"public_key": hexlify(current_key), "total_up": total_up, "total_down": total_down})
             self.page_rank.add_node(hexlify(current_key))
         edges = self.get_edges(list_of_nodes)
         for edge in edges:
@@ -332,8 +332,9 @@ class MultiChainCommunity(Community):
         :return: a list of neighbors within the given radius, or only the public key itself when radius is zero
         """
         if neighbor_level == 0:
-            return {public_key: {"up": self.persistence.total_up(public_key),
-                                 "down": self.persistence.total_down(public_key)}}
+            total_up, total_down = self.persistence.total_traffic(public_key)
+            return {public_key: {"up": total_up,
+                                 "down": total_down}}
         list_of_nodes = self.get_list_of_nodes(public_key, neighbor_level - 1)
         return_list = deepcopy(list_of_nodes)
         for key in list_of_nodes:
