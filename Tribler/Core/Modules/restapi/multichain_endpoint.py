@@ -281,12 +281,7 @@ class MultichainNetworkEndpoint(resource.Resource):
             return MultichainNetworkEndpoint.return_error(request, status_code=http.NOT_FOUND, message=exc.args)
 
         if "dataset" in request.args and not (len(request.args["dataset"]) < 1 or len(request.args["dataset"][0]) == 0):
-            dataset = request.args["dataset"][0]
-            if isinstance(dataset, basestring):
-                if dataset == "static":
-                    mc_community.persistence.use_dummy_data(use_random=False)
-                elif dataset == "random":
-                    mc_community.persistence.use_dummy_data(use_random=True)
+            self.use_dummy_data(request.args["dataset"][0], mc_community)
 
         if "focus_node" not in request.args:
             return MultichainNetworkEndpoint.return_error(request, message="focus_node parameter missing")
@@ -300,19 +295,12 @@ class MultichainNetworkEndpoint(resource.Resource):
             user_node = hexlify(mc_community.my_member.public_key)
 
         focus_node = request.args["focus_node"][0]
-        if isinstance(focus_node, basestring):
-            if request.args["focus_node"][0] == "self":
-                focus_node = user_node
-            else:
-                focus_node = request.args["focus_node"][0]
-        else:
+        if not isinstance(focus_node, basestring):
             return MultichainNetworkEndpoint.return_error(request, message="focus_node was not a string")
 
-        neighbor_level = 1
-        # Note that isdigit() checks if all chars are numbers, hence negative numbers are not possible to be set
-        if "neighbor_level" in request.args and len(request.args["neighbor_level"]) > 0 and \
-                request.args["neighbor_level"][0].isdigit():
-            neighbor_level = int(request.args["neighbor_level"][0])
+        focus_node = self.get_focus_node(focus_node, mc_community)
+
+        neighbor_level = self.get_neighbor_level(request.args)
 
         nodes, edges = mc_community.get_graph(unhexlify(focus_node), neighbor_level)
 
@@ -321,3 +309,53 @@ class MultichainNetworkEndpoint(resource.Resource):
                            "neighbor_level": neighbor_level,
                            "nodes": nodes,
                            "edges": edges})
+
+    @staticmethod
+    def use_dummy_data(dataset, community):
+        """
+        Set a dummy database for the rest of this run.
+
+        Note that once a dummy database is set, this dummy database is used until the software is restarted.
+        :param dataset: the dummy dataset type
+        :param community: the community to get the database from
+        :return:
+        """
+        if isinstance(dataset, basestring):
+            if dataset == "static" or dataset == "random":
+                if dataset == "static":
+                    community.persistence.use_dummy_data(use_random=False)
+                elif dataset == "random":
+                    community.persistence.use_dummy_data(use_random=True)
+
+    @staticmethod
+    def get_focus_node(focus_node, community):
+        """
+        Set the focus node.
+
+        :param focus_node: the focus_node argument given in the request
+        :param community: the community to get the database from
+        :return: the focus node value
+        """
+        if focus_node == "self":
+            if community.persistence.dummy_setup:
+                focus_node = "00"
+            else:
+                focus_node = hexlify(community.my_member.public_key)
+        return focus_node
+
+    @staticmethod
+    def get_neighbor_level(arguments):
+        """
+        Get the neighbor level.
+
+        The default neighbor level is 1.
+
+        :param arguments: the arguments supplied with the HTTP request
+        :return: the neighbor level
+        """
+        neighbor_level = 1
+        # Note that isdigit() checks if all chars are numbers, hence negative numbers are not possible to be set
+        if "neighbor_level" in arguments and len(arguments["neighbor_level"]) > 0 and \
+                arguments["neighbor_level"][0].isdigit():
+            neighbor_level = int(arguments["neighbor_level"][0])
+        return neighbor_level
