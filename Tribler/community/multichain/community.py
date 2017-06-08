@@ -3,7 +3,7 @@ The MultiChain Community is the first step in an incremental approach in buildin
 This reputation system builds a tamper proof interaction history contained in a chain data-structure.
 Every node has a chain and these chains intertwine by blocks shared by chains.
 """
-from binascii import hexlify
+from binascii import hexlify, unhexlify
 from copy import deepcopy
 from itertools import permutations
 import logging
@@ -293,86 +293,97 @@ class MultiChainCommunity(Community):
             statistics["total_down"] = 0
         return statistics
 
+    def get_node(self, public_key, nodes, total_up=None, total_down=None):
+        """
+        Get a node in an encoded format and with the maximum values given the current dictionary of nodes.
+
+        The format is described as follows:
+            { "public_key": public_key, "total_up": total_up, "total_down": total_down }
+        This function checks whether the given total up and download amounts are higher than the current recorded (if
+        any). Moreover, if the public key does not exist in the nodes list and no total_up or total_down is given, the
+        latest block from the database is retrieved.
+
+        :param public_key: the public key for which a node dictionary has to be created
+        :param nodes: the dictionary of currently recorded nodes
+        :param total_up: the total up amount
+        :param total_down: the total down amount
+        :return: a dictionary corresponding to the node in the correct format
+        """
+        if public_key in nodes:
+            return {"public_key": public_key, "total_up": max(total_up, nodes[public_key]["total_up"]),
+                    "total_down": max(total_down, nodes[public_key]["total_down"])}
+        else:
+            if total_up and total_down:
+                return {"public_key": public_key, "total_up": total_up, "total_down": total_down}
+            else:
+                binary_public_key = unhexlify(public_key)
+                total_traffic = self.persistence.total_traffic(binary_public_key)
+                latest_block = self.persistence.get_latest(binary_public_key)
+                if latest_block:
+                    return {"public_key": public_key, "total_up": max(latest_block.total_up, total_traffic[0]),
+                            "total_down": max(latest_block.total_down, total_traffic[1])}
+                else:
+                    return {"public_key": public_key, "total_up": total_traffic[0], "total_down": total_traffic[1]}
+
+    @staticmethod
+    def update_edges(from_pk, to_pk, edges, amount=0):
+        """
+        Update the given edge dictionary with the newly acquired data.
+
+        If there is not yet an entry for the public key pair, it is automatically added to the edges dictionary. If
+        an edge is already recorded, the given amount is added to the total.
+
+        :param from_pk: the public key of the node where the edge originates from
+        :param to_pk: the public key of the node where the edge arrives
+        :param edges: the dictionary of edges
+        :param amount: the amount of data transferred over this edge
+        """
+        if from_pk in edges:
+            edges[from_pk][to_pk] = edges[from_pk][to_pk] + amount if to_pk in edges[from_pk] else amount
+        else:
+            edges[from_pk] = {to_pk: amount}
+
     @blocking_call_on_reactor_thread
     def get_graph(self, public_key=None, neighbor_level=1):
         """
         Return a dictionary with the neighboring nodes and edges of a certain focus node within a certain radius,
-        regarding the local multichain database.
+        regarding the local MultiChain database.
 
         :param public_key: the public key of the focus node in raw format
         :param neighbor_level: the radius within which the neighbors have to be returned
-        :return: a tuple of a dictionary with nodes and a dictionary with edges
+        :return: a tuple of a list with nodes and a list with edges
         """
         if public_key is None:
             public_key = self.my_member.public_key
-        list_of_nodes = self.get_list_of_nodes(public_key, neighbor_level)
-        nodes = []
-        for current_key in list_of_nodes:
-            # TODO: retrieve more information at once when appropriate queries are present in database_driver
-            total_up, total_down = self.persistence.total_traffic(current_key)
-            nodes.append({"public_key": hexlify(current_key), "total_up": total_up, "total_down": total_down})
-            self.page_rank.add_node(hexlify(current_key))
-        edges = self.get_edges(list_of_nodes)
-        for edge in edges:
-            self.page_rank.add_edge(edge['from'], edge['to'], edge['amount'])
+
+        query_result = self.persistence.get_graph_edges(public_key, neighbor_level)
+        nodes = {hexlify(public_key): self.get_node(hexlify(public_key), {})}
+        edges = {}
+
+        for edge in query_result:
+            from_pk = hexlify(edge[0])
+            to_pk = hexlify(edge[1])
+            amount_up = edge[2]
+            amount_down = edge[3]
+            nodes[from_pk] = self.get_node(from_pk, nodes, total_up=edge[4], total_down=edge[5])
+            nodes[to_pk] = self.get_node(to_pk, nodes)
+            self.update_edges(from_pk, to_pk, edges, amount=amount_up)
+            self.update_edges(to_pk, from_pk, edges, amount=amount_down)
+
+        return_nodes = nodes.values()
+        return_edges = []
+        for node in nodes.keys():
+            self.page_rank.add_node(node)
+        for from_pk, edge_list in edges.iteritems():
+            new_edges = [{"from": from_pk, "to": to_pk, "amount": amount} for to_pk, amount in edge_list.iteritems()]
+            for edge in new_edges:
+                self.page_rank.add_edge(edge['from'], edge['to'], edge['amount'])
+            return_edges += new_edges
+
         self.get_page_ranks()
-        for dic in nodes:
-            dic["page_rank"] = 0
-            if dic["public_key"] in self.ranks:
-                dic["page_rank"] = self.ranks[dic["public_key"]]
-        return nodes, edges
-
-    @blocking_call_on_reactor_thread
-    def get_list_of_nodes(self, public_key, neighbor_level):
-        """
-        Return a list of nodes surrounding a certain focus node.
-
-        :param public_key: the public key of the focus node
-        :param neighbor_level: the radius within which the neighbors have to be returned
-        :return: a list of neighbors within the given radius, or only the public key itself when radius is zero
-        """
-        if neighbor_level == 0:
-            total_up, total_down = self.persistence.total_traffic(public_key)
-            return {public_key: {"up": total_up, "down": total_down}}
-        list_of_nodes = self.get_list_of_nodes(public_key, neighbor_level - 1)
-        return_list = deepcopy(list_of_nodes)
-        for key in list_of_nodes:
-            new_neighbors = self.persistence.neighbor_list(key)
-            for new_key in new_neighbors:
-                if new_key not in return_list:
-                    return_list[new_key] = new_neighbors[new_key]
-        return return_list
-
-    @blocking_call_on_reactor_thread
-    def get_edges(self, nodes):
-        """
-        Return a dictionary with all edges between certain nodes around a certain focus node,
-        regarding the local multichain database.
-
-        :param public_key: the public key of the focus node
-        :param nodes: the dictionary of nodes between which the edges have to be returned
-        :return: a dictionary with edges
-        """
-        list_of_edges = []
-        for pair in permutations(nodes, 2):
-            current_neighbors = self.persistence.neighbor_list(pair[0])
-            if pair[1] in current_neighbors:
-                list_of_edges.append(
-                    [pair[0], pair[1], current_neighbors[pair[1]]["up"], current_neighbors[pair[1]]["down"]])
-            else:
-                list_of_edges.append(
-                    [pair[0], pair[1], 0, 0])
-        edges = []
-        for edge in list_of_edges:
-            if edge[2] > 0:
-                edges.append({"from": hexlify(edge[0]), "to": hexlify(edge[1]),
-                              "amount": edge[2]})
-                self.page_rank.add_edge(hexlify(edge[0]), hexlify(edge[1]), edge[2])
-            if edge[3] > 0:
-                edges.append({"from": hexlify(edge[1]), "to": hexlify(edge[0]),
-                              "amount": edge[3]})
-                self.page_rank.add_edge(hexlify(edge[1]), hexlify(edge[0]), edge[3])
-        return edges
+        for node in return_nodes:
+            node["page_rank"] = self.ranks[node["public_key"]] if node["public_key"] in self.ranks else 0.
+        return return_nodes, return_edges
 
     def get_page_ranks(self):
         """
