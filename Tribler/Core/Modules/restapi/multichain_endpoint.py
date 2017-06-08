@@ -253,6 +253,7 @@ class MultichainNetworkEndpoint(resource.Resource):
             .. sourcecode:: javascript
 
                 {
+                    "user_node": "abc",
                     "focus_node": "xyz",
                     "neighbor_level": 1,
                     "nodes": [{
@@ -293,13 +294,15 @@ class MultichainNetworkEndpoint(resource.Resource):
         if len(request.args["focus_node"]) < 1 or len(request.args["focus_node"][0]) == 0:
             return MultichainNetworkEndpoint.return_error(request, message="focus_node parameter empty")
 
+        if mc_community.persistence.dummy_setup:
+            user_node = "00"
+        else:
+            user_node = hexlify(mc_community.my_member.public_key)
+
         focus_node = request.args["focus_node"][0]
         if isinstance(focus_node, basestring):
             if request.args["focus_node"][0] == "self":
-                if mc_community.persistence.dummy_setup:
-                    focus_node = "00"
-                else:
-                    focus_node = hexlify(mc_community.my_member.public_key)
+                focus_node = user_node
             else:
                 focus_node = request.args["focus_node"][0]
         else:
@@ -313,7 +316,8 @@ class MultichainNetworkEndpoint(resource.Resource):
 
         nodes, edges = mc_community.get_graph(unhexlify(focus_node), neighbor_level)
 
-        return json.dumps({"focus_node": focus_node,
+        return json.dumps({"user_node": user_node,
+                           "focus_node": focus_node,
                            "neighbor_level": neighbor_level,
                            "nodes": nodes,
                            "edges": edges})
