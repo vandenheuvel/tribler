@@ -4,6 +4,7 @@
  * NOTE: Use a browser DOM inspection tool to see how the SVG is
  * built up and modified by this code.
  */
+
 // Update the visualization
 function onNewData(data) {
     state.request_pending = false;

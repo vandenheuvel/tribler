@@ -304,11 +304,14 @@ class TestDatabase(MultiChainTestCase):
         self.db.add_block(self.block3)
         self.db.add_block(focus_block1)
 
-        expected_result = {focus_block1.public_key:
-                           {"up": self.block1.up + self.block2.up, "down": self.block1.down + self.block2.down},
-                           focus_block2.public_key: {"up": self.block3.up, "down": self.block3.down}}
-
-        self.assertDictEqual(expected_result, self.db.neighbor_list(self.block1.public_key))
+        expected_result = {focus_block1.public_key: [self.block1.up + self.block2.up,
+                                                     self.block1.down + self.block2.down, self.block2.total_up,
+                                                     self.block2.total_down],
+                           focus_block2.public_key: [self.block3.up, self.block3.down,
+                                                     self.block3.total_up, self.block3.total_down]}
+        result = {str(row[1]): [row[2], row[3], row[4], row[5]]
+                  for row in self.db.get_graph_edges(self.block1.public_key)}
+        self.assertDictEqual(expected_result, result)
 
     @blocking_call_on_reactor_thread
     def test_neighbors_symmetric(self):
@@ -318,14 +321,18 @@ class TestDatabase(MultiChainTestCase):
         self.block1.link_public_key = self.block2.public_key
         self.block2.link_public_key = self.block1.public_key
 
-        self.db.add_block(self.block1)
-        self.db.add_block(self.block2)
         self.block2.up = self.block1.down
         self.block2.down = self.block1.up
+        self.db.add_block(self.block1)
+        self.db.add_block(self.block2)
 
-        expected_result = {self.block1.public_key: {"up": self.block1.down, "down": self.block1.up}}
-
-        self.assertDictEqual(expected_result, self.db.neighbor_list(self.block2.public_key))
+        expected_result = {self.block1.public_key: [self.block2.up, self.block2.down, self.block2.total_up,
+                                                    self.block2.total_down],
+                           self.block2.public_key: [self.block1.up, self.block1.down,
+                                                    self.block1.total_up, self.block1.total_down]}
+        result = {str(row[1]): [row[2], row[3], row[4], row[5]]
+                  for row in self.db.get_graph_edges(self.block2.public_key)}
+        self.assertDictEqual(expected_result, result)
 
     @blocking_call_on_reactor_thread
     def test_random_dummy_data(self):
@@ -356,7 +363,7 @@ class TestDatabase(MultiChainTestCase):
         """
         self.db.use_dummy_data(use_random=True)
 
-        focus_neighbors = self.db.neighbor_list("0")
+        focus_neighbors = self.db.get_graph_edges("0", 2)
         num_rows = self.db.execute(u"SELECT count (*) FROM multi_chain").fetchone()[0]
         self.assertEqual(num_rows, 104)
         self.assertTrue(self.db.dummy_setup)
@@ -370,4 +377,4 @@ class TestDatabase(MultiChainTestCase):
         self.db.use_dummy_data(use_random=True)
         self.assertEqual(num_rows, 104)
         self.assertTrue(self.db.dummy_setup)
-        self.assertDictEqual(focus_neighbors, self.db.neighbor_list("0"))
+        self.assertListEqual(focus_neighbors, self.db.get_graph_edges("0", 2))

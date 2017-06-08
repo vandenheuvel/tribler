@@ -5,7 +5,6 @@ html, body {
     height: 100%;
     /*display: table;*/
     background-color: #202020;
-<<<<<<< HEAD
     overflow: hidden;
     -webkit-user-select: none;
 }
@@ -16,8 +15,6 @@ html, body {
 
 .quantity {
     padding: 0 10px 0 0;
-=======
->>>>>>> Trust display using QtWebEngine, HTML, Javascript and D3.js
 }
 
 svg {
