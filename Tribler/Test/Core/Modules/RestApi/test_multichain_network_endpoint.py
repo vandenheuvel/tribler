@@ -118,6 +118,19 @@ class TestMultichainNetworkEndpoint(AbstractApiTest):
         network_endpoint, request = self.set_up_endpoint_request("multichain", "self", 1)
         self.assertEquals(dumps(exp_message), network_endpoint.render_GET(request))
 
+    def test_negative_neighbor_level(self):
+        """
+        Evaluate whether the API uses neighbor level 1 when a negative number is provided.
+        """
+        user_public_key = hexlify(self.member.public_key)
+        exp_message = {"user_node": user_public_key,
+                       "focus_node": hexlify(self.member.public_key),
+                       "neighbor_level": 1,
+                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0, "page_rank": 1.0}],
+                       "edges": []}
+        network_endpoint, request = self.set_up_endpoint_request("multichain", "self", -1)
+        self.assertEquals(dumps(exp_message), network_endpoint.render_GET(request))
+
     def test_empty_dataset(self):
         """
         Evaluate whether the API sends a response when the dataset is not well-defined.
