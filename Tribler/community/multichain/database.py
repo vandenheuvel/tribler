@@ -189,23 +189,21 @@ class MultiChainDB(Database):
 
         return LATEST_DB_VERSION
 
-    def total_up(self, public_key):
+    def total_traffic(self, public_key):
         """
-        Gets the total uploaded value from the focus.
+        Gets the total amount of uploaded and downloaded data.
         :param public_key: public key of the focus node
-        :return: number representing the amount of uploaded data
+        :return: amount uploaded, amount downloaded
         """
-        block = self.get_latest(public_key)
-        return block.total_up if block else 0
+        query = u"SELECT sum(uploaded), sum(downloaded) FROM (" \
+                u"SELECT public_key, sequence_number, up AS uploaded, down AS downloaded " \
+                u"FROM multi_chain WHERE public_key = ? " \
+                u"UNION " \
+                u"SELECT link_public_key, link_sequence_number, down AS uploaded, up AS downloaded " \
+                u"FROM multi_chain WHERE link_public_key = ?)"
 
-    def total_down(self, public_key):
-        """
-        Gets the total downloaded value from the focus.
-        :param public_key: public key of the focus node
-        :return: number representing the amount of uploaded data
-        """
-        block = self.get_latest(public_key)
-        return block.total_down if block else 0
+        result = self.execute(query, (buffer(public_key), buffer(public_key))).fetchone()
+        return result[0] or 0, result[1] or 0
 
     def neighbor_list(self, public_key):
         """
@@ -288,10 +286,12 @@ class MultiChainDB(Database):
             ]
 
         for block in blocks:
-            self.add_block(MultiChainBlock([block[2], block[3], self.total_up(block[0]) + block[2],
-                                            self.total_down(block[0]) + block[3], unhexlify(block[0]), seq_num,
+            total_up_0, total_down_0 = self.total_traffic(block[0])
+            total_up_1, total_down_1 = self.total_traffic(block[1])
+            self.add_block(MultiChainBlock([block[2], block[3], total_up_0 + block[2],
+                                            total_down_0 + block[3], unhexlify(block[0]), seq_num,
                                             unhexlify(block[1]), seq_num + 1, '', '', None]))
-            self.add_block(MultiChainBlock([block[3], block[2], self.total_up(block[1]) + block[3],
-                                            self.total_down(block[1]) + block[2], unhexlify(block[1]), seq_num + 1,
+            self.add_block(MultiChainBlock([block[3], block[2], total_up_1 + block[3],
+                                            total_down_1 + block[2], unhexlify(block[1]), seq_num + 1,
                                             unhexlify(block[0]), seq_num, '', '', None]))
             seq_num += 2

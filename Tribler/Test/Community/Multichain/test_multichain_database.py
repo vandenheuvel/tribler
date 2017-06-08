@@ -230,32 +230,53 @@ class TestDatabase(MultiChainTestCase):
         self.assertEqual(block_dict["insert_time"], self.block1.insert_time)
 
     @blocking_call_on_reactor_thread
-    def test_total_up(self):
+    def test_total_traffic(self):
         """
-        The database should return the correct amount of uploaded data.
+        The database should return the correct amount of uploaded and downloaded traffic.
         """
-        self.block2.total_up = 0
+        # Block 1 and block 2 are different transactions
+        self.block1.up = 10
+        self.block1.down = 15
+        self.block1.link_public_key = self.block2.public_key
+        self.block1.link_sequence_number = (self.block2.sequence_number - 1)
+
+        self.block2.up = 2
+        self.block2.down = 3
+        self.block2.link_public_key = self.block1.public_key
+        self.block2.link_sequence_number = (self.block1.sequence_number + 1)
+
+        # Block3 and duplicate_block are the same transaction
+        duplicate_block = TestBlock()
+        duplicate_block.up = 1
+        duplicate_block.down = 2
+        duplicate_block.link_public_key = self.block3.public_key
+        duplicate_block.link_sequence_number = self.block3.sequence_number
+
+        self.block3.up = 2
+        self.block3.down = 1
+        self.block3.link_public_key = duplicate_block.public_key
+        self.block3.link_sequence_number = duplicate_block.sequence_number
 
         self.db.add_block(self.block1)
         self.db.add_block(self.block2)
+        self.db.add_block(self.block3)
+        self.db.add_block(duplicate_block)
 
-        self.assertEqual(self.block1.total_up, self.db.total_up(self.block1.public_key))
-        self.assertEqual(0, self.db.total_up(self.block2.public_key))
-        self.assertEqual(0, self.db.total_up(self.block3.public_key))
+        total_up_1, total_down_1 = self.db.total_traffic(self.block1.public_key)
+        total_up_3, total_down_3 = self.db.total_traffic(self.block3.public_key)
+        total_up_fake, total_down_fake = self.db.total_traffic("fake pk")
 
-    @blocking_call_on_reactor_thread
-    def test_total_down(self):
-        """
-        The database should return the correct amount of downloaded data.
-        """
-        self.block2.total_down = 0
+        # Two different blocks
+        self.assertEqual(13, total_up_1)
+        self.assertEqual(17, total_down_1)
 
-        self.db.add_block(self.block1)
-        self.db.add_block(self.block2)
+        # Mirrored block
+        self.assertEqual(2, total_up_3)
+        self.assertEqual(1, total_down_3)
 
-        self.assertEqual(self.block2.total_down, self.db.total_down(self.block2.public_key))
-        self.assertEqual(0, self.db.total_down(self.block2.public_key))
-        self.assertEqual(0, self.db.total_down(self.block3.public_key))
+        # Block not present
+        self.assertEqual(0, total_up_fake)
+        self.assertEqual(0, total_down_fake)
 
     @blocking_call_on_reactor_thread
     def test_neighbors(self):
