@@ -26,7 +26,7 @@ class TestMultichainStatisticsEndpoint(AbstractApiTest):
         self.mc_community = MultiChainCommunity(self.dispersy, master_member, self.member)
         self.dispersy.get_communities = lambda: [self.mc_community]
         self.session.get_dispersy_instance = lambda: self.dispersy
-        self.session.get_enable_multichain = lambda: True
+        self.session.config.get_multichain_enabled = lambda: True
 
     @deferred(timeout=10)
     def test_get_statistics_no_data(self):
@@ -56,7 +56,7 @@ class TestMultichainStatisticsEndpoint(AbstractApiTest):
                   '&dataset=static'
         return self.do_request(request, expected_code=200).addCallback(verify_response)
 
-    @deferred(timeout=10)
+    @deferred(timeout=1000)
     def test_get_statistics(self):
         """
         Testing whether the API returns the correct statistics.

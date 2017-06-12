@@ -204,7 +204,7 @@ class MultichainNetworkEndpoint(resource.Resource):
         :raise: OperationNotEnabledByConfigurationException if the MultiChain Community cannot be found
         :return: the MultiChain community
         """
-        if not self.session.lm.session.get_enable_multichain():
+        if not self.session.config.get_multichain_enabled():
             raise OperationNotEnabledByConfigurationException("multichain is not enabled")
         for community in self.session.get_dispersy_instance().get_communities():
             if isinstance(community, MultiChainCommunity):
