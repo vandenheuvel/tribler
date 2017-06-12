@@ -344,7 +344,7 @@ class MultiChainCommunity(Community):
             edges[from_pk] = {to_pk: amount}
 
     @blocking_call_on_reactor_thread
-    def get_graph(self, public_key=None, neighbor_level=1):
+    def get_graph(self, public_key=None, neighbor_level=[10]):
         """
         Return a dictionary with the neighboring nodes and edges of a certain focus node within a certain radius,
         regarding the local MultiChain database.
@@ -356,7 +356,7 @@ class MultiChainCommunity(Community):
         if public_key is None:
             public_key = self.my_member.public_key
 
-        query_result = self.persistence.get_graph_edges(public_key, neighbor_level)
+        query_result = self.persistence.get_graph_edges(public_key, len(neighbor_level))
         nodes = {hexlify(public_key): self.get_node(hexlify(public_key), {})}
         edges = {}
 

@@ -28,7 +28,7 @@ var state = {
 };
 
 // Fetch the data
-get_node_info(state.focus_pk, config.neighbor_level, onNewData);
+get_node_info(state.focus_pk, config.neighbors_per_level.slice(0, config.neighbor_level), onNewData);
 
 var simulation = new RadialSimulation({
     center_x : radialView.getCenterX(),
@@ -119,7 +119,7 @@ function handle_node_click(public_key) {
             state.previous_focus_pk = state.focus_pk;
             state.previous_angle = newTreeNode.alpha;
 
-            get_node_info(public_key, config.neighbor_level, onNewData)
+            get_node_info(public_key, config.neighbors_per_level.slice(0, config.neighbor_level), onNewData)
         }
     }
 }

@@ -260,7 +260,12 @@ class MultichainNetworkEndpoint(resource.Resource):
                         "public_key": "xyz",
                         "total_up": 12736457,
                         "total_down": 1827364,
-                        "page_rank": 0.5
+                        "page_rank": 0.5,
+                        "remaining": {
+                            "node_count": 2,
+                            "total_up": 423412,
+                            "total_down": 34321
+                        }
                     }, ...],
                     "edges": [{
                         "from": "xyz",
@@ -300,13 +305,13 @@ class MultichainNetworkEndpoint(resource.Resource):
 
         focus_node = self.get_focus_node(focus_node, mc_community)
 
-        neighbor_level = self.get_neighbor_level(request.args)
+        neighbors_per_level = self.get_neighbors_per_level(request.args)
 
-        nodes, edges = mc_community.get_graph(unhexlify(focus_node), neighbor_level)
+        nodes, edges = mc_community.get_graph(unhexlify(focus_node), neighbors_per_level)
 
         return json.dumps({"user_node": user_node,
                            "focus_node": focus_node,
-                           "neighbor_level": neighbor_level,
+                           "neighbor_level": neighbors_per_level,
                            "nodes": nodes,
                            "edges": edges})
 
@@ -344,7 +349,7 @@ class MultichainNetworkEndpoint(resource.Resource):
         return focus_node
 
     @staticmethod
-    def get_neighbor_level(arguments):
+    def get_neighbors_per_level(arguments):
         """
         Get the neighbor level.
 
@@ -353,9 +358,4 @@ class MultichainNetworkEndpoint(resource.Resource):
         :param arguments: the arguments supplied with the HTTP request
         :return: the neighbor level
         """
-        neighbor_level = 1
-        # Note that isdigit() checks if all chars are numbers, hence negative numbers are not possible to be set
-        if "neighbor_level" in arguments and len(arguments["neighbor_level"]) > 0 and \
-                arguments["neighbor_level"][0].isdigit():
-            neighbor_level = int(arguments["neighbor_level"][0])
-        return neighbor_level
+        return [int(x) for x in arguments["neighbor_level"][0].split(",")]
