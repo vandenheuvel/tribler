@@ -84,7 +84,7 @@ function RadialNodes(svg, options) {
             .style("font-weight", self.config.publicKeyLabel.fontWeight)
             .style("fill", self.config.publicKeyLabel.color)
             .text(function (d) {
-                return d.public_key.substr(-self.config.publicKeyLabel.characters);
+                return self.getNodeName(d);
             });
 
         // Transparent circle to capture mouse events
@@ -124,6 +124,15 @@ function RadialNodes(svg, options) {
         self.selectAll()
             .attr("x", function (d) { return d.x; })
             .attr("y", function (d) { return d.y; });
+    };
+
+    /**
+     * Get the name of the node, either the public key or a user name.
+     * @param {GraphNode} node
+     * @returns {string} name of the node
+     */
+    self.getNodeName = function (node) {
+        return node.is_user ? self.config.userLabelText : node.public_key.substr(-self.config.publicKeyLabel.characters);
     };
 
     /**
