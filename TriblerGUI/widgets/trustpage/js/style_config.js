@@ -18,7 +18,7 @@ var config = {
         highlightOutDelay: 300
     },
     node: {
-        userLabelText: "Me",
+        userLabelText: "You",
         publicKeyLabel: {
             color: "#202020",
             fontSize: "10px",
