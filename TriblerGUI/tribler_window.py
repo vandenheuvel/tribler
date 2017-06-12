@@ -20,12 +20,13 @@ from TriblerGUI.debug_window import DebugWindow
 from TriblerGUI.defs import PAGE_SEARCH_RESULTS, \
     PAGE_HOME, PAGE_EDIT_CHANNEL, PAGE_VIDEO_PLAYER, PAGE_DOWNLOADS, PAGE_SETTINGS, PAGE_SUBSCRIBED_CHANNELS, \
     PAGE_CHANNEL_DETAILS, PAGE_PLAYLIST_DETAILS, BUTTON_TYPE_NORMAL, BUTTON_TYPE_CONFIRM, PAGE_LOADING,\
-    PAGE_DISCOVERING, PAGE_DISCOVERED, PAGE_TRUST
+    PAGE_DISCOVERING, PAGE_DISCOVERED, PAGE_TRUST_NETWORK, PAGE_TRUST_GRAPH
 from TriblerGUI.dialogs.confirmationdialog import ConfirmationDialog
 from TriblerGUI.dialogs.feedbackdialog import FeedbackDialog
 from TriblerGUI.dialogs.startdownloaddialog import StartDownloadDialog
 from TriblerGUI.tribler_request_manager import TriblerRequestManager
 from TriblerGUI.utilities import get_ui_file_path, get_image_path, get_gui_setting
+from TriblerGUI.widgets.trustpagenetwork import  TRUST_NETWORK_HTML_PATH
 
 
 
@@ -122,7 +123,8 @@ class TriblerWindow(QMainWindow):
 
         self.menu_buttons = [self.left_menu_button_home, self.left_menu_button_search, self.left_menu_button_my_channel,
                              self.left_menu_button_subscriptions, self.left_menu_button_video_player,
-                             self.left_menu_button_downloads, self.left_menu_button_discovered, self.left_menu_button_trust_display]
+                             self.left_menu_button_downloads, self.left_menu_button_discovered,
+                             self.left_menu_button_trust_display]
 
         self.video_player_page.initialize_player()
         self.search_results_page.initialize_search_results_page()
@@ -134,7 +136,16 @@ class TriblerWindow(QMainWindow):
         self.loading_page.initialize_loading_page()
         self.discovering_page.initialize_discovering_page()
         self.discovered_page.initialize_discovered_page()
-        self.trust_page.initialize_trust_page()
+
+        # If QWebEngineView cannot be imported, make sure to render the graph trust page instead.
+        try:
+            from PyQt5.QtWebEngineWidgets import QWebEngineView
+            self.trust_page_network.initialize_trust_page()
+        except ImportError:
+            self.trust_page_graph.initialize_trust_page()
+            label = self.stackedWidget.widget(PAGE_TRUST_GRAPH).window().trust_explanation_label
+            label.setText(label.text().replace("LINK_PLACEHOLDER", TRUST_NETWORK_HTML_PATH))
+            self.left_menu_button_trust_display.clicked.connect(self.clicked_menu_button_trust_graph)
 
         self.stackedWidget.setCurrentIndex(PAGE_LOADING)
 
@@ -364,12 +375,6 @@ class TriblerWindow(QMainWindow):
         self.navigation_stack = []
         self.hide_left_menu_playlist()
 
-    def on_trust_button_click(self):
-        self.deselect_all_menu_buttons()
-        self.stackedWidget.setCurrentIndex(PAGE_TRUST)
-        self.navigation_stack = []
-        self.hide_left_menu_playlist()
-
     def on_add_torrent_button_click(self, pos):
         menu = TriblerActionMenu(self)
 
@@ -548,9 +553,16 @@ class TriblerWindow(QMainWindow):
         self.navigation_stack = []
         self.hide_left_menu_playlist()
 
-    def clicked_menu_button_trust(self):
+    def clicked_menu_button_trust_network(self):
         self.deselect_all_menu_buttons(self.left_menu_button_trust_display)
-        self.stackedWidget.setCurrentIndex(PAGE_TRUST)
+        self.stackedWidget.setCurrentIndex(PAGE_TRUST_NETWORK)
+        self.navigation_stack = []
+        self.hide_left_menu_playlist()
+
+    def clicked_menu_button_trust_graph(self):
+        self.deselect_all_menu_buttons(self.left_menu_button_trust_display)
+        self.stackedWidget.setCurrentIndex(PAGE_TRUST_GRAPH)
+        self.trust_page_graph.load_trust_statistics()
         self.navigation_stack = []
         self.hide_left_menu_playlist()
 
