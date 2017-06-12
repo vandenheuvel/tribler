@@ -77,8 +77,8 @@ function RadialToolTip() {
     self.displayLinkData = function (link) {
         // The quantity descriptions and the corresponding values
         var quantities = [
-            ["Uploaded by ..." + link.target_pk.substr(-config.node.hoverLabel.publicKeyCharacters), formatBytes(link.amount_up)],
-            ["Uploaded by ..." + link.source_pk.substr(-config.node.hoverLabel.publicKeyCharacters), formatBytes(link.amount_down)]
+            ["Uploaded by ..." + link.target_pk.substr(-config.node.hoverLabel.publicKeyCharacters), formatBytes(link.amount_down)],
+            ["Uploaded by ..." + link.source_pk.substr(-config.node.hoverLabel.publicKeyCharacters), formatBytes(link.amount_up)]
         ];
 
         // Update the label with the information corresponding to the link
