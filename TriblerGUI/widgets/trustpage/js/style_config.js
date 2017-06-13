@@ -52,7 +52,8 @@ var config = {
         strokeColor: "#333333"
     },
     radius_step: 120,
-    neighbor_level: 2
+    neighbor_level: 2,
+    neighbors_per_level: [30, 10, 5, 2]
 };
 
 if (typeof module !== "undefined") {
