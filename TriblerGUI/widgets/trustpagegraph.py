@@ -72,7 +72,7 @@ class TrustPlotMplCanvas(MplCanvas):
         self.draw()
 
 
-class TrustPage(QWidget):
+class TrustPageGraph(QWidget):
     """
     This page shows various trust statistics.
     """
@@ -127,7 +127,7 @@ class TrustPage(QWidget):
 
         # Convert all dates to a datetime object
         for block in self.blocks:
-            plot_data[1].append(datetime.datetime.strptime(block["insert_time"], "%Y-%m-%d %H:%M:%S"))
+            plot_data[1].append(datetime.datetime.strptime(block["insert_time"].decode("HEX"), "%Y-%m-%d %H:%M:%S"))
 
             plot_data[0][0].append(block["total_up"] / self.byte_scale)
             plot_data[0][1].append(block["total_down"] / self.byte_scale)

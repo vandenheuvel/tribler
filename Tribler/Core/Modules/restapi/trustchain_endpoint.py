@@ -1,7 +1,12 @@
+"""
+Handle HTTP requests for the trust display, whilst validating the arguments and using them in the query.
+"""
 import json
+from binascii import hexlify
 
 from twisted.web import http, resource
 
+from Tribler.Core.exceptions import OperationNotEnabledByConfigurationException
 from Tribler.community.triblerchain.community import TriblerChainCommunity
 
 
@@ -13,7 +18,8 @@ class TrustchainEndpoint(resource.Resource):
     def __init__(self, session):
         resource.Resource.__init__(self)
 
-        child_handler_dict = {"statistics": TrustchainStatsEndpoint, "blocks": TrustchainBlocksEndpoint}
+        child_handler_dict = {"blocks": TrustchainBlocksEndpoint, "network": TrustChainNetworkEndpoint,
+                              "statistics": TrustchainStatsEndpoint, }
 
         for path, child_cls in child_handler_dict.iteritems():
             self.putChild(path, child_cls(session))
@@ -84,12 +90,12 @@ class TrustchainStatsEndpoint(TrustchainBaseEndpoint):
                     }
                 }
         """
-        mc_community = self.get_trustchain_community()
-        if not mc_community:
+        tribler_chain_community = self.get_trustchain_community()
+        if not tribler_chain_community:
             request.setResponseCode(http.NOT_FOUND)
             return json.dumps({"error": "trustchain community not found"})
 
-        return json.dumps({'statistics': mc_community.get_statistics()})
+        return json.dumps({'statistics': tribler_chain_community.get_statistics()})
 
 
 class TrustchainBlocksEndpoint(TrustchainBaseEndpoint):
@@ -161,3 +167,191 @@ class TrustchainBlocksIdentityEndpoint(TrustchainBaseEndpoint):
 
         blocks = mc_community.persistence.get_latest_blocks(self.identity.decode("HEX"), limit_blocks)
         return json.dumps({"blocks": [dict(block) for block in blocks]})
+
+
+class TrustChainNetworkEndpoint(resource.Resource):
+    """
+    Handle HTTP requests for the trust display.
+    """
+
+    def __init__(self, session):
+        """
+        Initialize the TrustNetworkEndpoint and make a session an attribute from the instance.
+
+        :param session: the Session object where the aggregated data can be retrieved from
+        """
+        resource.Resource.__init__(self)
+        self.session = session
+
+
+    @staticmethod
+    def return_error(request, status_code=http.BAD_REQUEST, message="your request seems to be wrong"):
+        """
+        Return a HTTP Code 400 with the given message.
+
+        :param request: the request which has to be changed
+        :param status_code: the HTTP status code to be returned
+        :param message: the error message which is used in the JSON string
+        :return: the error message formatted in JSON
+        """
+        request.setResponseCode(status_code)
+        return json.dumps({"error": message})
+
+    def get_tribler_chain_community(self):
+        """
+        Get the TriblerChain Community from the session.
+
+        :raise: OperationNotEnabledByConfigurationException if the TrustChain Community cannot be found
+        :return: the TriblerChain community
+        """
+        if not self.session.config.get_trustchain_enabled():
+            raise OperationNotEnabledByConfigurationException("trustchain is not enabled")
+        for community in self.session.get_dispersy_instance().get_communities():
+            if isinstance(community, TriblerChainCommunity):
+                return community
+
+    def render_GET(self, request):
+        """
+        Process the GET request which retrieves information about the TrustChain network.
+
+        .. http:get:: /trustchain/network?dataset=(string: dataset)&focus_node=(string: public key)
+                                                                    &neighbor_level=(int: neighbor level)
+
+        A GET request to this endpoint returns the data from the trustchain. This data is retrieved from the trustchain
+        database and will be focused around the given focus node. The neighbor_level parameter specifies which nodes
+        are taken into consideration (e.g. a neighbor_level of 2 indicates that only the focus node, it's neighbors
+        and the neighbors of those neighbors are taken into consideration).
+
+        Note: the parameters are handled as follows:
+        - dataset
+            - Not given: TrustChain data
+            - "static": Static dummy data
+            - "random": Random dummy data
+            - otherwise: TrustChain data
+        - focus_node
+            - Not given: HTTP 400
+            - Non-String value: HTTP 400
+            - "self": TriblerChain Community public key
+            - otherwise: Passed data, albeit a string
+        - neighbor_level
+            - Not given: 1
+            - Non-Integer value: 1
+            - otherwise: Passed data, albeit an integer
+
+        The returned data will be in such format that the GUI component which visualizes this data can easily use it.
+        Although this data might not seem as formatted in a useful way to the human eye, this is done to accommodate as
+        little parsing effort at the GUI side.
+
+            **Example request**:
+
+            .. sourcecode:: none
+
+                curl -X GET 'http://localhost:8085/trustchain/network?dataset=static&focus_node=xyz&neighbor_level=1'
+
+            **Example response**:
+
+            .. sourcecode:: javascript
+
+                {
+                    "user_node": "abc",
+                    "focus_node": "xyz",
+                    "neighbor_level": 1,
+                    "nodes": [{
+                        "public_key": "xyz",
+                        "total_up": 12736457,
+                        "total_down": 1827364,
+                        "score": 0.0011,
+                        "total_neighbors": 1
+                    }, ...],
+                    "edges": [{
+                        "from": "xyz",
+                        "to": "xyz_n1",
+                        "amount": 12384
+                    }, ...]
+                }
+
+        :param request: the HTTP GET request which specifies the focus node and optionally the neighbor level
+        :return: the node data formatted in JSON
+        """
+        # This header is needed because this request is not made from the same host
+        request.setHeader('Access-Control-Allow-Origin', '*')
+
+        try:
+            tribler_chain_community = self.get_tribler_chain_community()
+        except OperationNotEnabledByConfigurationException as exc:
+            return TrustChainNetworkEndpoint.return_error(request, status_code=http.NOT_FOUND, message=exc.args)
+
+        if "dataset" in request.args:
+            self.use_dummy_data(request.args["dataset"][0], tribler_chain_community)
+
+        if "focus_node" not in request.args:
+            return TrustChainNetworkEndpoint.return_error(request, message="focus_node parameter missing")
+
+        focus_node = request.args["focus_node"][0]
+        if not focus_node:
+            return TrustChainNetworkEndpoint.return_error(request, message="focus_node parameter empty")
+
+        focus_node = self.get_focus_node(focus_node, tribler_chain_community)
+
+        if tribler_chain_community.persistence.dummy_setup:
+            user_node = "00"
+        else:
+            user_node = hexlify(tribler_chain_community.my_member.public_key)
+
+        neighbor_level = self.get_neighbor_level(request.args)
+
+        nodes, edges = tribler_chain_community.get_graph(focus_node, neighbor_level)
+
+        return json.dumps({"user_node": user_node,
+                           "focus_node": focus_node,
+                           "neighbor_level": neighbor_level,
+                           "nodes": nodes,
+                           "edges": edges})
+
+    @staticmethod
+    def use_dummy_data(dataset, community):
+        """
+        Set a dummy database for the rest of this run.
+
+        Note that once a dummy database is set, this dummy database is used until the software is restarted.
+        :param dataset: the dummy dataset type
+        :param community: the community to get the database from
+        :return:
+        """
+        if isinstance(dataset, basestring):
+            if dataset == "static" or dataset == "random":
+                if dataset == "static":
+                    community.persistence.use_dummy_data(use_random=False)
+                elif dataset == "random":
+                    community.persistence.use_dummy_data(use_random=True)
+
+    @staticmethod
+    def get_focus_node(focus_node, community):
+        """
+        Set the focus node.
+
+        :param focus_node: the focus_node argument given in the request
+        :param community: the community to get the database from
+        :return: the focus node value
+        """
+        if focus_node == "self":
+            if community.persistence.dummy_setup:
+                focus_node = "00"
+            else:
+                focus_node = hexlify(community.my_member.public_key)
+        return focus_node
+
+    @staticmethod
+    def get_neighbor_level(arguments):
+        """
+        Get the neighbor level.
+
+        The default neighbor level is 1.
+        :param arguments: the arguments supplied with the HTTP request
+        :return: the neighbor level
+        """
+        neighbor_level = 1
+        # Note that isdigit() checks if all chars are numbers, hence negative numbers are not possible to be set
+        if "neighbor_level" in arguments and arguments["neighbor_level"][0].isdigit():
+            neighbor_level = int(arguments["neighbor_level"][0])
+        return neighbor_level
