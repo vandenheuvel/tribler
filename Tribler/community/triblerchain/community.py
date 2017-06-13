@@ -1,3 +1,5 @@
+from binascii import hexlify
+
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.task import LoopingCall
@@ -5,6 +7,7 @@ from twisted.internet.task import LoopingCall
 from Tribler.Core.simpledefs import NTFY_TUNNEL, NTFY_REMOVE
 from Tribler.community.triblerchain.block import TriblerChainBlock
 from Tribler.community.triblerchain.database import TriblerChainDB
+from Tribler.community.triblerchain.score import calculate_score
 from Tribler.community.trustchain.community import TrustChainCommunity
 from Tribler.dispersy.util import blocking_call_on_reactor_thread
 
@@ -162,6 +165,92 @@ class TriblerChainCommunity(TrustChainCommunity):
             if self.pending_bytes[pk].clean is not None:
                 self.pending_bytes[pk].clean.reset(0)
         yield super(TriblerChainCommunity, self).unload_community()
+
+    def get_node(self, public_key, nodes, total_up=None, total_down=None, total_neighbors=None):
+        """
+        Get a node in an encoded format and with the maximum values given the current dictionary of nodes.
+
+        The format is described as follows:
+            { "public_key": public_key, "total_up": total_up, "total_down": total_down }
+        This function checks whether the given total up and download amounts are higher than the current recorded (if
+        any). Moreover, if the public key does not exist in the nodes list and no total_up or total_down is given, the
+        latest block from the database is retrieved.
+
+        :param public_key: the public key for which a node dictionary has to be created
+        :param nodes: the dictionary of currently recorded nodes
+        :param total_up: the total up amount
+        :param total_down: the total down amount
+        :return: a dictionary corresponding to the node in the correct format
+        """
+        if public_key in nodes:
+            return {"public_key": public_key, "total_up": max(total_up, nodes[public_key]["total_up"]),
+                    "total_down": max(total_down, nodes[public_key]["total_down"]),
+                    "total_neighbors": max(total_neighbors, nodes[public_key]["total_neighbors"])}
+        else:
+            if total_up and total_down and total_neighbors:
+                return {"public_key": public_key, "total_up": total_up, "total_down": total_down,
+                        "total_neighbors": total_neighbors}
+            else:
+                total_traffic = self.persistence.total_traffic(public_key)
+                return {"public_key": public_key, "total_up": total_traffic[0], "total_down": total_traffic[1],
+                        "total_neighbors": total_traffic[2]}
+
+    @staticmethod
+    def update_edges(from_pk, to_pk, edges, amount=0):
+        """
+        Update the given edge dictionary with the newly acquired data.
+
+        If there is not yet an entry for the public key pair, it is automatically added to the edges dictionary. If
+        an edge is already recorded, the given amount is added to the total.
+
+        :param from_pk: the public key of the node where the edge originates from
+        :param to_pk: the public key of the node where the edge arrives
+        :param edges: the dictionary of edges
+        :param amount: the amount of data transferred over this edge
+        """
+        if from_pk in edges:
+            edges[from_pk][to_pk] = edges[from_pk][to_pk] + amount if to_pk in edges[from_pk] else amount
+        else:
+            edges[from_pk] = {to_pk: amount}
+
+    @blocking_call_on_reactor_thread
+    def get_graph(self, public_key=None, neighbor_level=1):
+        """
+        Return a dictionary with the neighboring nodes and edges of a certain focus node within a certain radius,
+        regarding the local MultiChain database.
+
+        :param public_key: the public key of the focus node in raw format
+        :param neighbor_level: the radius within which the neighbors have to be returned
+        :return: a tuple of a list with nodes and a list with edges
+        """
+        if public_key is None:
+            public_key = hexlify(self.my_member.public_key)
+
+        nodes = {public_key: self.get_node(public_key, {})}
+        edges = {}
+
+        for edge in self.persistence.get_graph_edges(public_key, neighbor_level):
+            from_pk = str(edge[0])
+            to_pk = str(edge[1])
+            amount_up = edge[2]
+            amount_down = edge[3]
+            nodes[from_pk] = self.get_node(from_pk, nodes, total_up=edge[4], total_down=edge[5],
+                                           total_neighbors=edge[6])
+            nodes[to_pk] = self.get_node(to_pk, nodes)
+            self.update_edges(from_pk, to_pk, edges, amount=amount_up)
+            self.update_edges(to_pk, from_pk, edges, amount=amount_down)
+
+        return_nodes = nodes.values()
+        return_edges = []
+
+        for node in return_nodes:
+            node["score"] = calculate_score(node)
+
+        for from_pk, edge_list in edges.iteritems():
+            new_edges = [{"from": from_pk, "to": to_pk, "amount": amount} for to_pk, amount in edge_list.iteritems()]
+            return_edges += new_edges
+
+        return return_nodes, return_edges
 
 
 class TriblerChainCommunityCrawler(TriblerChainCommunity):

@@ -7,6 +7,11 @@ from unittest import skipUnless
 from PyQt5.QtCore import QPoint, Qt, QTimer
 from PyQt5.QtGui import QPixmap, QRegion
 from PyQt5.QtTest import QTest
+try:
+    from PyQt5.QtWebEngineWidgets import QWebEngine
+except ImportError:
+    # If the QtWebEngineWidgets module is not found, the old trust page will be rendered.
+    pass
 from PyQt5.QtWidgets import QApplication, QListWidget, QTreeWidget
 
 import TriblerGUI.core_manager as core_manager
@@ -516,8 +521,8 @@ class TriblerGUITest(AbstractTriblerGUITest):
         QTest.mouseClick(window.edit_channel_manage_playlist_save_button, Qt.LeftButton)
 
     def test_trust_page(self):
-        QTest.mouseClick(window.trust_button, Qt.LeftButton)
-        self.wait_for_variable("trust_page.blocks")
+        QTest.mouseClick(window.left_menu_button_trust_display, Qt.LeftButton)
+        # Since the trust page is rendered in JavaScript, it is tested there.
         self.screenshot(window, name="trust_page_values")
 
 if __name__ == "__main__":
