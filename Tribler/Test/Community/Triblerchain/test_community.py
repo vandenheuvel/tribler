@@ -28,7 +28,7 @@ class TestPendingBytes(TrustChainTestCase):
 
 class TestTriblerChainCommunity(BaseTestTrustChainCommunity):
     """
-    Class that tests the TrustChainCommunity on an integration level.
+    Class that tests the TriblerChainCommunity on an integration level.
     """
 
     @staticmethod
@@ -353,3 +353,57 @@ class TestTriblerChainCommunity(BaseTestTrustChainCommunity):
         statistics = node.community.get_statistics(public_key=other.community.my_member.public_key)
         assert isinstance(statistics, dict), type(statistics)
         assert len(statistics) > 0
+
+    def test_get_node_empty(self):
+        """
+        Check whether get_node returns the correct node if no past data is given.
+        """
+        node, = self.create_nodes(1)
+        self.assertEqual({"public_key": "test", "total_up": 3, "total_down": 5},
+                         node.community.get_node("test", [], 3, 5))
+
+    def test_get_node_maximum(self):
+        """
+        Check whether get_node returns the maximum of total_up and total_down.
+        """
+        node, = self.create_nodes(1)
+        nodes = {"test": {"public_key": "test", "total_up": 1, "total_down": 10}}
+        self.assertEqual({"public_key": "test", "total_up": 3, "total_down": 10},
+                         node.community.get_node("test", nodes, 3, 5))
+
+    def test_get_node_request_total_traffic(self):
+        """
+        Check whether get_node requires a total_traffic method if no total_up and total_down is given.
+        """
+        node, = self.create_nodes(1)
+        node.community.persistence.get_latest = lambda _: None
+        node.community.persistence.total_traffic = lambda _: [5, 6]
+        self.assertEqual({"public_key": '74657374', "total_up": 5, "total_down": 6},
+                         node.community.get_node('74657374', []))
+
+    def test_update_edges_empty(self):
+        """
+        Check whether update_edges updates edges when the dictionary is empty.
+        """
+        node, = self.create_nodes(1)
+        edges = {}
+        node.community.update_edges("test1", "test2", edges, 5)
+        self.assertEqual({"test1": {"test2": 5}}, edges)
+
+    def test_update_edges_update(self):
+        """
+        Check whether update_edges updates edges when there is already an entrance.
+        """
+        node, = self.create_nodes(1)
+        edges = {"test1": {"test2": 6}}
+        node.community.update_edges("test1", "test2", edges, 5)
+        self.assertEqual({"test1": {"test2": 11}}, edges)
+
+    def test_get_graph(self):
+        """
+        Test the get_graph method.
+        """
+        node, = self.create_nodes(1)
+        nodes, edges = node.community.get_graph()
+        self.assertGreater(len(nodes), 0)
+        self.assertEqual(len(edges), 0)

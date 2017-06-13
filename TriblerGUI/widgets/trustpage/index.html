@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Trust Page</title>
+    <script src="js/d3/d3.v4.min.js"></script>
+    <script src="js/d3/d3-legend.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<!-- THE GRAPH -->
+<svg id="graph" width="600" height="600" viewBox="0 0 600 600"></svg>
+<div class="tooltip">
+    <div id="tooltip-content">
+        <p class="header">Nodes</p>
+        <ul>
+            <li>Size: the total amount of transmitted data relative to all other visible nodes.</li>
+            <li>Color: the difference between total amount uploaded and total amount downloaded.</li>
+        </ul>
+        <p class="header">Edges</p>
+        <ul>
+            <li>Size: the relative size of the upload quantity to all available.</li>
+            <li>Division point: the ratio between the amounts uploaded between two nodes.</li>
+        </ul>
+    </div>
+</div>
+
+<div id="inspector">
+    <h2 class="title">
+        <span class="title"></span>
+        <span class="subtitle"></span>
+    </h2>
+</div>
+
+<!-- MAIN -->
+<script src="js/style_config.js"></script>
+<script src="js/radial_view/radial_link.js"></script>
+<script src="js/radial_view/radial_node.js"></script>
+<script src="js/radial_view/radial_inspector.js"></script>
+<script src="js/radial_view/radial_view.js"></script>
+<script src="js/support/eventful_mixin.js"></script>
+<script src="js/request_data.js"></script>
+<script src="js/graph_to_tree.js"></script>
+<script src="js/radial_view/radial_simulation.js"></script>
+<script src="js/radial.js"></script>
+<script src="js/utilities.js"></script>
+<script src="js/data_processor.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

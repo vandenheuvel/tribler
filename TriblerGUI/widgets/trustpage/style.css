@@ -1,0 +1,132 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    /*display: table;*/
+    background-color: #202020;
+    overflow: hidden;
+    -webkit-user-select: none;
+}
+
+.line {
+    box-shadow: 10px 10px 5px #888888;
+}
+
+.quantity {
+    padding: 0 10px 0 0;
+}
+
+svg {
+    display: block;
+    margin: 0 auto;
+    height: 100%;
+    width: 100%;
+}
+
+.hoverInfoLabel {
+    position: absolute;
+    padding: 7px;
+    font: 12px sans-serif;
+    border: 0;
+    border-radius: 8px;
+    pointer-events: none;
+    display: table;
+}
+
+.tooltip {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    text-align: center;
+    background-color: #E67300;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    line-height: 26px;
+    cursor: default;
+}
+
+.tooltip:before {
+    content: '?';
+    font-weight: bold;
+    color: #282828;
+}
+
+.tooltip:hover #tooltip-content {
+    display: block;
+    transform-origin: 100% 0;
+
+    -webkit-animation: fadeIn 0.4s ease-in-out;
+    animation: fadeIn 0.4s ease-in-out;
+
+}
+
+.tooltip #tooltip-content {
+    opacity: 0.7;
+    display: none;
+    text-align: left;
+    background-color: #282828;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 20px;
+    min-width: 300px;
+    position: absolute;
+    border-radius: 3px;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+    right: -4px;
+    color: #B5B5B5;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+@-webkit-keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+
+    100% {
+        opacity: 100%;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 100%;
+    }
+}
+
+#inspector {
+    font: 14px/18px sans-serif;
+    width: 300px;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    border: 2px solid #333;
+    color: white;
+    padding: 20px;
+}
+
+.badge {
+    padding: 5px;
+    margin: -5px 5px 5px -5px;
+    border-radius: 5px;
+    color: #202020;
+}
+
+#inspector h2.title {
+    line-height: 120%;
+    margin-top: 0;
+}
+
+#inspector .subtitle {
+    color: #999;
+    display: block;
+    font-weight: normal;
+    font-size: 80%;
+}

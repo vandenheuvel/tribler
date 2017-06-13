@@ -2,8 +2,8 @@ import json
 
 from twisted.internet.defer import inlineCallbacks
 
-from Tribler.community.triblerchain.community import TriblerChainCommunity
 from Tribler.community.trustchain.block import TrustChainBlock
+from Tribler.community.triblerchain.community import TriblerChainCommunity
 from Tribler.dispersy.community import Community
 from Tribler.dispersy.dispersy import Dispersy
 from Tribler.dispersy.endpoint import ManualEnpoint
