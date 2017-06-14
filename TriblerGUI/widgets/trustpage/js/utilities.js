@@ -63,6 +63,30 @@ function distance2D(positionA, positionB) {
 }
 
 /**
+ * Replace variable bindings in brackets inside given string with given substitutions
+ * @example substituteString("Hello {name}", {name: "Joe"}) returns "Hello Joe"
+ * @param {String} str - the subject of replacement
+ * @param {Object} substitutions - the key-value pairs
+ * @returns {String} the resulting string
+ */
+function substituteString(str, substitutions) {
+    if(!substitutions instanceof Object) return str;
+    for (var key in substitutions) {
+        str = str.replace(new RegExp("{" + key + "}","g"), substitutions[key]);
+    }
+    return str;
+}
+
+/**
+ * Set the first character of the provided string to uppercase.
+ * @param {string} str
+ * @returns {string}
+ */
+function ucfirst(str) {
+    return (str.length > 0) ? (str.substr(0, 1).toUpperCase() + str.substr(1)) : "";
+}
+
+/**
  * Export functions so Mocha can test it
  */
 if (typeof module !== 'undefined') {
@@ -71,6 +95,7 @@ if (typeof module !== 'undefined') {
         groupBy: groupBy,
         formatBytes: formatBytes,
         xAtFraction: xAtFraction,
-        distance2D: distance2D
+        distance2D: distance2D,
+        substituteString: substituteString
     };
 }

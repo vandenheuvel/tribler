@@ -50,52 +50,54 @@ function RadialNodes(svg, options) {
     self.create = function (enterSelection) {
 
         // Create <svg.node>
-        var groups = enterSelection
-            .append("svg")
-            .attr("overflow", "visible")
-            .attr("class", "node");
+        var groups = enterSelection.append("svg")
+            .attr("class", "node")
 
-        // Append <circle> to <svg.node>
-        var circles = groups
-            .append("circle")
+            // Limit surface area of <svg>
+            .attr("overflow", "visible")
+            .attr("width", 1)
+            .attr("height", 1);
+
+        // Append <circle.background> to <svg.node>
+        var background = groups.append("circle")
+            .attr("class", "background")
+            .attr("fill", self.config.circle.strokeColor)
+            .attr("r", function (node) { return self._calculateRadius(node, true)});
+
+        // Append <svg.foreground> to <svg.node>
+        var foreground = groups.append("svg")
+            .attr("class", "foreground")
+
+            // Limit surface area of <svg>
+            .attr("overflow", "visible")
+            .attr("width", 1)
+            .attr("height", 1);
+
+        // Append <circle.color> to <svg.foreground>
+        foreground.append("circle")
+            .attr("class", "color")
             .attr("fill", function (node) {
                 return self._calculateFill(node)
             })
-            .attr("r", "0")
-            .style("stroke", config.node.circle.strokeColor)
+            .attr("stroke", self.config.circle.strokeColor)
             .attr("stroke-width", self.config.circle.strokeWidth)
-            .attr("cx", self.config.circle.cx)
-            .attr("cy", self.config.circle.cy);
+            .attr("r", function (node) { return self._calculateRadius(node, false)});
 
-        // Transition the radius of the circles
-        circles.transition()
-            .duration(1000)
-            .attr("r", function (node) {
-                return self._calculateRadius(node)
-            });
-
-        // Append a <text> element to it
-        groups
-            .append("text")
+        // Append <text> to <svg.foreground>
+        foreground.append("text")
             .attr("dominant-baseline", "central")
             .attr("text-anchor", "middle")
             .style("font-family", self.config.publicKeyLabel.fontFamily)
             .style("font-size", self.config.publicKeyLabel.fontSize)
             .style("font-weight", self.config.publicKeyLabel.fontWeight)
             .style("fill", self.config.publicKeyLabel.color)
-            .text(function (d) {
-                return self.getNodeName(d);
-            });
+            .text(function (d) { return self.getNodeName(d); });
 
         // Transparent circle to capture mouse events
-        groups
-            .append("circle")
-            .style("fill-opacity", "0")
-            .attr("r", function (node) {
-                return self._calculateRadius(node) + self.config.circle.strokeWidth;
-            })
-            .attr("cx", self.config.circle.cx)
-            .attr("cy", self.config.circle.cy)
+        foreground.append("circle")
+            .attr("class", "events")
+            .attr("fill", "transparent")
+            .attr("r", function (node) { return self._calculateRadius(node, true); })
             .style("cursor", self.config.circle.cursor)
             .on("click", self.getEventHandlers("click"))
             .on("mouseover", self.getEventHandlers("mouseover"))
@@ -136,14 +138,41 @@ function RadialNodes(svg, options) {
     };
 
     /**
+     * Highlights all links for which the filter function returns true, dims the others.
+     * @param filterFunction
+     */
+    self.applyHighlight = function (filterFunction) {
+        self.selectAll()
+            .selectAll("svg.foreground")
+            .transition()
+            .duration(self.config.highlightInDuration)
+            .style("opacity", function (d) {
+                return filterFunction(d) ? 1 : self.config.highlightDimmedOpacity
+            });
+    };
+
+    /**
+     * Restores the original opacity of all links.
+     */
+    self.unapplyHighlight = function () {
+        self.selectAll()
+            .selectAll("svg.foreground")
+            .transition()
+            .duration(self.config.highlightOutDuration)
+            .style("opacity", 1);
+    };
+
+    /**
      * Compute the radius of the node.
      * @param {GraphNode} node - the node to compute the size of
+     * @param {boolean} is_background - if true, will return the radius of the background (larger than foreground)
      * @returns the radius of the node
      */
-    self._calculateRadius = function (node) {
+    self._calculateRadius = function (node, is_background) {
         var nodeTraffic = node.total_up + node.total_down - self.graphData.traffic_min;
         var slope = (self.config.circle.maxRadius - self.config.circle.minRadius) * self.graphData.traffic_slope;
-        return self.config.circle.minRadius + (slope * nodeTraffic)
+        return self.config.circle.minRadius + (slope * nodeTraffic) +
+            (is_background ? self.config.circle.strokeWidth : 0);
     };
 
     /**

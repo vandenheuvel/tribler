@@ -15,7 +15,7 @@ function onNewData(data) {
 var svg = d3.select("#graph");
 
 // Build up the radial view
-var radialView = new RadialView(svg);
+var radialView = new RadialView(svg, config);
 radialView.initialize();
 
 var state = {

@@ -5,6 +5,8 @@
 var config = {
     byteUnits: ["B", "kB", "MB", "GB", "TB", "PB"],
     background: "#202020",
+    hoverInDelay: 0,
+    hoverOutDelay: 500,
     link: {
         color: "#22FFD5",
         highlightColor: "#DD002A",
@@ -14,8 +16,7 @@ var config = {
         opacityDecrementPerLevel: 0.02,
         highlightDimmedOpacity: 0.1,
         highlightInDuration: 200,
-        highlightOutDuration: 200,
-        highlightOutDelay: 300
+        highlightOutDuration: 1000
     },
     node: {
         userLabelText: "You",
@@ -29,8 +30,6 @@ var config = {
         circle: {
             minRadius: 15,
             maxRadius: 25,
-            cx: 0,
-            cy: 0,
             cursor: "pointer",
             strokeWidth: 3,
             strokeColor: "#202020"
@@ -43,7 +42,10 @@ var config = {
             publicKeyCharacters: 5,
             pageRankDecimals: 4,
             opacity: 0.85
-        }
+        },
+        highlightDimmedOpacity: 0.5,
+        highlightInDuration: 200,
+        highlightOutDuration: 1000
     },
     tooltip: {
         background: "#FFFFFF"

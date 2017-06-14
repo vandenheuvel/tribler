@@ -100,3 +100,33 @@ svg {
         opacity: 100%;
     }
 }
+
+#inspector {
+    font: 14px/18px sans-serif;
+    width: 300px;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    border: 2px solid #333;
+    color: white;
+    padding: 20px;
+}
+
+.badge {
+    padding: 5px;
+    margin: -5px 5px 5px -5px;
+    border-radius: 5px;
+    color: #202020;
+}
+
+#inspector h2.title {
+    line-height: 120%;
+    margin-top: 0;
+}
+
+#inspector .subtitle {
+    color: #999;
+    display: block;
+    font-weight: normal;
+    font-size: 80%;
+}

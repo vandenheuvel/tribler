@@ -127,16 +127,6 @@ function RadialLinks(svg, options) {
         });
     };
 
-    // Highlight a hovered edge, dim others.
-    self.bind("mouseover", function (hoveredLink) {
-        self.applyHighlight(function (link) { return link === hoveredLink; });
-    });
-
-    // Restore opacity after a highlight.
-    self.bind("mouseout", function () {
-        self.unapplyHighlight();
-    });
-
     /**
      * Highlights all links for which the filter function returns true, dims the others.
      * @param filterFunction
@@ -156,7 +146,6 @@ function RadialLinks(svg, options) {
     self.unapplyHighlight = function () {
         self.selectAll()
             .transition()
-            .delay(self.config.highlightOutDelay)
             .duration(self.config.highlightOutDuration)
             .style("opacity", function (d) {
                 return self._calculateOpacity(d);

@@ -64,4 +64,32 @@ describe("utilities.js", function () {
             });
         });
     });
+
+    describe('substituteString', function(){
+        it('should return the original when no bindings provided', function(){
+            var result = utilities.substituteString("Test", {});
+
+            assert.equal(result, "Test");
+        });
+        it('should ignore missing variables', function(){
+            var result = utilities.substituteString("Test {c}", {a: 10, b: 5});
+
+            assert.equal(result, "Test {c}");
+        });
+        it('should not ignore unused variables', function(){
+            var result = utilities.substituteString("Test {b}", {a: 10, b: 5});
+
+            assert.equal(result, "Test 5");
+        });
+        it('should replace all occurrences in braces', function(){
+           var result = utilities.substituteString("Test {a} and {a} and a", {a: 10});
+
+           assert.equal(result, "Test 10 and 10 and a");
+        });
+        it('should replace with multiple varialbes', function(){
+            var result = utilities.substituteString("Test {a} and {b}", {a: 10, b : "done"});
+
+            assert.equal(result, "Test 10 and done");
+        });
+    });
 });
