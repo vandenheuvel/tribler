@@ -159,14 +159,14 @@ describe('radial.js', function () {
                 [0, 1, 2, 0.5, 0],
 
                 // Diagonal line pointing down left
-                [-1, -1, 0, .75 * a, -a * .75],
-                [-1, -1, 0.25, a, -a],
+                [-1, -1, 0, .75, -.75],
+                [-1, -1, 0.25, 1, -1],
             ];
 
             for (var i = 0; i < data.length; i++) {
-                var f = radial.radialForceVector(data[i][0], data[i][1], data[i][2] * pi);
-                assert.equal(round(f.x, 5), round(data[i][3], 5));
-                assert.equal(round(f.y, 5), round(data[i][4], 5));
+                var f = radial.radialForceVector(data[i][0], data[i][1], data[i][2] * pi, 0);
+                assert.equal(round(f.x, 5), round(data[i][3], 5), "Failed f.x with dataset " + i + ".");
+                assert.equal(round(f.y, 5), round(data[i][4], 5), "Failed f.y with dataset  " + i + ".");
             }
 
         })

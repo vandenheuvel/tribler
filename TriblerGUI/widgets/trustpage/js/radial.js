@@ -82,9 +82,10 @@ function angularDifference(alpha, beta) {
  * @param {number} x - The x coordinate of the vector
  * @param {number} y - The y coordinate of the vector
  * @param {number} alpha_target - the target angle to go to
+ * @param {number} min_distance - the minimum distance before a force is applied
  * @returns {{x: number, y: number}} x,y in (-inf, +inf)
  */
-function radialForceVector(x, y, alpha_target) {
+function radialForceVector(x, y, alpha_target, min_distance) {
     const pi = Math.PI;
 
     var length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
@@ -102,8 +103,8 @@ function radialForceVector(x, y, alpha_target) {
     var moment = (diff / pi);
 
     return {
-        x: (-y / length) * moment,
-        y: (x / length) * moment
+        x: -y * moment,
+        y: x * moment
     };
 }
 
@@ -131,6 +132,7 @@ function sum(list, key) {
  */
 function radialForce(nodesList) {
     var strength = 1,
+        min_distance = 0,
         nodes = nodesList || [];
 
     /**
@@ -175,6 +177,21 @@ function radialForce(nodesList) {
         }
         else {
             return strength;
+        }
+    };
+
+    /**
+     * Set or get the minimum distance of this force
+     * @param newDistance
+     * @returns {*}
+     */
+    force.min_distance = function (newDistance) {
+        if (typeof newDistance !== "undefined") {
+            min_distance = newDistance;
+            return force;
+        }
+        else {
+            return min_distance;
         }
     };
 

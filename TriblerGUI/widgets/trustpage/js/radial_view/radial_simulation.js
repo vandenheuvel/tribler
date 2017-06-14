@@ -15,8 +15,9 @@ function RadialSimulation(options) {
         center_x: 0,
         center_y: 0,
         alpha_decay: 0,
-        radial_force_strength: 20,
-        link_strength: 0.05,
+        radial_force_strength: 0.2,
+        radial_force_min_distance: 30,
+        link_strength: 0.3,
         radius_step: 80
     };
 
@@ -50,7 +51,9 @@ function RadialSimulation(options) {
             .force("center", d3.forceCenter(self.config.center_x, self.config.center_y))
 
             // Torque force to keep nodes at correct angle
-            .force("torque", radialForce().strength(self.config.radial_force_strength))
+            .force("torque", radialForce()
+                .strength(self.config.radial_force_strength)
+                .min_distance(self.config.radial_force_min_distance))
 
             // Make sure the simulation never dies out
             .alphaDecay(self.config.alpha_decay);
