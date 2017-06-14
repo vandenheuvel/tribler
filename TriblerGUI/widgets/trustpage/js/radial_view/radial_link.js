@@ -38,7 +38,7 @@ function RadialLinks(svg, options) {
                 return link.id;
             });
 
-        self.destroy(self.selectAll());
+        self.destroy(update.exit());
         self.update(update);
         self.create(update.enter());
     };
