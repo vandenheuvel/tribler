@@ -292,7 +292,7 @@ class TestDatabase(MultiChainTestCase):
         self.block2.public_key = self.block1.public_key
         self.block2.sequence_number = self.block1.sequence_number + 1
         self.block3.public_key = self.block1.public_key
-        self.block2.sequence_number = self.block1.sequence_number + 2
+        self.block3.sequence_number = self.block1.sequence_number + 2
 
         self.block1.link_public_key = focus_block1.public_key
         self.block2.link_public_key = focus_block1.public_key
@@ -320,9 +320,10 @@ class TestDatabase(MultiChainTestCase):
         """
         self.block1.link_public_key = self.block2.public_key
         self.block2.link_public_key = self.block1.public_key
-
         self.block2.up = self.block1.down
         self.block2.down = self.block1.up
+        self.block2.sequence_number = self.block1.sequence_number + 1
+
         self.db.add_block(self.block1)
         self.db.add_block(self.block2)
 
