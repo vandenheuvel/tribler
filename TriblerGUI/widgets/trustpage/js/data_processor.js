@@ -210,6 +210,7 @@ function addTrafficFunction(response, interim) {
 
     return {
         traffic_min: min,
+        traffic_max: max,
         traffic_slope: 1 / (max - min)
     };
 }
