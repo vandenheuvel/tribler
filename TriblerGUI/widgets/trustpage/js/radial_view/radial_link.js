@@ -90,6 +90,12 @@ function RadialLinks(svg, options) {
      * @param updateSelection
      */
     self.update = function (updateSelection) {
+        // Pass updated data through to all child elements using it
+        updateSelection.each(function (newData) {
+            var nodeElement = d3.select(this);
+            nodeElement.select('.link-source').datum(newData);
+            nodeElement.select('.link-target').datum(newData);
+        });
         updateSelection
             .attr("stroke-width", function (d) {
                 return self._calculateStrokeWidth(d);
