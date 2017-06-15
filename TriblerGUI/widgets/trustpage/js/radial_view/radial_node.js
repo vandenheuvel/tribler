@@ -109,7 +109,15 @@ function RadialNodes(svg, options) {
      * Update existing <svg.link> objects based on updated data.
      * @param updateSelection
      */
-    self.update = function (updateSelection) {};
+    self.update = function (updateSelection) {
+        // Pass updated data through to all child elements using it
+        updateSelection.each(function (newData) {
+            var nodeElement = d3.select(this);
+            nodeElement.select('.background').datum(newData);
+            nodeElement.select('.foreground').datum(newData);
+            nodeElement.select('.events').datum(newData);
+        });
+    };
 
     /**
      * Destroy existing <svg.link> objects based on exiting data.
