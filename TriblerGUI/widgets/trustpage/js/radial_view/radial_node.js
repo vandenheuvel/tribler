@@ -176,10 +176,14 @@ function RadialNodes(svg, options) {
      * @returns {number} the radius of the node
      */
     self._calculateRadius = function (node, is_background) {
-        var nodeTraffic = node.total_up + node.total_down - self.graphData.traffic_min;
-        var slope = (self.config.circle.maxRadius - self.config.circle.minRadius) * self.graphData.traffic_slope;
-        return self.config.circle.minRadius + (slope * nodeTraffic) +
-            (is_background ? self.config.circle.strokeWidth : 0);
+        if (self.graphData.min_total_traffic === self.graphData.max_total_traffic)
+            return (self.config.circle.minRadius + self.config.circle.maxRadius) / 2;
+
+        var nodeSize = d3.scaleLinear()
+            .domain([self.graphData.min_total_traffic, self.graphData.max_total_traffic])
+            .range([self.config.circle.minRadius, self.config.circle.maxRadius]);
+
+        return nodeSize(node.total_up + node.total_down) + (is_background ? self.config.circle.strokeWidth : 0);
     };
 
     /**

@@ -3,6 +3,7 @@
  */
 
 assert = require("assert");
+d3 = require("TriblerGUI/widgets/trustpage/js/d3/d3.v4.min");
 radial_node = require("TriblerGUI/widgets/trustpage/js/radial_view/radial_node.js");
 
 describe("radial_node.js", function () {
@@ -11,14 +12,14 @@ describe("radial_node.js", function () {
         var nodes = new radial_node.RadialNodes(null, {
             circle: {
                 minRadius : 15,
-                maxRadius : 25,
+                maxRadius : 25
             }
         });
 
         it("the minimal node size is returned when the node has the least amount of traffic", function () {
             nodes.graphData = {
-                "traffic_slope": 1,
-                "traffic_min": 1
+                "min_total_traffic": 1,
+                "max_total_traffic": 2
             };
             var node = {
                 "total_up": 0,
