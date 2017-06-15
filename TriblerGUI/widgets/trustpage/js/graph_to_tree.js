@@ -6,7 +6,7 @@
 /**
  * Turns a graph structure into a tree structure
  * @param {GraphNode} graphRootNode - the focus node of the graph
- * @returns {{root: TreeNode, nodes: TreeNodes[]}} - the root and all nodes of the tree
+ * @returns {{root: TreeNode, nodes: TreeNode[]}} - the root and all nodes of the tree
  */
 function makeTreeFromGraphNode(graphRootNode) {
 
@@ -15,7 +15,7 @@ function makeTreeFromGraphNode(graphRootNode) {
             children: [],
             parent: null,
             depth: 0,
-            descendants: 1,
+            descendants: 1
         },
         treeNodes = [treeRoot],
         nextQueue = [treeRoot],
@@ -40,7 +40,7 @@ function makeTreeFromGraphNode(graphRootNode) {
                     children: [],
                     parent: treeNode,
                     depth: treeNode.depth + 1,
-                    descendants: 1,
+                    descendants: 1
                 };
 
                 treeNodes.push(treeChild);
@@ -84,7 +84,7 @@ function _calculateNodesOnDepths(treeNodes) {
  * Turns a graph into a tree.
  *
  * @param {GraphNode} graphRootNode - the focus node of the graph
- * @returns {Tree} - The tree structure
+ * @returns {{root: TreeNode, nodes: TreeNode[]}} - The tree structure
  */
 function graphToTree(graphRootNode) {
 

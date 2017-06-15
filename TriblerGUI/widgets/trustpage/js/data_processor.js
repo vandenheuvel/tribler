@@ -145,7 +145,7 @@ function combineLinks(response, interim) {
                 amount_up: up,
                 amount_down: down,
                 ratio: !empty ? up / (up + down) : 1,
-                log_ratio: !empty ? Math.log(up + 1) / (Math.log(up + 1) + Math.log(down + 1)) : 1,
+                log_ratio: !empty ? Math.log(up + 1) / (Math.log(up + 1) + Math.log(down + 1)) : 1
             };
         });
     });
@@ -171,8 +171,7 @@ function combineLinks(response, interim) {
 function addMinMaxTransmission(response, interim) {
 
     var min = -1,
-        max = -1,
-        pk = response.focus_node;
+        max = -1;
 
     interim.links.forEach(function (link) {
             var total = link.amount_up + link.amount_down;
@@ -301,7 +300,7 @@ function addPageRank(response) {
 
     return {
         min_page_rank: sortedPageRank[0],
-        max_page_rank: sortedPageRank[sortedPageRank.length - 1],
+        max_page_rank: sortedPageRank[sortedPageRank.length - 1]
     };
 }
 
@@ -417,6 +416,6 @@ if (typeof module !== 'undefined') {
         focusNodePublicKey: focusNodePublicKey,
         sortNodes: sortNodes,
         addNeighborsToNodes: addNeighborsToNodes,
-        addPageRank: addPageRank,
+        addPageRank: addPageRank
     };
 }

@@ -1,7 +1,3 @@
-if (typeof require !== "undefined") {
-    var config = require("../style_config.js");
-}
-
 /**
  * The data inspector for the Radial Network
  * @param d3element - the container HTML element wrapped in d3
@@ -75,7 +71,7 @@ function RadialInspector(d3element, options) {
             [
                 "Shared <strong>{formatted_upload}</strong> with {peer_count} users.",
                 "Consumed <strong>{formatted_download}</strong> from {peer_count} users.",
-                "<span class='badge' style='background:{color}'>Balance: <strong>{formatted_balance}</strong></span>.",
+                "<span class='badge' style='background:{color}'>Balance: <strong>{formatted_balance}</strong></span>."
             ], bindings);
     };
 
