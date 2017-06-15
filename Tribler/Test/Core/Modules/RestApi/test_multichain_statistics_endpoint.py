@@ -56,7 +56,7 @@ class TestMultichainStatisticsEndpoint(AbstractApiTest):
                   '&dataset=static'
         return self.do_request(request, expected_code=200).addCallback(verify_response)
 
-    @deferred(timeout=1000)
+    @deferred(timeout=10)
     def test_get_statistics(self):
         """
         Testing whether the API returns the correct statistics.
@@ -81,7 +81,6 @@ class TestMultichainStatisticsEndpoint(AbstractApiTest):
                 returned_neighbors.append(node["public_key"])
                 self.assertIn("total_up", node)
                 self.assertIn("total_down", node)
-                self.assertIn("page_rank", node)
             for key in expected_neighbors:
                 self.assertIn(key, returned_neighbors)
             self.assertIn("edges", response_json)

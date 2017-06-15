@@ -4,11 +4,7 @@ This reputation system builds a tamper proof interaction history contained in a 
 Every node has a chain and these chains intertwine by blocks shared by chains.
 """
 from binascii import hexlify, unhexlify
-from copy import deepcopy
-from itertools import permutations
 import logging
-
-from networkx import DiGraph
 
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
@@ -29,7 +25,6 @@ from Tribler.dispersy.util import blocking_call_on_reactor_thread
 from Tribler.community.multichain.block import MultiChainBlock, ValidationResult, GENESIS_SEQ, UNKNOWN_SEQ
 from Tribler.community.multichain.payload import HalfBlockPayload, CrawlRequestPayload
 from Tribler.community.multichain.conversion import MultiChainConversion
-from Tribler.community.multichain.statistics.page_rank import IncrementalPageRank
 
 HALF_BLOCK = u"half_block"
 CRAWL = u"crawl"
@@ -66,9 +61,6 @@ class MultiChainCommunity(Community):
         self.notifier = None
 
         self.persistence = MultiChainDB(self.dispersy.working_directory)
-        self.graph = DiGraph()
-        self.page_rank = IncrementalPageRank(self.graph)
-        self.ranks = {}
 
         # We store the bytes send and received in the tunnel community in a dictionary.
         # The key is the public key of the peer being interacted with, the value a tuple of the up and down bytes
@@ -372,31 +364,11 @@ class MultiChainCommunity(Community):
 
         return_nodes = nodes.values()
         return_edges = []
-        for node in nodes.keys():
-            self.page_rank.add_node(node)
         for from_pk, edge_list in edges.iteritems():
             new_edges = [{"from": from_pk, "to": to_pk, "amount": amount} for to_pk, amount in edge_list.iteritems()]
-            for edge in new_edges:
-                self.page_rank.add_edge(edge['from'], edge['to'], edge['amount'])
             return_edges += new_edges
 
-        self.get_page_ranks()
-        for node in return_nodes:
-            node["page_rank"] = self.ranks[node["public_key"]] if node["public_key"] in self.ranks else 0.
         return return_nodes, return_edges
-
-    def get_page_ranks(self):
-        """
-        If the page ranks are not yet cached in self.ranks, then fetch and store them.
-
-        """
-        if self.ranks:
-            self.page_rank.update_walk()
-        else:
-            self.page_rank.initial_walk()
-        self.page_rank.count()
-        self.ranks = self.page_rank.get_ranks()
-
 
     @inlineCallbacks
     def unload_community(self):

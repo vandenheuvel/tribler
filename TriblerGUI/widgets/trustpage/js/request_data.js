@@ -34,7 +34,6 @@ function make_cors_request(method, url) {
  *           "public_key": "xyz",
  *           "total_up": 12736457,
  *           "total_down": 1827364,
- *           "page_rank": 0.5
  *       }, ...],
  *       "edges": [{
  *           "from": "xyz",
@@ -93,5 +92,4 @@ function get_node_info(public_key, neighbor_level, callback) {
  * @property {String} public_key - The public key of the node
  * @property {number} total_up   - The total amount of MB uploaded by the node
  * @property {number} total_down - The total amount of MB downloaded by the node
- * @property {number} page_rank  - The page rank score between 0 and 1
  */

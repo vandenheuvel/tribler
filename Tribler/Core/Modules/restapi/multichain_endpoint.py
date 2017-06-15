@@ -260,7 +260,6 @@ class MultichainNetworkEndpoint(resource.Resource):
                         "public_key": "xyz",
                         "total_up": 12736457,
                         "total_down": 1827364,
-                        "page_rank": 0.5
                     }, ...],
                     "edges": [{
                         "from": "xyz",
