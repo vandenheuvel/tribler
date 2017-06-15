@@ -30,7 +30,6 @@ function processData(response) {
         sortNodes,
         makeLocalKeyMap, // after sorting
         addNeighborsToNodes,
-        addPageRank
     ];
 
     return convertResponse(response, converters);
@@ -65,7 +64,6 @@ function mapNodes(response) {
             public_key: node.public_key,
             total_up: node.total_up,
             total_down: node.total_down,
-            page_rank: node.page_rank
         }
     });
 
@@ -205,8 +203,6 @@ function addTrafficFunction(response, interim) {
     min = min === Number.MAX_VALUE ? 0 : Math.max(min, 0);
     max = Math.max(max, 1);
 
-    var slope = 1 / (max - min);
-
     return {
         traffic_min: min,
         traffic_slope: 1 / (max - min)
@@ -287,6 +283,7 @@ function sortNodes(response, interim) {
 }
 
 /**
+<<<<<<< HEAD
  * Add the page min and max page rank of the set of nodes.
  *
  * @param {GraphResponseData} response - The response
@@ -305,6 +302,8 @@ function addPageRank(response) {
 }
 
 /**
+=======
+>>>>>>> Remove pagerank
  * Returns the first object in a list of objects that matches a given key-value pair.
  *
  * @param {Object[]} list - The list of objects
@@ -349,8 +348,6 @@ function groupBy(list, key) {
  * @typedef {Object} GraphData
  * @property {String} focus_pk         - the public key of the focus node
  * @property {GraphNode} focus_node    - the focus node object
- * @property {number} min_page_rank    - the smallest page rank score in the set of nodes
- * @property {number} max_page_rank    - the highest page rank score in the set of nodes
  * @property {number} min_transmission - the smallest transmission (up+down) from the focus node
  * @property {number} max_transmission - the largest transmission (up+down) from the focus node
  * @property {number} traffic_min      - the minimal amount of traffic a single node in the set has
@@ -367,7 +364,6 @@ function groupBy(list, key) {
  * @property {number} local_key      - the local key of this node (corresponds with GraphData.local_keys)
  * @property {number} total_up       - the total upload by this node
  * @property {number} total_down     - the total download by this node
- * @property {number} page_rank      - the page rank score of this node
  * @property {boolean} is_user       - true if this node represents the user
  * @property {GraphNode[]} neighbors - the list of neighbors of this node
  */
@@ -415,7 +411,6 @@ if (typeof module !== 'undefined') {
         makeLocalKeyMap: makeLocalKeyMap,
         focusNodePublicKey: focusNodePublicKey,
         sortNodes: sortNodes,
-        addNeighborsToNodes: addNeighborsToNodes,
-        addPageRank: addPageRank
+        addNeighborsToNodes: addNeighborsToNodes
     };
 }

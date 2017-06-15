@@ -52,8 +52,7 @@ describe('data_processor.js', function () {
             assert.deepEqual(result.nodes, [{
                 public_key: 'aaa',
                 total_up: 5,
-                total_down: 10,
-                page_rank: 0.5
+                total_down: 10
             }]);
         });
     });
@@ -300,9 +299,9 @@ describe('data_processor.js', function () {
 
     function getTestData() {
         return {
-            node1: {public_key: 'aaa', total_up: 5, total_down: 10, page_rank: 0.5},
-            node2: {public_key: 'bbb', total_up: 110, total_down: 50, page_rank: 0.5},
-            node3: {public_key: 'ccc', total_up: 40, total_down: 50, page_rank: 0.5},
+            node1: {public_key: 'aaa', total_up: 5, total_down: 10},
+            node2: {public_key: 'bbb', total_up: 110, total_down: 50},
+            node3: {public_key: 'ccc', total_up: 40, total_down: 50},
             edge1to2: {from: "aaa", to: "bbb", amount: 4},
             edge2to1: {from: "bbb", to: "aaa", amount: 16},
             edge1to3: {from: "aaa", to: "bbb", amount: 5},

@@ -183,7 +183,8 @@ function RadialNodes(svg, options) {
     };
 
     /**
-     * Get the color of a node based on the page rank score of the node
+     * Get the color of a node based on the difference in total
+     * amount uploaded and total amount downloaded of a node.
      * @param {GraphNode} node - the node to get the color for
      * @returns the color of the node
      */
@@ -193,13 +194,12 @@ function RadialNodes(svg, options) {
             .domain(self.config.color.domain)
             .range(self.config.color.range);
 
-        // Map relative to the minimum and maximum page rank of the graph
-        var rank_difference = self.graphData.max_page_rank - self.graphData.min_page_rank;
-        if (rank_difference === 0) {
-            return nodeColor(1);
-        }
+        var difference = node.total_up - node.total_down;
+        difference = Math.max(difference, self.config.upDownDifferenceDomain.min);
+        difference = Math.min(difference, self.config.upDownDifferenceDomain.max);
 
-        return nodeColor((node.page_rank - self.graphData.min_page_rank) / rank_difference);
+        var rangeSize = self.config.upDownDifferenceDomain.max - self.config.upDownDifferenceDomain.min;
+        return nodeColor((difference - self.config.upDownDifferenceDomain.min) / rangeSize);
     };
 
 }

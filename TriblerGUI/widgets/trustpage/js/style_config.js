@@ -45,7 +45,12 @@ var config = {
         },
         highlightDimmedOpacity: 0.5,
         highlightInDuration: 200,
-        highlightOutDuration: 1000
+        highlightOutDuration: 1000,
+        // TODO: Move these configuration items to the core
+        upDownDifferenceDomain: {
+            min: -100,
+            max: 500
+        }
     },
     tooltip: {
         background: "#FFFFFF"
