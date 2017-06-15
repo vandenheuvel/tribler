@@ -63,7 +63,7 @@ function mapNodes(response) {
         return {
             public_key: node.public_key,
             total_up: node.total_up,
-            total_down: node.total_down,
+            total_down: node.total_down
         }
     });
 
@@ -188,24 +188,24 @@ function addMinMaxTransmission(response, interim) {
  *
  * @param {GraphResponseData} response - The response
  * @param {Object} interim - The interim result
- * @returns {{traffic_min: number, traffic_slope: number}}
+ * @returns {{min_total_traffic: number, max_total_traffic: number}}
  */
 function addTrafficFunction(response, interim) {
     var min = Number.MAX_VALUE,
-        max = 0;
+        max = Number.MIN_VALUE;
 
     interim.nodes.forEach(function (node) {
-       var sum = node.total_up + node.total_down;
-       if (sum < min) min = sum;
-       if (sum > max) max = sum;
+       var total_traffic = node.total_up + node.total_down;
+       min = Math.min(total_traffic, min);
+       max = Math.max(total_traffic, max);
     });
 
-    min = min === Number.MAX_VALUE ? 0 : Math.max(min, 0);
-    max = Math.max(max, 1);
+    if (min === Number.MAX_VALUE && max === Number.MIN_VALUE)
+        max = min = 0;
 
     return {
-        traffic_min: min,
-        traffic_slope: 1 / (max - min)
+        min_total_traffic: min,
+        max_total_traffic: max
     };
 }
 
@@ -325,16 +325,16 @@ function groupBy(list, key) {
 
 /**
  * @typedef {Object} GraphData
- * @property {String} focus_pk         - the public key of the focus node
- * @property {GraphNode} focus_node    - the focus node object
- * @property {number} min_transmission - the smallest transmission (up+down) from the focus node
- * @property {number} max_transmission - the largest transmission (up+down) from the focus node
- * @property {number} traffic_min      - the minimal amount of traffic a single node in the set has
- * @property {number} traffic_slope    - the slope of the traffic function
- * @property {String[]} local_keys     - a map from GraphNode.local key (array index) to public_key
- * @property {GraphNode[]} nodes       - the array of nodes (sorted ascending on .total_up + .total_down)
- * @property {GraphEdge[]} edges       - the directed edges
- * @property {GraphLink[]} links       - the combined links (sorted ascending on .amount_up + .amount_down)
+ * @property {String} focus_pk          - the public key of the focus node
+ * @property {GraphNode} focus_node     - the focus node object
+ * @property {number} min_transmission  - the smallest transmission (up+down) from the focus node
+ * @property {number} max_transmission  - the largest transmission (up+down) from the focus node
+ * @property {number} min_total_traffic - the minimal amount of traffic a single node in the set has
+ * @property {number} max_total_traffic - the slope of the traffic function
+ * @property {String[]} local_keys      - a map from GraphNode.local key (array index) to public_key
+ * @property {GraphNode[]} nodes        - the array of nodes (sorted ascending on .total_up + .total_down)
+ * @property {GraphEdge[]} edges        - the directed edges
+ * @property {GraphLink[]} links        - the combined links (sorted ascending on .amount_up + .amount_down)
  */
 
 /**
