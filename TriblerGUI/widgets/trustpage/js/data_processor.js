@@ -283,27 +283,6 @@ function sortNodes(response, interim) {
 }
 
 /**
-<<<<<<< HEAD
- * Add the page min and max page rank of the set of nodes.
- *
- * @param {GraphResponseData} response - The response
- * @returns {{min_page_rank: number, max_page_rank: number}}
- */
-function addPageRank(response) {
-
-    var sortedPageRank = response.nodes.map(function (node) {
-        return node.page_rank;
-    }).sort();
-
-    return {
-        min_page_rank: sortedPageRank[0],
-        max_page_rank: sortedPageRank[sortedPageRank.length - 1]
-    };
-}
-
-/**
-=======
->>>>>>> Remove pagerank
  * Returns the first object in a list of objects that matches a given key-value pair.
  *
  * @param {Object[]} list - The list of objects
