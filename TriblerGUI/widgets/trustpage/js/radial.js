@@ -32,8 +32,6 @@
  * @param {{x: number, y: number}} reference - The reference position
  */
 function applyRecursiveAlphaByDescendants(treeRoot, alpha_0, alpha_1, reference) {
-    const pi = Math.PI;
-
     if (!treeRoot.children) return;
 
     // The angle of the piece of pie
@@ -82,10 +80,9 @@ function angularDifference(alpha, beta) {
  * @param {number} x - The x coordinate of the vector
  * @param {number} y - The y coordinate of the vector
  * @param {number} alpha_target - the target angle to go to
- * @param {number} min_distance - the minimum distance before a force is applied
  * @returns {{x: number, y: number}} x,y in (-inf, +inf)
  */
-function radialForceVector(x, y, alpha_target, min_distance) {
+function radialForceVector(x, y, alpha_target) {
     const pi = Math.PI;
 
     var length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
@@ -203,7 +200,7 @@ if (typeof module !== 'undefined') {
     module.exports = {
         applyRecursiveAlphaByDescendants: applyRecursiveAlphaByDescendants,
         angularDifference: angularDifference,
-        radialForceVector: radialForceVector,
+        radialForceVector: radialForceVector
     };
 }
 

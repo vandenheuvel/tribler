@@ -64,7 +64,7 @@ function update(graph) {
     state.data = graph;
 
     // Position all new nodes at the focus node
-    graph.nodes.forEach(function (node, i) {
+    graph.nodes.forEach(function (node) {
         if (!('x' in node)) {
             node.x = state.focus_node.x || radialView.getCenterX();
             node.y = state.focus_node.y || radialView.getCenterY();
@@ -95,7 +95,7 @@ function update(graph) {
     }
 
     // Update the view
-    radialView.onNewData(graph, state.tree);
+    radialView.onNewData(graph);
 
     // Update the simulation
     simulation.update(state.tree.nodes);

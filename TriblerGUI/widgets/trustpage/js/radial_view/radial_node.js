@@ -1,5 +1,4 @@
 if (typeof require !== "undefined") {
-    var config = require("../style_config.js");
     var applyEventfulMixin = require("../support/eventful_mixin.js").applyEventfulMixin;
 }
 
@@ -174,7 +173,7 @@ function RadialNodes(svg, options) {
      * Compute the radius of the node.
      * @param {GraphNode} node - the node to compute the size of
      * @param {boolean} is_background - if true, will return the radius of the background (larger than foreground)
-     * @returns the radius of the node
+     * @returns {number} the radius of the node
      */
     self._calculateRadius = function (node, is_background) {
         var nodeTraffic = node.total_up + node.total_down - self.graphData.traffic_min;

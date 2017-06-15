@@ -1,5 +1,4 @@
 if (typeof require !== "undefined") {
-    var config = require("../style_config.js");
     var applyEventfulMixin = require("../support/eventful_mixin.js").applyEventfulMixin;
 }
 
@@ -121,13 +120,13 @@ function RadialLinks(svg, options) {
             d3.select(this).select(".link-source")
                 .attr("x1", function (d) { return d.source.x; })
                 .attr("y1", function (d) { return d.source.y; })
-                .attr("x2", function (d) { return separator.x_from_source})
-                .attr("y2", function (d) { return separator.y_from_source});
+                .attr("x2", function () { return separator.x_from_source})
+                .attr("y2", function () { return separator.y_from_source});
 
             // // Part of line at the target
             d3.select(this).select(".link-target")
-                .attr("x1", function (d) { return separator.x_from_target })
-                .attr("y1", function (d) { return separator.y_from_target; })
+                .attr("x1", function () { return separator.x_from_target })
+                .attr("y1", function () { return separator.y_from_target; })
                 .attr("x2", function (d) { return d.target.x; })
                 .attr("y2", function (d) { return d.target.y; });
         });

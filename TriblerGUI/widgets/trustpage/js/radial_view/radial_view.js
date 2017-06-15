@@ -32,7 +32,7 @@ function RadialView(svg, settings) {
 
         self.links = new RadialLinks(svg, config.link);
         self.nodes = new RadialNodes(svg, config.node);
-        self.inspector = new RadialInspector(d3.select("#inspector"));
+        self.inspector = new RadialInspector(d3.select("#inspector"), config.inspector);
 
         self.nodes.bind("click", function (node) {
             handle_node_click(node.public_key)
@@ -90,12 +90,11 @@ function RadialView(svg, settings) {
     /**
      * Pass the data to the nodes and edges.
      * @param {GraphData} newGraphData
-     * @param {Tree} newTreeData
      */
-    self.onNewData = function (newGraphData, newTreeData) {
-        self.nodes.onNewData(newGraphData, newTreeData);
-        self.links.onNewData(newGraphData, newTreeData);
-        self.inspector.onNewData(newGraphData, newTreeData);
+    self.onNewData = function (newGraphData) {
+        self.nodes.onNewData(newGraphData);
+        self.links.onNewData(newGraphData);
+        self.inspector.onNewData(newGraphData);
     };
 
     /**
