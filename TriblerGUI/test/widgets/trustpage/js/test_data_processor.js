@@ -188,7 +188,7 @@ describe('data_processor.js', function () {
     });
 
     describe('addTrafficFunction', function () {
-       it('should return values for empy list of nodes', function () {
+       it('should return values for empty list of nodes', function () {
           var data = getTestData();
           var response = {
               nodes: [],
@@ -201,13 +201,12 @@ describe('data_processor.js', function () {
               processor.addTrafficFunction
           ]);
 
-          assert.equal(result.traffic_slope, 1);
-          assert.equal(result.traffic_min, 0);
+          assert.equal(result.min_total_traffic, 0);
+          assert.equal(result.max_total_traffic, 0);
        });
 
        it('should return correct values', function () {
            var data = getTestData();
-           data.node1.total_down = 95;
             var response = {
                 nodes: [data.node1, data.node3],
                 edges: []
@@ -220,8 +219,8 @@ describe('data_processor.js', function () {
                 processor.addTrafficFunction
             ]);
 
-            assert.equal(result.traffic_min, 90);
-            assert.equal(result.traffic_slope, 1/10);
+          assert.equal(result.min_total_traffic, 15);
+          assert.equal(result.max_total_traffic, 90);
        });
     });
 
@@ -304,7 +303,7 @@ describe('data_processor.js', function () {
             node3: {public_key: 'ccc', total_up: 40, total_down: 50},
             edge1to2: {from: "aaa", to: "bbb", amount: 4},
             edge2to1: {from: "bbb", to: "aaa", amount: 16},
-            edge1to3: {from: "aaa", to: "bbb", amount: 5},
+            edge1to3: {from: "aaa", to: "bbb", amount: 5}
         }
     }
 
