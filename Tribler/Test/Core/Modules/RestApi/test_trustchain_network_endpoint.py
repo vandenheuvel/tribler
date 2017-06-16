@@ -39,6 +39,26 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         self.dispersy.get_communities = lambda: [self.tribler_chain_community]
         self.session.get_dispersy_instance = lambda: self.dispersy
 
+    def set_up_endpoint_request(self, dataset, focus_node, neighbor_level):
+        """
+        Create a mocked session, create a TrustchainNetworkEndpoint instance
+        and create a request from the provided parameters.
+
+        :param dataset: dataset to use for the request
+        :param focus_node: node for which to request the data
+        :param neighbor_level: amount of levels from this node to request
+        :return: a 2-tuple of the TrustchainNetworkEndpoint and the request
+        """
+        mocked_session = MockObject()
+        network_endpoint = TrustChainNetworkEndpoint(mocked_session)
+        network_endpoint.get_tribler_chain_community = lambda: self.tribler_chain_community
+        request = MockObject()
+        request.setHeader = lambda header, flags: None
+        request.setResponseCode = lambda status_code: None
+        request.args = {"dataset": [str(dataset)], "focus_node": [str(focus_node)],
+                        "neighbor_level": [str(neighbor_level)]}
+        return network_endpoint, request
+
     def test_get_no_focus_node(self):
         """
         Evaluate whether the API returns an Bad Request error if there is no focus node specified.
@@ -54,27 +74,8 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         """
         exp_message = {"error": "focus_node parameter empty"}
         network_endpoint, request = self.set_up_endpoint_request("trustchain", "X", 1)
-        request.args["focus_node"] = ""
+        request.args["focus_node"] = [""]
         self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
-
-    def set_up_endpoint_request(self, dataset, focus_node, neighbor_level):
-        """
-        Create a mocked session, create a TrustchainNetworkEndpoint instance
-        and create a request from the provided parameters.
-
-        :param focus_node: node for which to request the data
-        :param neighbor_level: amount of levels from this node to request
-        :return: a 2-tuple of the TrustchainNetworkEndpoint and the request
-        """
-        mocked_session = MockObject()
-        network_endpoint = TrustChainNetworkEndpoint(mocked_session)
-        network_endpoint.get_tribler_chain_community = lambda: self.tribler_chain_community
-        request = MockObject()
-        request.setHeader = lambda header, flags: None
-        request.setResponseCode = lambda status_code: None
-        request.args = {"dataset": [str(dataset)], "focus_node": [str(focus_node)],
-                        "neighbor_level": [str(neighbor_level)]}
-        return network_endpoint, request
 
     def test_get_no_edges(self):
         """
