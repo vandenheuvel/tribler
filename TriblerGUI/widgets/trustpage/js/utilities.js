@@ -1,3 +1,8 @@
+if (typeof require !== "undefined") {
+    var d3 = require("TriblerGUI/widgets/trustpage/js/d3/d3.v4.min");
+    var config = require("TriblerGUI/widgets/trustpage/js/style_config");
+}
+
 /**
  * Filters the nodes on which the given force is applied using a provided filter callback.
  *

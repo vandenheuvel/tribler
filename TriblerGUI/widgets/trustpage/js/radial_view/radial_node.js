@@ -87,7 +87,7 @@ function RadialNodes(svg, options) {
             .attr("dominant-baseline", "central")
             .attr("text-anchor", "middle")
             .style("font-family", self.config.publicKeyLabel.fontFamily)
-            .style("font-size", self.config.publicKeyLabel.fontSize)
+            .style("font-size", self.config.publicKeyLabel.fontSize + "px")
             .style("font-weight", self.config.publicKeyLabel.fontWeight)
             .style("fill", self.config.publicKeyLabel.color)
             .text(function (d) { return self.getNodeName(d); });
