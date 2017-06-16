@@ -20,6 +20,10 @@ radialView.nodes.bind("click", function (node) {
     navigation.step(node.public_key);
 });
 
+// Build up the help page
+var helpPage = new HelpPage(config);
+helpPage.initialize();
+
 // Set up the force simulation to move all nodes into position
 var simulation = new RadialSimulation({
     radius_step: config.radius_step
@@ -58,4 +62,11 @@ function update(graph) {
  */
 function backToYou() {
     animation.rewindHistory();
+}
+
+/**
+ * Toggle the help page on button click
+ */
+function toggleHelpPage() {
+    helpPage.toggle();
 }
