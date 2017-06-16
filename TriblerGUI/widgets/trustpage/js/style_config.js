@@ -4,6 +4,7 @@
 
 var config = {
     byteUnits: ["B", "kB", "MB", "GB", "TB", "PB"],
+    triblerOrange: "#E67300",
     background: "#202020",
     hoverInDelay: 0,
     hoverOutDelay: 500,
@@ -27,7 +28,7 @@ var config = {
         userLabelText: "You",
         publicKeyLabel: {
             color: "#202020",
-            fontSize: "10px",
+            fontSize: 10,
             fontFamily: "sans-serif",
             fontWeight: "bold",
             characters: 3
@@ -65,7 +66,42 @@ var config = {
         strokeColor: "#333333"
     },
     radius_step: 120,
-    neighbor_level: 2
+    neighbor_level: 2,
+    help: {
+        label : {
+            fontSize: 10,
+            fontFamily: "sans-serif",
+            fontWeight: "bold",
+            color: "#FFFFFF",
+            offsetY: 10
+        },
+        nodes : {
+            examplePublicKey: "#bcb",
+            numberOfNodes: 5,
+            circleColor : {
+                nodeRadius: 20,
+                labels: ["Freerider", "Unreliable", "Neutral", "Reliable", "Contributor"]
+            },
+            circleSize : {
+                labels: ["Least", "Less", "Average", "More", "Most"]
+            }
+        },
+        edges: {
+            numberOfEdges: 3,
+            edgeLength: 100,
+            dividingWidth: 2,
+            width : {
+                labels: ["Little", "Average", "Much"]
+            },
+            separator : {
+                labels: ["Right user", "Balanced", "Left user"]
+            }
+        },
+        page : {
+            // When the window width gets smaller than this, the help page and help button are not shown anymore
+            minWindowWidth: 640
+        }
+    }
 };
 
 if (typeof module !== "undefined") {
