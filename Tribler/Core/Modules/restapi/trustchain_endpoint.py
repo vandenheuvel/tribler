@@ -246,7 +246,7 @@ class TrustChainNetworkEndpoint(resource.Resource):
 
             .. sourcecode:: none
 
-                curl -X GET http://localhost:8085/trustchain/network?dataset=static&focus_node=xyz&neighbor_level=1
+                curl -X GET 'http://localhost:8085/trustchain/network?dataset=static&focus_node=xyz&neighbor_level=1'
 
             **Example response**:
 
@@ -279,25 +279,22 @@ class TrustChainNetworkEndpoint(resource.Resource):
         except OperationNotEnabledByConfigurationException as exc:
             return TrustChainNetworkEndpoint.return_error(request, status_code=http.NOT_FOUND, message=exc.args)
 
-        if "dataset" in request.args and not (len(request.args["dataset"]) < 1 or len(request.args["dataset"][0]) == 0):
+        if "dataset" in request.args:
             self.use_dummy_data(request.args["dataset"][0], tribler_chain_community)
 
         if "focus_node" not in request.args:
             return TrustChainNetworkEndpoint.return_error(request, message="focus_node parameter missing")
 
-        if len(request.args["focus_node"]) < 1 or len(request.args["focus_node"][0]) == 0:
+        focus_node = request.args["focus_node"][0]
+        if not focus_node:
             return TrustChainNetworkEndpoint.return_error(request, message="focus_node parameter empty")
+
+        focus_node = self.get_focus_node(focus_node, tribler_chain_community)
 
         if tribler_chain_community.persistence.dummy_setup:
             user_node = "00"
         else:
             user_node = hexlify(tribler_chain_community.my_member.public_key)
-
-        focus_node = request.args["focus_node"][0]
-        if not isinstance(focus_node, basestring):
-            return TrustChainNetworkEndpoint.return_error(request, message="focus_node was not a string")
-
-        focus_node = self.get_focus_node(focus_node, tribler_chain_community)
 
         neighbor_level = self.get_neighbor_level(request.args)
 
@@ -353,7 +350,6 @@ class TrustChainNetworkEndpoint(resource.Resource):
         """
         neighbor_level = 1
         # Note that isdigit() checks if all chars are numbers, hence negative numbers are not possible to be set
-        if "neighbor_level" in arguments and len(arguments["neighbor_level"]) > 0 and \
-                arguments["neighbor_level"][0].isdigit():
+        if "neighbor_level" in arguments and arguments["neighbor_level"][0].isdigit():
             neighbor_level = int(arguments["neighbor_level"][0])
         return neighbor_level
