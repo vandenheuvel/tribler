@@ -27,6 +27,19 @@ class TestDatabase(TrustChainTestCase):
         self.block3 = TestBlock(transaction={'up': 11, 'down': 23})
 
     @blocking_call_on_reactor_thread
+    def set_db_version(self, database_version, aggregate_version):
+        """
+        Update the version of the database.
+
+        :param database_version: the new version of the database
+        :param aggregate_version: the new version of the aggregate table
+        """
+        self.db.executescript(u"UPDATE option SET value = '%d' WHERE key = 'database_version';" % database_version)
+        self.db.executescript(u"UPDATE option SET value = '%d' WHERE key = 'aggregate_version';" % aggregate_version)
+        self.db.close(commit=True)
+        self.db = TriblerChainDB(self.getStateDir(), u'triblerchain')
+
+    @blocking_call_on_reactor_thread
     def test_get_num_interactors(self):
         """
         Test whether the right number of interactors is returned
@@ -139,6 +152,28 @@ class TestDatabase(TrustChainTestCase):
                   for row in self.db.get_graph_edges("11", neighbor_level=2)]
 
         self.assertEqual(expected_result, result)
+
+    @blocking_call_on_reactor_thread
+    def test_database_upgrade(self):
+        """
+        Set the database version to a newer version before upgrading.
+        """
+        self.set_db_version(1, 0)
+        database_version, = next(self.db.execute(u"SELECT value FROM option WHERE key = 'database_version' LIMIT 1"))
+        aggregate_version, = next(self.db.execute(u"SELECT value FROM option WHERE key = 'aggregate_version' LIMIT 1"))
+        self.assertEqual(database_version, u"4")
+        self.assertEqual(aggregate_version, u"1")
+
+    @blocking_call_on_reactor_thread
+    def test_database_no_downgrade(self):
+        """
+        Set the database version to a newer version before upgrading.
+        """
+        self.set_db_version(100, 101)
+        database_version, = next(self.db.execute(u"SELECT value FROM option WHERE key = 'database_version' LIMIT 1"))
+        aggregate_version, = next(self.db.execute(u"SELECT value FROM option WHERE key = 'aggregate_version' LIMIT 1"))
+        self.assertEqual(database_version, u"100")
+        self.assertEqual(aggregate_version, u"101")
 
     @blocking_call_on_reactor_thread
     def test_random_dummy_data(self):

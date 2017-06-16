@@ -7,7 +7,7 @@ from networkx import random_regular_graph
 from Tribler.community.trustchain.database import TrustChainDB
 from Tribler.community.trustchain.block import TrustChainBlock
 
-LATEST_triblerchain_aggregates_VERSION = 1
+LATEST_TRIBLERCHAIN_AGGREGATES_VERSION = 1
 
 triblerchain_aggregates_schema = u"""
   CREATE TABLE IF NOT EXISTS triblerchain_aggregates(
@@ -18,7 +18,7 @@ triblerchain_aggregates_schema = u"""
     PRIMARY KEY (public_key_a, public_key_b)
   );
   INSERT INTO option(key, value) VALUES ('aggregate_version', '%s');
-""" % LATEST_triblerchain_aggregates_VERSION
+""" % LATEST_TRIBLERCHAIN_AGGREGATES_VERSION
 
 upgrade_triblerchain_aggregates_schema = u"""
     DROP TABLE IF EXISTS triblerchain_aggregates;
@@ -133,24 +133,6 @@ class TriblerChainDB(TrustChainDB):
         result = self.execute(query, (buffer(public_key), buffer(public_key))).fetchone()
         return result[0] or 0, result[1] or 0
 
-    def neighbor_list(self, public_key):
-        """
-        Only gets first level neighbors
-        :param public_key: public key of the focus node
-        :return: dict containing a dict with up and down for each neighbor
-        """
-        query = u"""
-            SELECT public_key_b, traffic_a_to_b, traffic_b_to_a FROM triblerchain_aggregates WHERE public_key_a = ?
-            UNION 
-            SELECT public_key_a, traffic_b_to_a, traffic_a_to_b FROM triblerchain_aggregates WHERE public_key_b = ?
-        """
-
-        return_dict = {}
-        for row in self.execute(query, (buffer(public_key), buffer(public_key))):
-            return_dict[str(row[0])] = {"up": row[1], "down": row[2]}
-
-        return return_dict
-
     def get_graph_edges(self, public_key, neighbor_level=1):
         query = u"""SELECT public_key_a, public_key_b FROM triblerchain_aggregates
                     WHERE public_key_a = ? OR public_key_b = ?"""
@@ -193,7 +175,7 @@ class TriblerChainDB(TrustChainDB):
         """
         aggregate_version = self.execute(u"SELECT value FROM option WHERE key = 'aggregate_version'").fetchone()
         if aggregate_version:
-            if aggregate_version[0].isdigit() and int(aggregate_version[0]) < LATEST_triblerchain_aggregates_VERSION:
+            if aggregate_version[0].isdigit() and int(aggregate_version[0]) < LATEST_TRIBLERCHAIN_AGGREGATES_VERSION:
                 self.executescript(upgrade_triblerchain_aggregates_schema)
                 self.executescript(triblerchain_aggregates_schema)
                 self.commit()
