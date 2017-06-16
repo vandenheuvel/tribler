@@ -26,6 +26,9 @@ describe("utilities.js", function () {
 
             data.forEach(function (set) {
                 assert.equal(utilities.formatBytes(set[0]), set[1]);
+
+                // Check negatives, except zero
+                if(set[0] > 0) assert.equal(utilities.formatBytes(-set[0]), "-" + set[1]);
             });
         });
     });
