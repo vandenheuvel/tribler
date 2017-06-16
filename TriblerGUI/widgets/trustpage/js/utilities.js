@@ -36,7 +36,7 @@ function formatBytes(bytes) {
 
     var i = 0;
 
-    while (bytes >= Math.pow(10, (i + 1) * 3) && (i + 1) < sizes.length) i++;
+    while (Math.abs(bytes) >= Math.pow(10, (i + 1) * 3) && (i + 1) < sizes.length) i++;
 
     return parseFloat(Math.round((1.0 * bytes) / Math.pow(10, (i - 1) * 3)) / 1000).toPrecision(4) + " " + sizes[i];
 }
