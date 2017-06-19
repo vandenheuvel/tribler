@@ -56,14 +56,15 @@ function convertResponse(response, converters) {
  * Map the GraphResponseNode to GraphNode objects
  *
  * @param {GraphResponseData} response - The response
- * @returns {{edges: GraphEdge[]}}
+ * @returns {{nodes: GraphNode[]}}
  */
 function mapNodes(response) {
     var nodes = response.nodes.map(function (node) {
         return {
             public_key: node.public_key,
             total_up: node.total_up,
-            total_down: node.total_down
+            total_down: node.total_down,
+            score: node.score
         }
     });
 
@@ -343,6 +344,7 @@ function groupBy(list, key) {
  * @property {number} local_key      - the local key of this node (corresponds with GraphData.local_keys)
  * @property {number} total_up       - the total upload by this node
  * @property {number} total_down     - the total download by this node
+ * @property {number} score          - the score between 0 and 1 for the rating in the network of the node
  * @property {boolean} is_user       - true if this node represents the user
  * @property {GraphNode[]} neighbors - the list of neighbors of this node
  */

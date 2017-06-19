@@ -82,11 +82,11 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         Evaluate whether the API passes the correct data if there are no edges returned.
         """
         self.tribler_chain_community.get_graph = lambda public_key, neighbor_level: (
-            [{"public_key": "xyz", "total_up": 0, "total_down": 0}], [])
+            [{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}], [])
         exp_message = {"user_node": hexlify(self.tribler_chain_community.my_member.public_key),
                        "focus_node": "30",
                        "neighbor_level": 1,
-                       "nodes": [{"public_key": "xyz", "total_up": 0, "total_down": 0}],
+                       "nodes": [{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}],
                        "edges": []}
         network_endpoint, request = self.set_up_endpoint_request("trustchain", 30, 1)
         self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
@@ -96,12 +96,12 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         Evaluate whether the API passes the correct data if there are edges returned.
         """
         self.tribler_chain_community.get_graph = lambda public_key, neighbor_level: (
-            [{"public_key": "xyz", "total_up": 0, "total_down": 0}], [
+            [{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}], [
                 {"from": "xyz", "to": "abc", "amount": 30}])
         exp_message = {"user_node": hexlify(self.tribler_chain_community.my_member.public_key),
                        "focus_node": "30",
                        "neighbor_level": 1,
-                       "nodes": [{"public_key": "xyz", "total_up": 0, "total_down": 0}],
+                       "nodes": [{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}],
                        "edges": [{"from": "xyz", "to": "abc", "amount": 30}]}
         network_endpoint, request = self.set_up_endpoint_request("trustchain", 30, 1)
         self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
@@ -114,7 +114,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         exp_message = {"user_node": user_public_key,
                        "focus_node": user_public_key,
                        "neighbor_level": 1,
-                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0}],
+                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0, "score": 0.5}],
                        "edges": []}
         network_endpoint, request = self.set_up_endpoint_request("trustchain", "self", 1)
         self.assertEquals(dumps(exp_message), network_endpoint.render_GET(request))
@@ -127,7 +127,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         exp_message = {"user_node": user_public_key,
                        "focus_node": hexlify(self.member.public_key),
                        "neighbor_level": 1,
-                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0}],
+                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0, "score": 0.5}],
                        "edges": []}
         network_endpoint, request = self.set_up_endpoint_request("trustchain", "self", -1)
         self.assertEquals(dumps(exp_message), network_endpoint.render_GET(request))
@@ -140,7 +140,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         exp_message = {"user_node": user_public_key,
                        "focus_node": user_public_key,
                        "neighbor_level": 1,
-                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0}],
+                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0, "score": 0.5}],
                        "edges": []}
         network_endpoint, request = self.set_up_endpoint_request("", "self", 1)
         self.assertEquals(dumps(exp_message), network_endpoint.render_GET(request))
@@ -150,7 +150,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         Evaluate whether the API sends a response when the dataset is not defined.
         """
         user_public_key = hexlify(self.member.public_key)
-        exp_message = {"nodes": [{"public_key": user_public_key, "total_down": 0, "total_up": 0}],
+        exp_message = {"nodes": [{"public_key": user_public_key, "total_down": 0, "total_up": 0, "score": 0.5}],
                        "neighbor_level": 1,
                        "user_node": user_public_key,
                        "focus_node": user_public_key,

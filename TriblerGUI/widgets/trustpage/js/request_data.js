@@ -77,7 +77,7 @@ function get_node_info(public_key, neighbor_level, callback) {
  * @property {String} focus_node         - The public key of the focus node
  * @property {number} neighbor_level     - The neighbor level
  * @property {GraphResponseNode[]} nodes - The nodes
- * @property {GraphResponseEdge[]} edges - The edges*
+ * @property {GraphResponseEdge[]} edges - The edges
  */
 
 /**
@@ -92,4 +92,5 @@ function get_node_info(public_key, neighbor_level, callback) {
  * @property {String} public_key - The public key of the node
  * @property {number} total_up   - The total amount of MB uploaded by the node
  * @property {number} total_down - The total amount of MB downloaded by the node
+ * @property {number} score      - the score between 0 and 1 for the rating in the network of the node
  */

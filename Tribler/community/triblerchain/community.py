@@ -7,6 +7,7 @@ from twisted.internet.task import LoopingCall
 from Tribler.Core.simpledefs import NTFY_TUNNEL, NTFY_REMOVE
 from Tribler.community.triblerchain.block import TriblerChainBlock
 from Tribler.community.triblerchain.database import TriblerChainDB
+from Tribler.community.triblerchain.score import calculate_score
 from Tribler.community.trustchain.community import TrustChainCommunity
 from Tribler.dispersy.util import blocking_call_on_reactor_thread
 
@@ -237,6 +238,10 @@ class TriblerChainCommunity(TrustChainCommunity):
 
         return_nodes = nodes.values()
         return_edges = []
+
+        for node in return_nodes:
+            node["score"] = calculate_score(node)
+
         for from_pk, edge_list in edges.iteritems():
             new_edges = [{"from": from_pk, "to": to_pk, "amount": amount} for to_pk, amount in edge_list.iteritems()]
             return_edges += new_edges
