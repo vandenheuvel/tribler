@@ -146,8 +146,8 @@ class TestDatabase(TrustChainTestCase):
         self.db.add_block(extra_block)
 
         expected_result = [
-            ["00", "11", 42, 13, 42, 13],
             ["11", "22", 46, 12, 59, 54],
+            ["00", "11", 42, 13, 42, 13],
             ["22", "33", 11, 23, 23, 69]
         ]
 
@@ -197,7 +197,7 @@ class TestDatabase(TrustChainTestCase):
         self.db.use_dummy_data(use_random=False)
 
         num_rows = self.db.execute(u"SELECT count (*) FROM triblerchain_aggregates").fetchone()[0]
-        self.assertEqual(num_rows, 14)
+        self.assertEqual(num_rows, 17)
         self.assertTrue(self.db.dummy_setup)
 
     @blocking_call_on_reactor_thread
