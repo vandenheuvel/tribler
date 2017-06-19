@@ -2,6 +2,7 @@
 Handle HTTP requests for the trust display, whilst validating the arguments and using them in the query.
 """
 import json
+import sys
 from binascii import hexlify
 
 from twisted.web import http, resource
@@ -214,8 +215,11 @@ class TrustChainNetworkEndpoint(resource.Resource):
         """
         Process the GET request which retrieves information about the TrustChain network.
 
-        .. http:get:: /trustchain/network?dataset=(string: dataset)&focus_node=(string: public key)
-                                                                    &neighbor_level=(int: neighbor level)
+        .. http:get:: /trustchain/network?dataset=(string: dataset)
+                                          &focus_node=(string: public key)
+                                          &neighbor_level=(int: neighbor level)
+                                          &max_neighbors=(int: max_neighbors)
+                                          &mandatory_nodes=(list: mandatory_nodes)
 
         A GET request to this endpoint returns the data from the trustchain. This data is retrieved from the trustchain
         database and will be focused around the given focus node. The neighbor_level parameter specifies which nodes
@@ -237,6 +241,15 @@ class TrustChainNetworkEndpoint(resource.Resource):
             - Not given: 1
             - Non-Integer value: 1
             - otherwise: Passed data, albeit an integer
+        - max_neighbors
+            - Not given: 8
+            - Non-integer value: 8
+            - Negative integer: 8
+            - 0: unlimited
+            - otherwise: Passed data, albeit an integer
+        - mandatory_nodes:
+            - Not given: [user_node]
+            - otherwise: list of given arguments
 
         The returned data will be in such format that the GUI component which visualizes this data can easily use it.
         Although this data might not seem as formatted in a useful way to the human eye, this is done to accommodate as
@@ -246,7 +259,8 @@ class TrustChainNetworkEndpoint(resource.Resource):
 
             .. sourcecode:: none
 
-                curl -X GET 'http://localhost:8085/trustchain/network?dataset=static&focus_node=xyz&neighbor_level=1'
+                curl -X GET 'http://localhost:8085/trustchain/network?dataset=static&focus_node=xyz&neighbor_level=1
+                                                                     &max_neighbors=4&mandatory_neighbors=['xyz']'
 
             **Example response**:
 
@@ -300,7 +314,12 @@ class TrustChainNetworkEndpoint(resource.Resource):
 
         neighbor_level = self.get_neighbor_level(request.args)
 
-        nodes, edges = tribler_chain_community.get_graph(focus_node, neighbor_level)
+        max_neighbors = self.get_max_neighbors(request.args)
+
+        mandatory_nodes = self.get_mandatory_nodes(request.args)
+
+        nodes, edges = tribler_chain_community.get_graph(focus_node, neighbor_level, max_neighbors,
+                                                         mandatory_nodes)
 
         return json.dumps({"user_node": user_node,
                            "focus_node": focus_node,
@@ -355,3 +374,32 @@ class TrustChainNetworkEndpoint(resource.Resource):
         if "neighbor_level" in arguments and arguments["neighbor_level"][0].isdigit():
             neighbor_level = int(arguments["neighbor_level"][0])
         return neighbor_level
+
+    @staticmethod
+    def get_max_neighbors(arguments):
+        """
+        Get the maximum amount of higher level neighbors for one node.
+
+        The default maximum is unlimited (portrayed by sys.maxint).
+        :param arguments: the arguments supplied with the HTTP request
+        :return: maximal number of higher level neighbors per node
+        """
+        max_neighbors = 0
+        # Note that isdigit() checks if all chars are numbers, hence negative numbers are not possible to be set
+        if "max_neighbors" in arguments and arguments["max_neighbors"][0].isdigit():
+            max_neighbors = int(arguments["max_neighbors"][0])
+        return max_neighbors or sys.maxint
+
+    @staticmethod
+    def get_mandatory_nodes(arguments):
+        """
+        Get the list of mandatory nodes.
+
+        The default is [user_node].
+        :param arguments: the arguments supplied with the HTTP request
+        :return: list of mandatory nodes
+        """
+        mandatory_nodes = []
+        if "mandatory_nodes" in arguments and arguments["mandatory_nodes"][0] != "undefined":
+            mandatory_nodes = arguments["mandatory_nodes"][0].split(",")
+        return mandatory_nodes

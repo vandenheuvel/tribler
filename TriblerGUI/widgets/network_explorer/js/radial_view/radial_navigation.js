@@ -14,24 +14,33 @@ function RadialNavigation(requestMethod) {
     self.pending = false;
     self.current_pk = null;
     self.history = [];
+    self.mandatory_nodes = [];
     self.squash_history = true;
     self.neighbor_level = 1;
+    self.max_neighbors = 4;
 
     /**
      * Focus on a new node if not already loading.
      * @param {String} public_key
+     * @param {GraphNode} node
      */
-    self.step = function (public_key) {
+    self.step = function (public_key, node) {
 
         // Ignore step when pending or same key
         if (self.pending || public_key === self.current_pk) return;
 
-        self.fire("before-step", [public_key], self);
-
         self.pending = true;
 
+        if (node) {
+            var focus = node;
+
+            while (focus.treeNode.parent !== null) {
+                focus = focus.treeNode.parent.graphNode;
+                self.mandatory_nodes.push(focus.public_key);
+            }
+        }
         // Request the data
-        requestMethod(public_key, self.neighbor_level, self.onResponse);
+        requestMethod(public_key, self.neighbor_level, self.max_neighbors, self.mandatory_nodes, self.onResponse);
     };
 
     /**
@@ -56,7 +65,8 @@ function RadialNavigation(requestMethod) {
      */
     self.onResponse = function (response) {
         self.pending = false;
-
+        if (response.user_node === response.focus_node)
+            self.mandatory_nodes = [];
         // Check whether the new focus node is already in the history
         var index = self.history.indexOf(response.focus_node);
 

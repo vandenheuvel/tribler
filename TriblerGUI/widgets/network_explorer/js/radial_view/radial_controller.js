@@ -36,7 +36,7 @@ function RadialController() {
         // When a node is clicked, load the new data corresponding to that node
         self.view.nodes.bind("click", function (node) {
             self.animation.stop();
-            self.navigation.step(node.public_key);
+            self.navigation.step(node.public_key, node);
         });
 
         // When the simulation clock ticks, update the view
