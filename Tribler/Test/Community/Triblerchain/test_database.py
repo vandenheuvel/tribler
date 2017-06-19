@@ -146,15 +146,19 @@ class TestDatabase(TrustChainTestCase):
         self.db.add_block(extra_block)
 
         expected_result = [
-            ["00", "11", 42, 13, 42, 13],
             ["11", "22", 46, 12, 59, 54],
+            ["00", "11", 42, 13, 42, 13],
             ["22", "33", 11, 23, 23, 69]
         ]
 
-        result = [[str(row[0]), str(row[1]), row[2], row[3], row[4], row[5]]
-                  for row in self.db.get_graph_edges("11", neighbor_level=2)]
+        def verify_result(result):
+            actual_result = [[str(row[0]), str(row[1]), row[2], row[3], row[4], row[5]]
+                             for row in result]
+            self.assertItemsEqual(expected_result, actual_result)
 
-        self.assertEqual(expected_result, result)
+        d = self.db.get_graph_edges("11", neighbor_level=2)
+        d.addCallback(verify_result)
+        return d
 
     @blocking_call_on_reactor_thread
     def test_database_upgrade(self):
@@ -177,48 +181,3 @@ class TestDatabase(TrustChainTestCase):
         aggregate_version, = next(self.db.execute(u"SELECT value FROM option WHERE key = 'aggregate_version' LIMIT 1"))
         self.assertEqual(database_version, u"100")
         self.assertEqual(aggregate_version, u"101")
-
-    @blocking_call_on_reactor_thread
-    def test_random_dummy_data(self):
-        """
-        The database should contain 104 rows when random dummy data is used.
-        """
-        self.db.use_dummy_data(use_random=True)
-
-        num_rows = self.db.execute(u"SELECT count (*) FROM triblerchain_aggregates").fetchone()[0]
-        self.assertGreater(num_rows, 0)
-        self.assertTrue(self.db.dummy_setup)
-
-    @blocking_call_on_reactor_thread
-    def test_static_dummy_data(self):
-        """
-        The database should contain the fixed data set when non-random dummy data is used.
-        """
-        self.db.use_dummy_data(use_random=False)
-
-        num_rows = self.db.execute(u"SELECT count (*) FROM triblerchain_aggregates").fetchone()[0]
-        self.assertEqual(num_rows, 14)
-        self.assertTrue(self.db.dummy_setup)
-
-    @blocking_call_on_reactor_thread
-    def test_no_dummy_overwrite(self):
-        """
-        The database should not overwrite the dataset once it has changed to dummy data.
-        """
-        self.db.use_dummy_data(use_random=True)
-
-        focus_neighbors = self.db.get_graph_edges("00", 2)
-        num_rows = self.db.execute(u"SELECT count (*) FROM triblerchain_aggregates").fetchone()[0]
-        self.assertGreater(num_rows, 0)
-        self.assertTrue(self.db.dummy_setup)
-
-        # Database stays the same when trying to setup static data
-        self.db.use_dummy_data(use_random=False)
-        self.assertGreater(num_rows, 0)
-        self.assertTrue(self.db.dummy_setup)
-
-        # Database does not overwrite random data on second call
-        self.db.use_dummy_data(use_random=True)
-        self.assertGreater(num_rows, 0)
-        self.assertTrue(self.db.dummy_setup)
-        self.assertListEqual(focus_neighbors, self.db.get_graph_edges("00", 2))
