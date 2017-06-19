@@ -165,7 +165,6 @@ function RadialNodes(svg, options) {
 
             var element = d3.select(this),
                 color_range = config.node.color.range;
-            console.log('Found', element);
 
             element.append("svg")
                 .attr("class", "marker")

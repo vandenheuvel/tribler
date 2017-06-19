@@ -20,7 +20,7 @@ from TriblerGUI.debug_window import DebugWindow
 from TriblerGUI.defs import PAGE_SEARCH_RESULTS, \
     PAGE_HOME, PAGE_EDIT_CHANNEL, PAGE_VIDEO_PLAYER, PAGE_DOWNLOADS, PAGE_SETTINGS, PAGE_SUBSCRIBED_CHANNELS, \
     PAGE_CHANNEL_DETAILS, PAGE_PLAYLIST_DETAILS, BUTTON_TYPE_NORMAL, BUTTON_TYPE_CONFIRM, PAGE_LOADING,\
-    PAGE_DISCOVERING, PAGE_DISCOVERED, PAGE_TRUST_NETWORK, PAGE_TRUST_GRAPH
+    PAGE_DISCOVERING, PAGE_DISCOVERED, PAGE_TRUST_NETWORK, PAGE_TRUST_PLOT
 from TriblerGUI.dialogs.confirmationdialog import ConfirmationDialog
 from TriblerGUI.dialogs.feedbackdialog import FeedbackDialog
 from TriblerGUI.dialogs.startdownloaddialog import StartDownloadDialog
@@ -138,15 +138,15 @@ class TriblerWindow(QMainWindow):
         self.discovering_page.initialize_discovering_page()
         self.discovered_page.initialize_discovered_page()
 
-        # If QWebEngineView cannot be imported, make sure to render the graph trust page instead.
+        # If QWebEngineView cannot be imported, make sure to render the plot trust page instead.
         try:
             from PyQt5.QtWebEngineWidgets import QWebEngineView
             self.network_explorer_page.initialize_web_page()
         except ImportError:
-            self.trust_page_graph.initialize_trust_page()
-            label = self.stackedWidget.widget(PAGE_TRUST_GRAPH).window().trust_explanation_label
+            self.trust_page_plot.initialize_trust_page()
+            label = self.stackedWidget.widget(PAGE_TRUST_PLOT).window().trust_explanation_label
             label.setText(label.text().replace("LINK_PLACEHOLDER", NETWORK_EXPLORER_HTML_PATH))
-            self.left_menu_button_trust_display.setText("Graph Display")
+            self.left_menu_button_trust_display.setText("Trust Plot")
             self.left_menu_button_trust_display.clicked.connect(self.clicked_menu_button_trust_graph)
 
         self.stackedWidget.setCurrentIndex(PAGE_LOADING)
@@ -573,8 +573,8 @@ class TriblerWindow(QMainWindow):
 
     def clicked_menu_button_trust_graph(self):
         self.deselect_all_menu_buttons(self.left_menu_button_trust_display)
-        self.stackedWidget.setCurrentIndex(PAGE_TRUST_GRAPH)
-        self.trust_page_graph.load_trust_statistics()
+        self.stackedWidget.setCurrentIndex(PAGE_TRUST_PLOT)
+        self.trust_page_plot.load_trust_statistics()
         self.navigation_stack = []
         self.hide_left_menu_playlist()
 

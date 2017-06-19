@@ -20,7 +20,7 @@ class TestBlock(TrustChainBlock):
         crypto = ECCrypto()
         other = crypto.generate_key(u"curve25519").pub().key_to_bin()
 
-        transaction = transaction or {'id': 42, 'up': 2, 'down': 3}
+        transaction = transaction or {'id': 42}
 
         if previous:
             self.key = previous.key

@@ -211,5 +211,5 @@ class TestDatabase(TrustChainTestCase):
         Test whether a block is correctly represented when converted to a dictionary.
         """
         block_dict = dict(self.block1)
-        self.assertDictEqual(block_dict["transaction"], {"id": 42, "down": 3, "up": 2})
+        self.assertDictEqual(block_dict["transaction"], {"id": 42})
         self.assertEqual(block_dict["insert_time"], self.block1.insert_time)

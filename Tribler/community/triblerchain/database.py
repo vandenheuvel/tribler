@@ -1,11 +1,8 @@
-from binascii import hexlify, unhexlify
-from random import randint
+from binascii import hexlify
 
-from sqlite3 import connect
-from networkx import gnp_random_graph
+from twisted.internet import task, reactor
 
 from Tribler.community.trustchain.database import TrustChainDB
-from Tribler.community.trustchain.block import TrustChainBlock
 
 LATEST_TRIBLERCHAIN_AGGREGATES_VERSION = 1
 
@@ -18,6 +15,9 @@ triblerchain_aggregates_schema = u"""
     PRIMARY KEY (public_key_a, public_key_b)
   );
   INSERT INTO option(key, value) VALUES ('aggregate_version', '%s');
+  
+  CREATE INDEX IF NOT EXISTS idx_public_key_a ON triblerchain_aggregates(public_key_a);
+  CREATE INDEX IF NOT EXISTS idx_public_key_b ON triblerchain_aggregates(public_key_b);
 """ % LATEST_TRIBLERCHAIN_AGGREGATES_VERSION
 
 upgrade_triblerchain_aggregates_schema = u"""
@@ -40,7 +40,6 @@ class TriblerChainDB(TrustChainDB):
         """
         super(TriblerChainDB, self).__init__(working_directory, db_name)
         self.check_statistics_database()
-        self.dummy_setup = False
 
     def add_block(self, block):
         """
@@ -116,7 +115,7 @@ class TriblerChainDB(TrustChainDB):
 
     def total_traffic(self, public_key):
         """
-        Find the amount of data the public key uploaded and downloaded.
+        Find the amount of data the node associated to this public key uploaded and downloaded.
         :param public_key: hex value of the public key
         :return: amount uploaded, amount downloaded
         """
@@ -134,10 +133,17 @@ class TriblerChainDB(TrustChainDB):
         return result[0] or 0, result[1] or 0, result[2] or 0
 
     def get_graph_edges(self, public_key, neighbor_level=1):
+        """
+        Gets all the edges for the network graph from the database.
+        :param public_key: hex value of the public key of the focus node
+        :param neighbor_level: the radius within which the neighbors have to be returned
+        :return: a deferred object that will eventually trigger with the query result
+        """
         query = u"""SELECT public_key_a, public_key_b FROM triblerchain_aggregates
                     WHERE public_key_a = ? OR public_key_b = ?"""
 
         for level in range(1, neighbor_level):
+            # Add next level neighbors iteratively
             query = u"""
                 SELECT DISTINCT ta.public_key_a, ta.public_key_b FROM triblerchain_aggregates ta,
                 (%(last_level)s) level%(level)d
@@ -165,9 +171,15 @@ class TriblerChainDB(TrustChainDB):
               AND ta.public_key_b = other.public_key_b
             JOIN (%(traffic)s) traffic 
               ON ta.public_key_a = traffic.pk
+            ORDER BY (ta.traffic_a_to_b + ta.traffic_b_to_a) DESC
         """ % {"query": query, "traffic": total_traffic}
 
-        return self.execute(query, (buffer(public_key), buffer(public_key))).fetchall()
+        def get_rows(result):
+            return result.fetchall()
+
+        d = task.deferLater(reactor, 0.0, self.execute, query, (buffer(public_key), buffer(public_key)))
+        d.addCallback(get_rows)
+        return d
 
     def check_statistics_database(self):
         """
@@ -182,67 +194,3 @@ class TriblerChainDB(TrustChainDB):
         else:
             self.executescript(triblerchain_aggregates_schema)
             self.commit()
-
-    #TODO: needs to be removed before merge to Tribler
-    def use_dummy_data(self, use_random=True):
-        """
-        Creates a new database and fills it with dummy data.
-        :param use_random: true if you want randomly generated data
-        """
-        if self.dummy_setup:
-            return
-
-        self.dummy_setup = True
-
-        self.close()
-
-        self._connection = connect(":memory:")
-        self._cursor = self._connection.cursor()
-
-        self.check_database(u"0")
-        self.check_statistics_database()
-
-        if use_random:
-            blocks = [["00" if edge[0] == 0 else "{0:08x}".format(edge[0] * 41903747),
-                       "00" if edge[1] == 0 else "{0:08x}".format(edge[1] * 41903747),
-                       randint(100, 1e10), randint(100, 1e10)]
-                      for edge in gnp_random_graph(100, 0.05).edges()]
-        else:
-            blocks = [
-                # from, to, up, down
-                ['00', '01', 10, 5],
-                ['01', '00', 3, 6],
-                ['01', '00', 46, 12],
-                ['00', '02', 123, 6],
-                ['02', '00', 21, 3],
-                ['00', '03', 22, 68],
-                ['03', '00', 234, 12],
-                ['00', '04', 57, 357],
-                ['04', '00', 223, 2],
-                ['01', '05', 13, 5],
-                ['05', '01', 14, 6],
-                ['01', '06', 234, 5],
-                ['01', '10', 102, 5],
-                ['10', '01', 123, 0],
-                ['02', '07', 87, 5],
-                ['07', '02', 342, 1],
-                ['02', '08', 0, 5],
-                ['02', '08', 78, 23],
-                ['03', '04', 20, 5],
-                ['04', '03', 3, 5],
-                ['04', '09', 650, 5],
-                ['09', '04', 650, 5],
-                ['05', '06', 234, 5],
-                ['06', '05', 5, 323],
-                ['06', '07', 12, 5],
-                ['07', '06', 12, 5],
-                ['09', '10', 51, 123],
-                ['10', '09', 76, 5]
-            ]
-
-        for block in blocks:
-            insert_block = TrustChainBlock()
-            insert_block.public_key = unhexlify(block[0])
-            insert_block.link_public_key = unhexlify(block[1])
-            insert_block.transaction = {"up": block[2], "down": block[3]}
-            self.insert_aggregate_block(insert_block)

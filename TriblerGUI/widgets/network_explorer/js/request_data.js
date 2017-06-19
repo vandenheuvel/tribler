@@ -48,11 +48,13 @@ function make_cors_request(method, url) {
  *
  * @param public_key The public key of the focus node
  * @param neighbor_level The neighbor level which has to be displayed
+ * @param max_neighbors The maximum amount of higher level neighbors one node can have
+ * @param path_to_old_focus All nodes in the tree connecting the new focus to the old focus
  * @param callback The callback which is called with the GraphResponseData
  */
-function get_node_info(public_key, neighbor_level, callback) {
-    var url = "http://localhost:8085/trustchain/network?focus_node=" + public_key + "&neighbor_level=" + neighbor_level;
-
+function get_node_info(public_key, neighbor_level, max_neighbors, path_to_old_focus, callback) {
+    var url = "http://localhost:8085/trustchain/network?focus_node=" + public_key + "&neighbor_level=" + neighbor_level
+                    + "&max_neighbors=" + max_neighbors + "&mandatory_nodes=" + path_to_old_focus;
     var response = make_cors_request('GET', url);
     if (!response) {
         console.log("No CORS support by this browser");
