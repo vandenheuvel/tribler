@@ -300,7 +300,9 @@ class TrustChainNetworkEndpoint(resource.Resource):
 
         neighbor_level = self.get_neighbor_level(request.args)
 
-        nodes, edges = tribler_chain_community.get_graph(focus_node, neighbor_level)
+        max_neighbors = self.get_max_neighbors(request.args)
+
+        nodes, edges = tribler_chain_community.get_graph(focus_node, neighbor_level, max_neighbors)
 
         return json.dumps({"user_node": user_node,
                            "focus_node": focus_node,
@@ -355,3 +357,18 @@ class TrustChainNetworkEndpoint(resource.Resource):
         if "neighbor_level" in arguments and arguments["neighbor_level"][0].isdigit():
             neighbor_level = int(arguments["neighbor_level"][0])
         return neighbor_level
+
+    @staticmethod
+    def get_max_neighbors(arguments):
+        """
+        Get the maximum amount of higher level neighbors for one node.
+
+        The default maximum is 8.
+        :param arguments: the arguments supplied with the HTTP request
+        :return: the neighbor level
+        """
+        max_neighbors = 8
+        # Note that isdigit() checks if all chars are numbers, hence negative numbers are not possible to be set
+        if "max_neighbors" in arguments and arguments["max_neighbors"][0].isdigit():
+            max_neighbors = int(arguments["max_neighbors"][0])
+        return max_neighbors

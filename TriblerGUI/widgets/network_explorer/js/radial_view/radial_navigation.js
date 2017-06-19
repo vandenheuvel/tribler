@@ -16,6 +16,7 @@ function RadialNavigation(requestMethod) {
     self.history = [];
     self.squash_history = true;
     self.neighbor_level = 1;
+    self.max_neighbors = 4;
 
     /**
      * Focus on a new node if not already loading.
@@ -31,7 +32,7 @@ function RadialNavigation(requestMethod) {
         self.pending = true;
 
         // Request the data
-        requestMethod(public_key, self.neighbor_level, self.onResponse);
+        requestMethod(public_key, self.neighbor_level, self.max_neighbors, self.onResponse);
     };
 
     /**

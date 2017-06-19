@@ -39,7 +39,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         self.dispersy.get_communities = lambda: [self.tribler_chain_community]
         self.session.get_dispersy_instance = lambda: self.dispersy
 
-    def set_up_endpoint_request(self, dataset, focus_node, neighbor_level):
+    def set_up_endpoint_request(self, dataset, focus_node, neighbor_level, max_neighbors=1):
         """
         Create a mocked session, create a TrustchainNetworkEndpoint instance
         and create a request from the provided parameters.
@@ -56,7 +56,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         request.setHeader = lambda header, flags: None
         request.setResponseCode = lambda status_code: None
         request.args = {"dataset": [str(dataset)], "focus_node": [str(focus_node)],
-                        "neighbor_level": [str(neighbor_level)]}
+                        "neighbor_level": [str(neighbor_level)], "max_neighbors": [str(max_neighbors)]}
         return network_endpoint, request
 
     def test_get_no_focus_node(self):
@@ -77,11 +77,34 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         request.args["focus_node"] = [""]
         self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
 
+    def test_max_neighbors(self):
+        """
+        Evaluate whether the max_neighbors argument is correctly parsed.
+        """
+        network_endpoint, request = self.set_up_endpoint_request("trustchain", "X", 1, 4)
+        self.assertEqual(4, network_endpoint.get_max_neighbors(request.args))
+
+    def test_no_max_neighbors(self):
+        """
+        Evaluate whether max_neighbors return the correct default value when the argument is not present.
+        """
+        network_endpoint, request = self.set_up_endpoint_request("trustchain", "X", 1, 4)
+        del request.args["max_neighbors"]
+        self.assertEqual(8, network_endpoint.get_max_neighbors(request.args))
+
+    def test_negative_max_neighbors(self):
+        """
+        Evaluate whether max_neighbors return the correct default value when the argument is negative.
+        """
+        network_endpoint, request = self.set_up_endpoint_request("trustchain", "X", 1, 4)
+        request.args["max_neighbors"] = ["-1"]
+        self.assertEqual(8, network_endpoint.get_max_neighbors(request.args))
+
     def test_get_no_edges(self):
         """
         Evaluate whether the API passes the correct data if there are no edges returned.
         """
-        self.tribler_chain_community.get_graph = lambda public_key, neighbor_level: (
+        self.tribler_chain_community.get_graph = lambda public_key, neighbor_level, max_neighbors: (
             [{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}], [])
         exp_message = {"user_node": hexlify(self.tribler_chain_community.my_member.public_key),
                        "focus_node": "30",
@@ -95,7 +118,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         """
         Evaluate whether the API passes the correct data if there are edges returned.
         """
-        self.tribler_chain_community.get_graph = lambda public_key, neighbor_level: (
+        self.tribler_chain_community.get_graph = lambda public_key, neighbor_level, max_neighbors: (
             [{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}], [
                 {"from": "xyz", "to": "abc", "amount": 30}])
         exp_message = {"user_node": hexlify(self.tribler_chain_community.my_member.public_key),
@@ -169,7 +192,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         """
         Evaluate whether the API sends a response when the static dummy dataset is initialized.
         """
-        network_endpoint, request = self.set_up_endpoint_request("static", "03", 1)
+        network_endpoint, request = self.set_up_endpoint_request("static", "03", 1, 4)
         response = network_endpoint.render_GET(request)
         self.assertTrue(self.tribler_chain_community.persistence.dummy_setup)
         self.assertEqual(len(loads(response)["nodes"]), 3)

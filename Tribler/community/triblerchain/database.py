@@ -18,6 +18,9 @@ triblerchain_aggregates_schema = u"""
     PRIMARY KEY (public_key_a, public_key_b)
   );
   INSERT INTO option(key, value) VALUES ('aggregate_version', '%s');
+  
+  CREATE INDEX IF NOT EXISTS idx_public_key_a ON triblerchain_aggregates(public_key_a);
+  CREATE INDEX IF NOT EXISTS idx_public_key_b ON triblerchain_aggregates(public_key_b);
 """ % LATEST_TRIBLERCHAIN_AGGREGATES_VERSION
 
 upgrade_triblerchain_aggregates_schema = u"""
@@ -138,6 +141,7 @@ class TriblerChainDB(TrustChainDB):
                     WHERE public_key_a = ? OR public_key_b = ?"""
 
         for level in range(1, neighbor_level):
+            # Add next level neighbors iteratively
             query = u"""
                 SELECT DISTINCT ta.public_key_a, ta.public_key_b FROM triblerchain_aggregates ta,
                 (%(last_level)s) level%(level)d
@@ -165,6 +169,7 @@ class TriblerChainDB(TrustChainDB):
               AND ta.public_key_b = other.public_key_b
             JOIN (%(traffic)s) traffic 
               ON ta.public_key_a = traffic.pk
+            ORDER BY ta.public_key_a, (ta.traffic_a_to_b + ta.traffic_b_to_a) DESC
         """ % {"query": query, "traffic": total_traffic}
 
         return self.execute(query, (buffer(public_key), buffer(public_key))).fetchall()
@@ -207,6 +212,7 @@ class TriblerChainDB(TrustChainDB):
                        "00" if edge[1] == 0 else "{0:08x}".format(edge[1] * 41903747),
                        randint(100, 1e10), randint(100, 1e10)]
                       for edge in gnp_random_graph(100, 0.05).edges()]
+
         else:
             blocks = [
                 # from, to, up, down

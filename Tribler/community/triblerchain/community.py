@@ -183,53 +183,29 @@ class TriblerChainCommunity(TrustChainCommunity):
         :return: a dictionary corresponding to the node in the correct format
         """
         if public_key in nodes:
-            return {"public_key": public_key, "total_up": max(total_up, nodes[public_key]["total_up"]),
+            return {"total_up": max(total_up, nodes[public_key]["total_up"]),
                     "total_down": max(total_down, nodes[public_key]["total_down"]),
                     "total_neighbors": max(total_neighbors, nodes[public_key]["total_neighbors"])}
         else:
-            if total_up and total_down and total_neighbors:
-                return {"public_key": public_key, "total_up": total_up, "total_down": total_down,
+            if total_up and total_down:
+                return {"total_up": total_up, "total_down": total_down,
                         "total_neighbors": total_neighbors}
             else:
                 total_traffic = self.persistence.total_traffic(public_key)
-                return {"public_key": public_key, "total_up": total_traffic[0], "total_down": total_traffic[1],
+                return {"total_up": total_traffic[0], "total_down": total_traffic[1],
                         "total_neighbors": total_traffic[2]}
 
-    @staticmethod
-    def update_edges(from_pk, to_pk, edges, amount=0):
-        """
-        Update the given edge dictionary with the newly acquired data.
-
-        If there is not yet an entry for the public key pair, it is automatically added to the edges dictionary. If
-        an edge is already recorded, the given amount is added to the total.
-
-        :param from_pk: the public key of the node where the edge originates from
-        :param to_pk: the public key of the node where the edge arrives
-        :param edges: the dictionary of edges
-        :param amount: the amount of data transferred over this edge
-        """
-        if from_pk in edges:
-            edges[from_pk][to_pk] = edges[from_pk][to_pk] + amount if to_pk in edges[from_pk] else amount
-        else:
-            edges[from_pk] = {to_pk: amount}
-
-    @blocking_call_on_reactor_thread
-    def get_graph(self, public_key=None, neighbor_level=1):
-        """
-        Return a dictionary with the neighboring nodes and edges of a certain focus node within a certain radius,
-        regarding the local MultiChain database.
-
-        :param public_key: the public key of the focus node in raw format
-        :param neighbor_level: the radius within which the neighbors have to be returned
-        :return: a tuple of a list with nodes and a list with edges
-        """
+    def format_edges(self, public_key, neighbor_level):
         if public_key is None:
             public_key = hexlify(self.my_member.public_key)
 
         nodes = {public_key: self.get_node(public_key, {})}
         edges = {}
 
-        for edge in self.persistence.get_graph_edges(public_key, neighbor_level):
+        query_result = self.persistence.get_graph_edges(public_key, neighbor_level)
+
+        # Find all nodes and all edges in the result
+        for edge in query_result:
             from_pk = str(edge[0])
             to_pk = str(edge[1])
             amount_up = edge[2]
@@ -237,21 +213,78 @@ class TriblerChainCommunity(TrustChainCommunity):
             nodes[from_pk] = self.get_node(from_pk, nodes, total_up=edge[4], total_down=edge[5],
                                            total_neighbors=edge[6])
             nodes[to_pk] = self.get_node(to_pk, nodes)
-            self.update_edges(from_pk, to_pk, edges, amount=amount_up)
-            self.update_edges(to_pk, from_pk, edges, amount=amount_down)
+            if from_pk not in edges:
+                edges[from_pk] = []
+            edges[from_pk].append((to_pk, amount_up, amount_down))
+            if to_pk not in edges:
+                edges[to_pk] = []
+            edges[to_pk].append((from_pk, amount_down, amount_up))
 
-        return_nodes = nodes.values()
+        return nodes, edges
+
+    @blocking_call_on_reactor_thread
+    def get_graph(self, public_key=None, neighbor_level=1, max_neighbors=8):
+        """
+        Return a dictionary with the neighboring nodes and edges of a certain focus node within a certain radius,
+        regarding the local MultiChain database, limited in the amount of higher level neighbors per node.
+
+        :param public_key: the public key of the focus node in raw format
+        :param neighbor_level: the radius within which the neighbors have to be returned
+        :param max_neighbors: the maximum amount of higher level neighbors one node may have
+        :return: a tuple of a list with nodes and a list with edges
+        """
+        nodes, edges = self.format_edges(public_key, neighbor_level)
+
+        return_nodes = []
         return_edges = []
+
+        nodes_visited = set()
+        this_level = set()
+        this_level.add(public_key)
+        next_level = set()
+
+        # Check if the list of edges is empty
+        if not edges:
+            return_nodes.append({"public_key": public_key, "total_up": nodes[public_key]["total_up"],
+                                 "total_down": nodes[public_key]["total_down"],
+                                 "total_neighbors": nodes[public_key]["total_neighbors"]})
+            return_nodes[0]["score"] = calculate_score(return_nodes[0])
+            return return_nodes, return_edges
+
+        # Limit the number of higher-level neighbors per node in the graph
+        for _ in range(0, neighbor_level):
+            for node in this_level:
+                return_nodes.append({"public_key": node, "total_up": nodes[node]["total_up"],
+                                     "total_down": nodes[node]["total_down"],
+                                     "total_neighbors": nodes[node]["total_neighbors"]})
+                nodes_visited.add(node)
+                num_edges = 0
+                for edge in edges[node]:
+                    if edge[0] in this_level:   # Free edge, opposite node in same level
+                        new_edge = {"from": node, "to": edge[0], "amount": edge[1]}
+                        if new_edge not in return_edges:
+                            return_edges.append(new_edge)
+                            return_edges.append({"from": edge[0], "to": node, "amount": edge[2]})
+                    elif edge[0] not in nodes_visited:  # Opposite node is one level higher
+                        num_edges += 1
+                        next_level.add((edge[0]))
+                        return_edges.append({"from": node, "to": edge[0], "amount": edge[1]})
+                        return_edges.append({"from": edge[0], "to": node, "amount": edge[2]})
+                        if num_edges == max_neighbors:  # Stop adding edges after limit is reached
+                            break
+                    # Else the node is in a lower level and thus the edge is not shown
+            this_level = next_level
+            next_level = set()
+
+        for node in this_level:     # Add last level nodes
+            return_nodes.append({"public_key": node, "total_up": nodes[node]["total_up"],
+                                 "total_down": nodes[node]["total_down"],
+                                 "total_neighbors": nodes[node]["total_neighbors"]})
 
         for node in return_nodes:
             node["score"] = calculate_score(node)
 
-        for from_pk, edge_list in edges.iteritems():
-            new_edges = [{"from": from_pk, "to": to_pk, "amount": amount} for to_pk, amount in edge_list.iteritems()]
-            return_edges += new_edges
-
         return return_nodes, return_edges
-
 
 class TriblerChainCommunityCrawler(TriblerChainCommunity):
     """
