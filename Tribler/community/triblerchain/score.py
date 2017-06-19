@@ -1,7 +1,7 @@
 """
 This module is used to calculate the score for a node.
 """
-BOUNDARY_VALUE = pow(10, 9)
+BOUNDARY_VALUE = pow(10, 10)
 
 
 def calculate_score(node):
