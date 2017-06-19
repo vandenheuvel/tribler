@@ -23,19 +23,22 @@ function RadialView(svg, settings) {
      */
     self.initialize = function () {
 
+        // Position the origin in the center of the SVG
+        self.container = svg.append("g").attr("id", "graph-center")
+            .attr("transform", "translate(" + self.config.center_x + "," + self.config.center_y + ")");
+
         for (var i = 1; i <= self.config.neighbor_level; i++)
             self._drawNeighborRing(self.config.radius_step * i);
 
-        svg.append("g").attr("class", "links");
-        svg.append("g").attr("class", "nodes");
-        svg.append("g").attr("class", "labels");
+        self.container.append("g").attr("class", "links");
+        self.container.append("g").attr("class", "nodes");
+        self.container.append("g").attr("class", "labels");
 
-        self.links = new RadialLinks(svg, config.link);
-        self.nodes = new RadialNodes(svg, config.node);
+        self.links = new RadialLinks(self.container, config.link);
+        self.nodes = new RadialNodes(self.container, config.node);
         self.inspector = new RadialInspector(d3.select("#inspector"), config.inspector);
 
         self.nodes.bind("click", function (node) {
-            handle_node_click(node.public_key);
             self.nodes.unapplyHighlight();
             self.links.unapplyHighlight();
         });
@@ -87,7 +90,6 @@ function RadialView(svg, settings) {
             }, self.config.hover_out_delay);
         });
 
-
     };
 
     /**
@@ -112,22 +114,6 @@ function RadialView(svg, settings) {
     };
 
     /**
-     * Return the x-coordinate of the center
-     * @returns {number}
-     */
-    self.getCenterX = function () {
-        return self.config.center_x;
-    };
-
-    /**
-     * Return the y-coordinate of the center
-     * @returns {number}
-     */
-    self.getCenterY = function () {
-        return self.config.center_y;
-    };
-
-    /**
      * Call a given callback after a period of time, overwriting a previously set callback.
      *
      * Many hover events will fire, causing a callback to be assigned before the previous callback is fired. This may
@@ -148,11 +134,9 @@ function RadialView(svg, settings) {
      * @returns D3 Selection of a <circle.neighbor-ring> element
      */
     self._drawNeighborRing = function (radius) {
-        return svg.append("circle")
+        return self.container.append("circle")
             .attr("class", "neighbor-ring")
             .attr("r", 0)
-            .attr("cx", self.config.center_x)
-            .attr("cy", self.config.center_y)
             .attr("stroke-width", 1)
             .attr("fill", "transparent")
             .style("stroke", config.neighbor_ring.strokeColor)

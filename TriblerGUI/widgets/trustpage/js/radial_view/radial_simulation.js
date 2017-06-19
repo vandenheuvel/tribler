@@ -12,8 +12,6 @@ function RadialSimulation(options) {
     self.simulation = null;
 
     var defaults = {
-        center_x: 0,
-        center_y: 0,
         alpha_decay: 0.01,
         radial_force_strength: 0.1,
         radial_force_min_distance: 30,
@@ -27,8 +25,8 @@ function RadialSimulation(options) {
      * The centerfix object
      */
     var centerFix = {
-        x: self.config.center_x,
-        y: self.config.center_y,
+        x: 0,
+        y: 0,
         local_key: 0,
         inCenter: true
     };
@@ -48,7 +46,7 @@ function RadialSimulation(options) {
                 .strength(self.config.link_strength))
 
             // Centering force (used for focus node)
-            .force("center", d3.forceCenter(self.config.center_x, self.config.center_y))
+            .force("center", d3.forceCenter(0, 0))
 
             // Torque force to keep nodes at correct angle
             .force("torque", radialForce()

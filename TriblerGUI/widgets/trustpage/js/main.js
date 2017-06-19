@@ -5,51 +5,36 @@
  * built up and modified by this code.
  */
 
-// Update the visualization
-function onNewData(data) {
-    state.request_pending = false;
-    update(processData(data));
-}
-
+// Set up navigation for loading data when clicking nodes
 var navigation = new RadialNavigation(get_node_info);
-navigation.bind('before-step', onStep);
-navigation.bind('response', onNewData);
-
-// Distance to peers
-var radius_step = config.radius_step,
-    neighbor_level = 2;
-
-// Select the svg DOM element
-var svg = d3.select("#graph");
-
-// Build up the radial view
-var radialView = new RadialView(svg, config);
-radialView.initialize();
-
-var state = {
-    request_pending: false,
-    focus_pk: "self",
-    previous_angle: 0,
-    previous_focus_pk: null,
-    focus_node: null,
-    user_pk : null,
-    nodes: []
-};
-
-// Fetch the data
-navigation.setNeighborLevel(neighbor_level);
-navigation.step(state.focus_pk);
-
-var animation = new RadialSteppingAnimation(radialView.nodes, navigation, config.steppingAnimation);
-
-var simulation = new RadialSimulation({
-    center_x : radialView.getCenterX(),
-    center_y : radialView.getCenterY(),
-    radius_step : config.radius_step
+navigation.setNeighborLevel(config.neighbor_level);
+navigation.bind('response', function (data) {
+    update(processData(data));
 });
 
-simulation.initialize()
-    .onTick(radialView.tick);
+// Set up the radial view to display all data
+var radialView = new RadialView(d3.select("#graph"), config);
+radialView.initialize();
+radialView.nodes.bind("click", function (node) {
+    animation.stop();
+    navigation.step(node.public_key);
+});
+
+// Set up the force simulation to move all nodes into position
+var simulation = new RadialSimulation({
+    radius_step: config.radius_step
+});
+simulation.initialize().onTick(radialView.tick);
+
+// Set up the positioning to calculate positions for all nodes
+var positioning = new RadialPositioning(navigation, simulation);
+positioning.initialize();
+
+// Set up the stepping-animation for navigating back to the user node
+var animation = new RadialSteppingAnimation(radialView.nodes, navigation, config.steppingAnimation);
+
+// Launch the visualization by loading the user as focus node
+navigation.step("self");
 
 /**
  * Update the visualization for the provided data set
@@ -57,97 +42,15 @@ simulation.initialize()
  */
 function update(graph) {
 
-    console.log(graph);
-
-    state.user_pk = state.user_pk || graph.focus_pk;
-
-    // Copy positions from old nodes to new ones;
-    state.nodes.forEach(function (node) {
-        var new_local = graph.local_keys.indexOf(node.public_key);
-        if (new_local >= 0) {
-            var new_node = graph.nodes[new_local];
-            new_node.x = node.x;
-            new_node.y = node.y;
-        }
-    });
-
-    // Set the focus node
-    state.focus_pk = graph.focus_node.public_key;
-    state.focus_node = graph.focus_node;
-    state.nodes = graph.nodes;
-    state.data = graph;
-
-    // Position all new nodes at the focus node
-    graph.nodes.forEach(function (node) {
-        if (!('x' in node)) {
-            node.x = state.focus_node.x || radialView.getCenterX();
-            node.y = state.focus_node.y || radialView.getCenterY();
-        }
-    });
-
-    // Make a tree from the graph
-    state.tree = graphToTree(graph.focus_node);
-    state.tree.nodes.forEach(function (treeNode) {
-        treeNode.graphNode.treeNode = treeNode;
-    });
-
-    // Position all nodes on a circle
-    applyRecursiveAlphaByDescendants(state.tree.root, 0, 2 * Math.PI, simulation.getCenterFix());
-
-    // Maintain orientation between previous and current focus node
-    if (state.previous_focus_pk) {
-        var target_angle = state.previous_angle + Math.PI;
-        var previous_focus = state.tree.nodes.find(function (node) {
-            return node.graphNode.public_key === state.previous_focus_pk;
-        });
-        if (previous_focus) {
-            var correction = target_angle - previous_focus.alpha;
-            state.tree.nodes.forEach(function (node) {
-                node.alpha += correction;
-            });
-        }
-    }
+    // Set the positions on all graph nodes
+    positioning.setNodePositions(graph);
 
     // Update the view
     radialView.onNewData(graph);
 
     // Update the simulation
-    simulation.update(state.tree.nodes);
-}
+    simulation.update(positioning.tree.nodes);
 
-/**
- * Make a new request when a node is clicked
- * @param public_key
- */
-function handle_node_click(public_key) {
-    if (state.request_pending) {
-        console.log("Request pending, ignore new request");
-    } else {
-        if (public_key !== state.focus_pk) {
-            animation.stop();
-            navigation.step(public_key);
-        }
-    }
-}
-
-/**
- * This is called when stepping. Then the previous angle is remembered, so orientation is preserved.
- * @param public_key
- */
-function onStep(public_key){
-    state.request_pending = true;
-
-    // Subsequent requests
-    if(state.data) {
-        // Store the previous focus node and its angle
-        var localKey = state.data.local_keys.indexOf(public_key);
-        var newNode = state.data.nodes[localKey];
-        var newTreeNode = find(state.tree.nodes, 'graphNode', newNode);
-        if(newTreeNode) {
-            state.previous_focus_pk = state.focus_pk;
-            state.previous_angle = newTreeNode.alpha;
-        }
-    }
 }
 
 /**
