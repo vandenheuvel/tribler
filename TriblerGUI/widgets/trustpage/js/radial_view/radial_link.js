@@ -49,7 +49,7 @@ function RadialLinks(svg, options) {
     self.create = function (enterSelection) {
         // Create <svg.link>
         var links = enterSelection
-            .append("svg")
+            .append("g")
             .attr("class", "link")
             .style("opacity", "0")
             .style("stroke", "transparent")
