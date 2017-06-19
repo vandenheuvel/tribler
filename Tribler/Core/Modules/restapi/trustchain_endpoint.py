@@ -260,6 +260,7 @@ class TrustChainNetworkEndpoint(resource.Resource):
                         "public_key": "xyz",
                         "total_up": 12736457,
                         "total_down": 1827364,
+                        "score": 0.3
                     }, ...],
                     "edges": [{
                         "from": "xyz",
