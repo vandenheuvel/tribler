@@ -246,13 +246,7 @@ function RadialNodes(svg, options) {
         var nodeColor = d3.scaleLinear()
             .domain(self.config.color.domain)
             .range(self.config.color.range);
-
-        var difference = node.total_up - node.total_down;
-        difference = Math.max(difference, self.config.upDownDifferenceDomain.min);
-        difference = Math.min(difference, self.config.upDownDifferenceDomain.max);
-
-        var rangeSize = self.config.upDownDifferenceDomain.max - self.config.upDownDifferenceDomain.min;
-        return nodeColor((difference - self.config.upDownDifferenceDomain.min) / rangeSize);
+        return nodeColor(node.score);
     };
 
 }
