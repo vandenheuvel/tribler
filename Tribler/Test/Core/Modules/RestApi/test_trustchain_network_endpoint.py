@@ -178,7 +178,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         network_endpoint, request = self.set_up_endpoint_request("random", "25", 1)
         response = network_endpoint.render_GET(request)
         self.assertTrue(self.tribler_chain_community.persistence.dummy_setup)
-        self.assertEqual(len(loads(response)["nodes"]), 5)
+        self.assertEqual(len(loads(response)["nodes"]), 1)
 
     @blocking_call_on_reactor_thread
     def test_self_dummy_data(self):

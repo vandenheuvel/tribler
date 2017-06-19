@@ -2,7 +2,7 @@ from binascii import hexlify, unhexlify
 from random import randint
 
 from sqlite3 import connect
-from networkx import random_regular_graph
+from networkx import gnp_random_graph
 
 from Tribler.community.trustchain.database import TrustChainDB
 from Tribler.community.trustchain.block import TrustChainBlock
@@ -183,6 +183,7 @@ class TriblerChainDB(TrustChainDB):
             self.executescript(triblerchain_aggregates_schema)
             self.commit()
 
+    #TODO: needs to be removed before merge to Tribler
     def use_dummy_data(self, use_random=True):
         """
         Creates a new database and fills it with dummy data.
@@ -202,10 +203,10 @@ class TriblerChainDB(TrustChainDB):
         self.check_statistics_database()
 
         if use_random:
-            blocks = [[str(edge[0]) if len(str(edge[0])) > 1 else "0" + str(edge[0]),
-                       str(edge[1]) if len(str(edge[1])) > 1 else "0" + str(edge[1]),
-                       randint(101, 200), randint(121, 200)]
-                      for edge in random_regular_graph(4, 26).edges()]
+            blocks = [["00" if edge[0] == 0 else "{0:08x}".format(edge[0] * 41903747),
+                       "00" if edge[1] == 0 else "{0:08x}".format(edge[1] * 41903747),
+                       randint(100, 1e10), randint(100, 1e10)]
+                      for edge in gnp_random_graph(100, 0.05).edges()]
         else:
             blocks = [
                 # from, to, up, down
