@@ -36,7 +36,7 @@ function RadialView(svg, settings) {
 
         self.links = new RadialLinks(self.container, config.link);
         self.nodes = new RadialNodes(self.container, config.node);
-        self.inspector = new RadialInspector(d3.select("#inspector"), config.inspector);
+        self.inspector = new RadialInspector(d3.select("#inspector"), config);
 
         self.nodes.bind("click", function (node) {
             self.nodes.unapplyHighlight();
