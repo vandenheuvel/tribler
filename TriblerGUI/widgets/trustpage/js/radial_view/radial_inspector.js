@@ -38,15 +38,19 @@ function RadialInspector(d3element, options) {
             bindings = {
                 focusNodeName: self._getNodeIdentifier(data.focus_node),
                 nodeCount: data.nodes.length,
-                linkCount: data.links.length
+                linkCount: data.links.length,
+                color: self.config.node.color.range[0]
             };
 
         self._setContents(
             "Tribler Trust Network",
             "Partial view around {focusNodeName}",
             [
-                "Showing <strong>{nodeCount} users</strong>.",
-                "Click on users to explore the rest of the network."
+                "Showing <strong>{nodeCount} users</strong>",
+                "Click on users to explore the rest of the network.",
+                "Users with" +
+                    "<span class='badge inline' style='background:{color}'>Balance: <strong>-10GB</strong></span>" +
+                    "or worse will be blocked from downloading until they start uploading again."
             ], bindings);
     };
 
@@ -69,9 +73,9 @@ function RadialInspector(d3element, options) {
             self._getNodeIdentifier(node),
             "Anonymous",
             [
-                "Shared <strong>{formatted_upload}</strong> with {peer_count} users.",
-                "Consumed <strong>{formatted_download}</strong> from {peer_count} users.",
-                "<span class='badge' style='background:{color}'>Balance: <strong>{formatted_balance}</strong></span>."
+                "Shared <strong>{formatted_upload}</strong> with {peer_count} users",
+                "Consumed <strong>{formatted_download}</strong> from {peer_count} users",
+                "<span class='badge' style='background:{color}'>Balance: <strong>{formatted_balance}</strong></span>"
             ], bindings);
     };
 
@@ -93,7 +97,7 @@ function RadialInspector(d3element, options) {
             [
                 "{source} shared <strong>{formatted_up}</strong> with {target}",
                 "{target} shared <strong>{formatted_down}</strong> with {source}",
-                "File contents are always hidden."
+                "File contents are always hidden"
             ], bindings);
     };
 
