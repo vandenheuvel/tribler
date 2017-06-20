@@ -77,27 +77,37 @@ svg#graph {
     font-size: 80%;
 }
 
-#locate-me-button {
+button {
+    font: 14px/18px sans-serif;
     border: 2px solid white;
     border-radius: 5px;
     padding: 5px;
     background: transparent;
     color: white;
     font-weight: bold;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin-left: -500px;
     -webkit-transition: all .3s;
-    opacity: .2;
-}
-
-#locate-me-button.visible{
-    opacity: 1;
     cursor: pointer;
+    opacity: 1;
+    outline: 0;
 }
 
-#locate-me-button.visible:hover {
+button.disabled {
+    opacity: .2;
+    cursor: default;
+}
+
+button:not(.disabled):hover {
     background: white;
     color: #202020;
+}
+
+#nav-bar {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+#nav-bar button {
+    float: right;
+    margin-left: 5px;
 }
