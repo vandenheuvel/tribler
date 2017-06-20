@@ -113,7 +113,7 @@ function RadialLinks(svg, options) {
      * Update the positions of the links on each tick.
      */
     self.tick = function () {
-        self.selectAll().each(function(link) {
+        self.selectAll().each(function (link) {
             var separator = self._calculateSeparatorPositionWithOffset(link);
 
             // Part of line at the source
@@ -169,10 +169,10 @@ function RadialLinks(svg, options) {
             offset = 1 / Math.max(1, distance2D(s, t)),
             ratio = link.ratio;
         return {
-            x_from_source: xAtFraction(s.x, t.x, 1 - ratio - offset),
-            y_from_source: xAtFraction(s.y, t.y, 1 - ratio - offset),
-            x_from_target: xAtFraction(t.x, s.x, ratio - offset),
-            y_from_target: xAtFraction(t.y, s.y, ratio - offset)
+            x_from_source: xAtFraction(s.x, t.x, ratio - offset),
+            y_from_source: xAtFraction(s.y, t.y, ratio - offset),
+            x_from_target: xAtFraction(t.x, s.x, 1 - ratio - offset),
+            y_from_target: xAtFraction(t.y, s.y, 1 - ratio - offset)
         };
     };
 
