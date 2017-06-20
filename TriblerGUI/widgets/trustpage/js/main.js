@@ -5,6 +5,9 @@
  * built up and modified by this code.
  */
 
+// Disable right mouse click functionality
+document.oncontextmenu = document.body.oncontextmenu = function () { return false; };
+
 // Set up navigation for loading data when clicking nodes
 var navigation = new RadialNavigation(get_node_info);
 navigation.setNeighborLevel(config.neighbor_level);
