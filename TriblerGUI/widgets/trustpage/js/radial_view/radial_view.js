@@ -101,7 +101,7 @@ function RadialView(svg, settings) {
         self.links.onNewData(newGraphData);
         self.inspector.onNewData(newGraphData);
 
-        d3.select('#locate-me-button')
+        d3.select('#back-to-you-button')
             .attr('class', newGraphData.focus_node.is_user ? 'disabled' : '');
     };
 

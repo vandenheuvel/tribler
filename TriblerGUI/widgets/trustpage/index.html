@@ -4,17 +4,16 @@
     <meta charset="UTF-8">
     <title>Trust Page</title>
     <script src="js/d3/d3.v4.min.js"></script>
-    <script src="js/d3/d3-legend.min.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
     <link rel="stylesheet" type="text/css" href="help_page.css">
 </head>
 <body>
 
-<!-- THE GRAPH -->
+<!-- GRAPH -->
 <svg id="graph" width="600" height="600" viewBox="0 0 600 600"></svg>
 <div id="nav-bar">
     <button id="help-button" onclick="toggleHelpPage()">Help</button>
-    <button id="locate-me-button" onclick="backToYou()">Back To You</button>
+    <button id="back-to-you-button" onclick="backToYou()">Back To You</button>
 </div>
 <div id="help-overlay" onclick="toggleHelpPage()"></div>
 <div id="help-page">
@@ -45,11 +44,12 @@
         <ul>
             <li>Get details about a user or a connection by mousing over it</li>
             <li>Explore other parts of the network by clicking on other users</li>
-            <li>Navigate back to yourself by clicking on ‘Back to You’</li>
+            <li>Navigate back to yourself by clicking on ‘Back To You’</li>
         </ul>
     </div>
 </div>
 
+<!-- INSPECTOR -->
 <div id="inspector">
     <h2 class="title">
         <span class="title"></span>
@@ -57,7 +57,7 @@
     </h2>
 </div>
 
-<!-- MAIN -->
+<!-- JAVASCRIPTS -->
 <script src="js/style_config.js"></script>
 <script src="js/radial_view/radial_navigation.js"></script>
 <script src="js/radial_view/radial_stepping_animation.js"></script>
