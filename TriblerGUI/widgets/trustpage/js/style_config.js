@@ -10,7 +10,7 @@ var config = {
     hoverOutDelay: 500,
     steppingAnimation: {
         delayStepAfterHighlight: 500,
-        delayUnhighlightAfterResponse : 300,
+        delayUnhighlightAfterResponse: 300,
         delayHighlightAfterResponse: 750
     },
     link: {
@@ -33,11 +33,16 @@ var config = {
             fontWeight: "bold",
             characters: 3
         },
-        marker : {
+        marker: {
             radius: 40,
             startRadius: 60,
             fadeInDuration: 500,
             fadeOutDuration: 500
+        },
+        userMarker: {
+            radiusFactor: 2,
+            color: "#FFFFFF",
+            opacity: 0.1
         },
         circle: {
             minRadius: 15,
@@ -68,21 +73,21 @@ var config = {
     radius_step: 120,
     neighbor_level: 2,
     help: {
-        label : {
+        label: {
             fontSize: 10,
             fontFamily: "sans-serif",
             fontWeight: "bold",
             color: "#FFFFFF",
             offsetY: 10
         },
-        nodes : {
+        nodes: {
             examplePublicKey: "#bcb",
             numberOfNodes: 5,
-            circleColor : {
+            circleColor: {
                 nodeRadius: 20,
                 labels: ["Freerider", "Unreliable", "Neutral", "Reliable", "Contributor"]
             },
-            circleSize : {
+            circleSize: {
                 labels: ["Least", "Less", "Average", "More", "Most"]
             }
         },
@@ -90,14 +95,14 @@ var config = {
             numberOfEdges: 3,
             edgeLength: 100,
             dividingWidth: 2,
-            width : {
+            width: {
                 labels: ["Little", "Average", "Much"]
             },
-            separator : {
+            separator: {
                 labels: ["Right user", "Balanced", "Left user"]
             }
         },
-        page : {
+        page: {
             // When the window width gets smaller than this, the help page and help button are not shown anymore
             minWindowWidth: 640
         }
