@@ -2,11 +2,13 @@
  * This file tests the graph_to_tree.js file with unit tests
  */
 assert = require('assert');
-graph_to_tree = require('TriblerGUI/widgets/trustpage/js/graph_to_tree.js');
+RadialPositioning = require('TriblerGUI/widgets/trustpage/js/radial_view/radial_positioning.js');
 
-describe('graph_to_tree.js', function () {
+describe('radial_positioning.js', function () {
 
     describe('makeTreeFromGraphNode', function () {
+
+        var positioning = new RadialPositioning();
 
         it('should work for a single graph node', function () {
             var graphNode = {
@@ -14,7 +16,7 @@ describe('graph_to_tree.js', function () {
                 neighbors: []
             };
 
-            var result = graph_to_tree.makeTreeFromGraphNode(graphNode);
+            var result = positioning._makeTreeFromGraphNode(graphNode);
 
             var expectTreeNode = {
                 graphNode: graphNode,
@@ -43,7 +45,7 @@ describe('graph_to_tree.js', function () {
 
             nodes[0].neighbors = [nodes[1], nodes[2]];
 
-            var result = graph_to_tree.makeTreeFromGraphNode(nodes[0]);
+            var result = positioning._makeTreeFromGraphNode(nodes[0]);
 
             var treeNodeC = {
                 graphNode: nodes[2],
@@ -73,36 +75,6 @@ describe('graph_to_tree.js', function () {
             });
         });
 
-    });
-
-    describe('_calculateNodesOnDepths', function () {
-        it('should count nodes on their respective depths', function () {
-            var treeNodeC = {
-                graphNode: {},
-                children: [],
-                depth: 1,
-                descendants: 1
-            };
-            var treeNodeB = {
-                graphNode: {},
-                children: [],
-                depth: 1,
-                descendants: 1
-            };
-            var treeNodeA = {
-                graphNode: {} ,
-                children: [treeNodeB, treeNodeC],
-                parent: null,
-                depth: 0,
-                descendants: 3
-            };
-            treeNodeB.parent = treeNodeA;
-            treeNodeC.parent = treeNodeA;
-
-            var result = graph_to_tree._calculateNodesOnDepths([treeNodeA, treeNodeB, treeNodeC]);
-
-            assert.deepEqual(result, [1, 2]);
-        })
     });
 
 });
