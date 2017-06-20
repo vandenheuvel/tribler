@@ -48,7 +48,7 @@ svg#graph {
 }
 
 #inspector {
-    font: 14px/18px sans-serif;
+    font: 14px/22px sans-serif;
     width: 300px;
     position: absolute;
     right: 10px;
@@ -63,6 +63,11 @@ svg#graph {
     margin: -5px 5px 5px -5px;
     border-radius: 5px;
     color: #202020;
+}
+
+.badge.inline {
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 #inspector h2.title {
