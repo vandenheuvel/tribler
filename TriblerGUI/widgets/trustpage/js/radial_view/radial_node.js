@@ -63,6 +63,17 @@ function RadialNodes(svg, options) {
             .attr("fill", self.config.circle.strokeColor)
             .attr("r", function (node) { return self._calculateRadius(node, true)});
 
+        // Append <circle.user-marker> to <svg.node>
+        groups.each(function (node) {
+            if (node.is_user) {
+                d3.select(this).append("circle")
+                    .attr("class", "user-marker")
+                    .attr("fill", self.config.userMarker.color)
+                    .attr("r", function (node) { return self.config.userMarker.radiusFactor * self._calculateRadius(node, false);})
+                    .style("opacity", self.config.userMarker.opacity)
+            }
+        });
+
         // Append <svg.foreground> to <svg.node>
         var foreground = groups.append("svg")
             .attr("class", "foreground")
@@ -78,8 +89,6 @@ function RadialNodes(svg, options) {
             .attr("fill", function (node) {
                 return self._calculateFill(node)
             })
-            .attr("stroke", self.config.circle.strokeColor)
-            .attr("stroke-width", self.config.circle.strokeWidth)
             .attr("r", function (node) { return self._calculateRadius(node, false)});
 
         // Append <text> to <svg.foreground>
@@ -113,6 +122,7 @@ function RadialNodes(svg, options) {
         updateSelection.each(function (newData) {
             var nodeElement = d3.select(this);
             nodeElement.select('.background').datum(newData);
+            nodeElement.select('.user-marker').datum(newData);
             nodeElement.select('.foreground').datum(newData);
             nodeElement.select('.events').datum(newData);
         });
