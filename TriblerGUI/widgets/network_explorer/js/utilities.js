@@ -1,6 +1,6 @@
 if (typeof require !== "undefined") {
-    var d3 = require("TriblerGUI/widgets/trustpage/js/d3/d3.v4.min");
-    var config = require("TriblerGUI/widgets/trustpage/js/style_config");
+    var d3 = require("TriblerGUI/widgets/network_explorer/js/d3/d3.v4.min");
+    var config = require("TriblerGUI/widgets/network_explorer/js/style_config");
 }
 
 /**

@@ -3,7 +3,7 @@
  */
 
 assert = require("assert");
-radial_link = require("TriblerGUI/widgets/trustpage/js/radial_view/radial_link.js");
+radial_link = require("TriblerGUI/widgets/network_explorer/js/radial_view/radial_link.js");
 
 describe("radial_link.js", function () {
 
