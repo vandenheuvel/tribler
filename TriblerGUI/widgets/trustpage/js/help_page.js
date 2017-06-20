@@ -26,7 +26,6 @@ function HelpPage(options) {
      * Show the help page
      */
     self.show = function () {
-        document.getElementById("help-button").innerHTML = "Close";
         document.getElementsByTagName("body")[0].classList.add("show-help-page");
         self.visible = true;
     };
@@ -35,7 +34,6 @@ function HelpPage(options) {
      * Hide the help page
      */
     self.hide = function () {
-        document.getElementById("help-button").innerHTML = "Help";
         document.getElementsByTagName("body")[0].classList.remove("show-help-page");
         self.visible = false;
     };
