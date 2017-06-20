@@ -12,10 +12,11 @@
 <!-- GRAPH -->
 <svg id="graph" width="600" height="600" viewBox="0 0 600 600"></svg>
 <div id="nav-bar">
-    <button id="help-button" onclick="toggleHelpPage()">Help</button>
-    <button id="back-to-you-button" onclick="backToYou()">Back To You</button>
+    <button id="help-button" onclick="controller.toggleHelpPage()">Help</button>
+    <button id="back-to-you-button" onclick="controller.backToYou()">Back To You</button>
 </div>
-<div id="help-overlay" onclick="toggleHelpPage()"></div>
+<div id="help-overlay" onclick="controller.toggleHelpPage()"></div>
+
 <div id="help-page">
     <div id="help-page-content">
         <h2 id="help-page-title">Visualization of the Tribler network</h2>
@@ -59,6 +60,7 @@
 
 <!-- JAVASCRIPTS -->
 <script src="js/style_config.js"></script>
+<script src="js/radial_view/radial_controller.js"></script>
 <script src="js/radial_view/radial_navigation.js"></script>
 <script src="js/radial_view/radial_stepping_animation.js"></script>
 <script src="js/radial_view/radial_link.js"></script>
@@ -74,6 +76,9 @@
 <script src="js/utilities.js"></script>
 <script src="js/data_processor.js"></script>
 <script src="js/help_page.js"></script>
-<script src="js/main.js"></script>
+<script>
+    // Initialize the controller and then start the animation
+    var controller = new RadialController().initialize().start();
+</script>
 </body>
 </html>
