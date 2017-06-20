@@ -20,6 +20,8 @@ function HelpPage(options) {
         self._drawCircleSizeSvg();
         self._drawLineSizeSvg();
         self._drawLineDividerSvg();
+
+        return self;
     };
 
     /**
