@@ -34,8 +34,7 @@ var simulation = new RadialSimulation({
 simulation.initialize().onTick(radialView.tick);
 
 // Set up the positioning to calculate positions for all nodes
-var positioning = new RadialPositioning(navigation, simulation);
-positioning.initialize();
+var positioning = new RadialPositioning();
 
 // Set up the stepping-animation for navigating back to the user node
 var animation = new RadialSteppingAnimation(radialView.nodes, navigation, config.steppingAnimation);
