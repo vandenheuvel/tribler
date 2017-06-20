@@ -3,8 +3,8 @@
  */
 
 assert = require("assert");
-utilities = require("TriblerGUI/widgets/trustpage/js/utilities.js");
-config = require("TriblerGUI/widgets/trustpage/js/style_config.js");
+utilities = require("TriblerGUI/widgets/network_explorer/js/utilities.js");
+config = require("TriblerGUI/widgets/network_explorer/js/style_config.js");
 
 describe("utilities.js", function () {
     describe('formatBytes', function () {

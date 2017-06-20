@@ -2,7 +2,7 @@
  * This file tests the graph_to_tree.js file with unit tests
  */
 assert = require('assert');
-RadialPositioning = require('TriblerGUI/widgets/trustpage/js/radial_view/radial_positioning.js');
+RadialPositioning = require('TriblerGUI/widgets/network_explorer/js/radial_view/radial_positioning.js');
 
 describe('radial_positioning.js', function () {
 
