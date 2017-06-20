@@ -46,7 +46,7 @@ function RadialInspector(d3element, options) {
             bindings.user = "user" + (bindings.nodeCount === 1 ? "" : "s");
 
         self._setContents(
-            "Tribler Trust Network",
+            "Tribler Network",
             "Partial view around {focusNodeName}",
             [
                 "Showing <strong>{nodeCount} {user}</strong>",

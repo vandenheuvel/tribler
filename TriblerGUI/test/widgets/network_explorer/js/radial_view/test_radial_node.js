@@ -3,8 +3,8 @@
  */
 
 assert = require("assert");
-d3 = require("TriblerGUI/widgets/trustpage/js/d3/d3.v4.min");
-radial_node = require("TriblerGUI/widgets/trustpage/js/radial_view/radial_node.js");
+d3 = require("TriblerGUI/widgets/network_explorer/js/d3/d3.v4.min");
+radial_node = require("TriblerGUI/widgets/network_explorer/js/radial_view/radial_node.js");
 
 describe("radial_node.js", function () {
 

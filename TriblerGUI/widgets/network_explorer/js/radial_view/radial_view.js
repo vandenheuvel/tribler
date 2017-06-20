@@ -1,5 +1,5 @@
 /**
- * The Radial View of the Tribler Trust Graph.
+ * The Radial View of the Network Explorer.
  * @param svg
  * @param {Object} settings - override of the defaults
  * @constructor
