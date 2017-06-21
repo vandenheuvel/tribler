@@ -1,3 +1,4 @@
+from OpenGL import GL
 import os
 import sys
 import unittest
