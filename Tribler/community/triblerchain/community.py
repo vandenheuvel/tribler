@@ -171,12 +171,12 @@ class TriblerChainCommunity(TrustChainCommunity):
         Get a node in an encoded format and with the maximum values given the current dictionary of nodes.
 
         The format is described as follows:
-            {"public_key": public_key, "total_up": total_up, "total_down": total_down}
-        This function checks whether the given total up and downloaded amounts are higher than the current recorded (if
-        any). Moreover, if the public key does not exist in the nodes list and no total_up and total_down is given, new
-        data is retrieved from the database.
+            { "public_key": public_key, "total_up": total_up, "total_down": total_down }
+        This function checks whether the given total up and download amounts are higher than the current recorded (if
+        any). Moreover, if the public key does not exist in the nodes list and no total_up or total_down is given, the
+        latest block from the database is retrieved.
 
-        :param public_key: the public key for which a nde dictionary has to be created
+        :param public_key: the public key for which a node dictionary has to be created
         :param nodes: the dictionary of currently recorded nodes
         :param total_up: the total up amount
         :param total_down: the total down amount
