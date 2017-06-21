@@ -2,7 +2,7 @@
  * This file tests the radial.js file with unit tests
  */
 assert = require('assert');
-radial = require('../../../../widgets/trustpage/js/radial.js');
+radial = require('TriblerGUI/widgets/trustpage/js/radial.js');
 
 describe('radial.js', function () {
 
