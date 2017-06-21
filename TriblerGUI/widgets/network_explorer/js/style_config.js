@@ -34,7 +34,6 @@ var config = {
             characters: 3
         },
         marker: {
-            radius: 40,
             startRadius: 60,
             fadeInDuration: 500,
             fadeOutDuration: 500
