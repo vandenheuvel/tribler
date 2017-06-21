@@ -1,10 +1,8 @@
 /**
  * Turns the graph into a tree and positions (using an angle) all GraphNodes.
- * @param {RadialNavigation} navigation
- * @param {RadialSimulation} simulation
  * @constructor
  */
-function RadialPositioning(navigation, simulation, options) {
+function RadialPositioning(options) {
 
     var self = this,
         defaults = {};
@@ -13,17 +11,6 @@ function RadialPositioning(navigation, simulation, options) {
     self.nodes = [];
     self.focus_pk = null;
     self.orientation = 0;
-
-    /**
-     * Make all necessary binds.
-     */
-    self.initialize = function () {
-
-        navigation.bind("before-step", function (new_public_key) {
-            var new_focus_node = find(self.nodes, "public_key", new_public_key);
-            self.orientation = new_focus_node ? new_focus_node.treeNode.alpha || 0 : 0;
-        });
-    };
 
     /**
      * Add the tree nodes and angles to all nodes in this view.
@@ -38,6 +25,11 @@ function RadialPositioning(navigation, simulation, options) {
             if (new_node) {
                 new_node.x = node.x;
                 new_node.y = node.y;
+            }
+
+            // Copy the previous alpha value from the new focus node
+            if (node.public_key === newGraphData.focus_pk) {
+                self.orientation = node.treeNode.alpha || 0;
             }
         });
 
@@ -58,7 +50,7 @@ function RadialPositioning(navigation, simulation, options) {
         });
 
         // Position all nodes on a circle
-        applyRecursiveAlphaByDescendants(tree.root, 0, 2 * Math.PI, simulation.getCenterFix());
+        applyRecursiveAlphaByDescendants(tree.root, 0, 2 * Math.PI, {x: 0, y: 0});
 
         // Find the new angle of the old focus node
         var target_angle = (self.orientation + Math.PI),
