@@ -376,7 +376,6 @@ class TestTriblerChainCommunity(BaseTestTrustChainCommunity):
         Check whether get_node requires a total_traffic method if no total_up and total_down is given.
         """
         node, = self.create_nodes(1)
-        node.community.persistence.get_latest = lambda _: None
         node.community.persistence.total_traffic = lambda _: [5, 6]
         self.assertEqual({"public_key": '74657374', "total_up": 5, "total_down": 6},
                          node.community.get_node('74657374', []))
