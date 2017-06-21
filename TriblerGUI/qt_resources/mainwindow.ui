@@ -905,7 +905,7 @@ color: white;
             <enum>Qt::NoFocus</enum>
            </property>
            <property name="text">
-            <string> Trust Display</string>
+            <string> Network Explorer</string>
            </property>
            <property name="icon">
             <iconset>
@@ -8682,7 +8682,7 @@ border-top: 1px solid #555;
           </item>
          </layout>
         </widget>
-        <widget class="TrustPageNetwork" name="trust_page_network">
+        <widget class="NetworkExplorerPage" name="network_explorer_page">
          <property name="styleSheet">
           <string notr="true">QLabel { color: #eee; }</string>
          </property>
@@ -8748,7 +8748,7 @@ border-top: 1px solid #555;
                                             margin: 10px;</string>
                </property>
                <property name="text">
-                <string>Trust Display</string>
+                <string>Network Explorer</string>
                </property>
               </widget>
              </item>
@@ -9422,9 +9422,9 @@ border: none;
    <header>TriblerGUI.widgets.videoplayerinfobutton.h</header>
   </customwidget>
   <customwidget>
-   <class>TrustPageNetwork</class>
+   <class>NetworkExplorerPage</class>
    <extends>QWidget</extends>
-   <header>TriblerGUI.widgets.trustpagenetwork.h</header>
+   <header>TriblerGUI.widgets.networkexplorerpage.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

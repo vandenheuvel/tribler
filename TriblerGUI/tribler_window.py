@@ -26,7 +26,7 @@ from TriblerGUI.dialogs.feedbackdialog import FeedbackDialog
 from TriblerGUI.dialogs.startdownloaddialog import StartDownloadDialog
 from TriblerGUI.tribler_request_manager import TriblerRequestManager
 from TriblerGUI.utilities import get_ui_file_path, get_image_path, get_gui_setting
-from TriblerGUI.widgets.trustpagenetwork import  TRUST_NETWORK_HTML_PATH
+from TriblerGUI.widgets.networkexplorerpage import NETWORK_EXPLORER_HTML_PATH
 
 
 
@@ -140,11 +140,12 @@ class TriblerWindow(QMainWindow):
         # If QWebEngineView cannot be imported, make sure to render the graph trust page instead.
         try:
             from PyQt5.QtWebEngineWidgets import QWebEngineView
-            self.trust_page_network.initialize_trust_page()
+            self.network_explorer_page.initialize_web_page()
         except ImportError:
             self.trust_page_graph.initialize_trust_page()
             label = self.stackedWidget.widget(PAGE_TRUST_GRAPH).window().trust_explanation_label
-            label.setText(label.text().replace("LINK_PLACEHOLDER", TRUST_NETWORK_HTML_PATH))
+            label.setText(label.text().replace("LINK_PLACEHOLDER", NETWORK_EXPLORER_HTML_PATH))
+            self.left_menu_button_trust_display.setText("Graph Display")
             self.left_menu_button_trust_display.clicked.connect(self.clicked_menu_button_trust_graph)
 
         self.stackedWidget.setCurrentIndex(PAGE_LOADING)
