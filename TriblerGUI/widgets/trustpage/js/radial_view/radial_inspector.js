@@ -40,14 +40,17 @@ function RadialInspector(d3element, options) {
                 nodeCount: data.nodes.length,
                 linkCount: data.links.length,
                 color: self.config.node.color.range[0]
-            };
+            },
+            exploreEncouragement = bindings.nodeCount === 1 ? "Exchange content to see more users."
+                : "Click on users to explore the rest of the network.";
+            bindings.user = "user" + (bindings.nodeCount === 1 ? "" : "s");
 
         self._setContents(
             "Tribler Trust Network",
             "Partial view around {focusNodeName}",
             [
-                "Showing <strong>{nodeCount} users</strong>",
-                "Click on users to explore the rest of the network.",
+                "Showing <strong>{nodeCount} {user}</strong>",
+                exploreEncouragement,
                 "Users with" +
                     "<span class='badge inline' style='background:{color}'>Balance: <strong>-10GB</strong></span>" +
                     "or worse will be blocked from downloading until they start uploading again."
@@ -68,13 +71,14 @@ function RadialInspector(d3element, options) {
                 peer_count: node.neighbors.length,
                 color: radial_nodes._calculateFill(node)
             };
+            bindings.user = "user" + (bindings.peer_count === 1 ? "" : "s");
 
         self._setContents(
             self._getNodeIdentifier(node),
             "Anonymous",
             [
-                "Shared <strong>{formatted_upload}</strong> with {peer_count} users",
-                "Consumed <strong>{formatted_download}</strong> from {peer_count} users",
+                "Shared <strong>{formatted_upload}</strong> with {peer_count} {user}",
+                "Consumed <strong>{formatted_download}</strong> from {peer_count} {user}",
                 "<span class='badge' style='background:{color}'>Balance: <strong>{formatted_balance}</strong></span>"
             ], bindings);
     };
