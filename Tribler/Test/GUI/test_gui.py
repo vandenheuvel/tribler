@@ -7,12 +7,11 @@ from unittest import skipUnless
 from PyQt5.QtCore import QPoint, Qt, QTimer
 from PyQt5.QtGui import QPixmap, QRegion
 from PyQt5.QtTest import QTest
-if "linux" not in sys.platform:
-    try:
-        from PyQt5.QtWebEngineWidgets import QWebEngine
-    except ImportError:
-        # If the QtWebEngineWidgets module is not found, the old trust page will be rendered.
-        pass
+try:
+    from PyQt5.QtWebEngineWidgets import QWebEngine
+except ImportError:
+    # If the QtWebEngineWidgets module is not found, the old trust page will be rendered.
+    pass
 from PyQt5.QtWidgets import QApplication, QListWidget, QTreeWidget
 
 import TriblerGUI.core_manager as core_manager
