@@ -23,20 +23,6 @@
     fill: #FFFFFF;
 }
 
-#help-button {
-    font-family: sans-serif;
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    text-align: center;
-    cursor: pointer;
-    color: #FFFFFF;
-    border: 2px solid #FFFFFF;
-    border-radius: 10px;
-    padding: 5px;
-    font-weight: bold;
-}
-
 #help-overlay {
     display: none;
     position: absolute;
@@ -46,6 +32,8 @@
     right: 0;
     z-index: 100;
     cursor: pointer;
+    background: #202020;
+    opacity: .5;
 }
 
 #help-page {
@@ -57,7 +45,7 @@
     left: 0;
     right: 0;
     margin: 0 auto;
-    background: #000000;
+    background: #333333;
     width: 600px;
     z-index: 200;
     overflow: auto;
@@ -73,10 +61,6 @@
     display: block;
 }
 
-.show-help-page #graph {
-    opacity: 0.5;
-}
-
 #help-page-content {
     padding: 10px;
 }
@@ -85,15 +69,15 @@
     text-align: center;
 }
 
-::-webkit-scrollbar-track
-{
-    background-color: #000000;
+::-webkit-scrollbar-track {
+    background-color: #202020;
 }
-::-webkit-scrollbar
-{
+
+::-webkit-scrollbar {
     width: 10px;
-    background-color: #FFFFFF;
+    background-color: #333333;
 }
+
 ::-webkit-scrollbar-thumb {
     background-color: #FFFFFF;
 }
