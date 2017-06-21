@@ -2,7 +2,7 @@
  * This file tests the graph_to_tree.js file with unit tests
  */
 assert = require('assert');
-graph_to_tree = require('../../../../widgets/trustpage/js/graph_to_tree.js');
+graph_to_tree = require('TriblerGUI/widgets/trustpage/js/graph_to_tree.js');
 
 describe('graph_to_tree.js', function () {
 
