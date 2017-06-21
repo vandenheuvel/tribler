@@ -90,6 +90,7 @@ function RadialView(svg, settings) {
             }, self.config.hover_out_delay);
         });
 
+        return self;
     };
 
     /**
