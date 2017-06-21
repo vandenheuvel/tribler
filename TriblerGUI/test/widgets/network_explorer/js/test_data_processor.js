@@ -53,7 +53,8 @@ describe('data_processor.js', function () {
                 public_key: 'aaa',
                 total_up: 5,
                 total_down: 10,
-                score: 0.5
+                score: 0.5,
+                total_neighbors: 1
             }]);
         });
     });
@@ -299,9 +300,9 @@ describe('data_processor.js', function () {
 
     function getTestData() {
         return {
-            node1: {public_key: 'aaa', total_up: 5, total_down: 10, score: 0.5},
-            node2: {public_key: 'bbb', total_up: 110, total_down: 50, score: 0.3},
-            node3: {public_key: 'ccc', total_up: 40, total_down: 50, score: 0.2},
+            node1: {public_key: 'aaa', total_up: 5, total_down: 10, score: 0.5, total_neighbors: 1},
+            node2: {public_key: 'bbb', total_up: 110, total_down: 50, score: 0.3, total_neighbors: 1},
+            node3: {public_key: 'ccc', total_up: 40, total_down: 50, score: 0.2, total_neighbors: 0},
             edge1to2: {from: "aaa", to: "bbb", amount: 4},
             edge2to1: {from: "bbb", to: "aaa", amount: 16},
             edge1to3: {from: "aaa", to: "bbb", amount: 5}
