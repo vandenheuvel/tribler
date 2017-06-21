@@ -150,10 +150,10 @@ class TriblerChainDB(TrustChainDB):
         total_traffic = u"""
             SELECT pk, sum(uploaded) AS uploaded, sum(downloaded) AS downloaded FROM (
               SELECT public_key_a AS pk, traffic_a_to_b AS uploaded, traffic_b_to_a AS downloaded 
-              FROM triblerchain_aggregates GROUP BY public_key_a
+              FROM triblerchain_aggregates
               UNION 
               SELECT public_key_b AS pk, traffic_b_to_a as uploaded, traffic_a_to_b AS downloaded 
-              FROM triblerchain_aggregates GROUP BY public_key_b
+              FROM triblerchain_aggregates
             ) GROUP BY pk
         """
         query = u"""
