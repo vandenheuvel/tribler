@@ -213,8 +213,7 @@ class TriblerChainCommunity(TrustChainCommunity):
         else:
             edges[from_pk] = {to_pk: amount}
 
-    @blocking_call_on_reactor_thread
-    def get_graph(self, public_key=None, neighbor_level=1):
+    def get_graph(self, public_key, query_result):
         """
         Return a dictionary with the neighboring nodes and edges of a certain focus node within a certain radius,
         regarding the local MultiChain database.
@@ -223,13 +222,10 @@ class TriblerChainCommunity(TrustChainCommunity):
         :param neighbor_level: the radius within which the neighbors have to be returned
         :return: a tuple of a list with nodes and a list with edges
         """
-        if public_key is None:
-            public_key = hexlify(self.my_member.public_key)
-
         nodes = {public_key: self.get_node(public_key, {})}
         edges = {}
 
-        for edge in self.persistence.get_graph_edges(public_key, neighbor_level):
+        for edge in query_result:
             from_pk = str(edge[0])
             to_pk = str(edge[1])
             amount_up = edge[2]

@@ -3,6 +3,7 @@ from random import randint
 
 from sqlite3 import connect
 from networkx import gnp_random_graph
+from twisted.internet.defer import Deferred, succeed, inlineCallbacks
 
 from Tribler.community.trustchain.database import TrustChainDB
 from Tribler.community.trustchain.block import TrustChainBlock
@@ -133,7 +134,8 @@ class TriblerChainDB(TrustChainDB):
         result = self.execute(query, (buffer(public_key), buffer(public_key))).fetchone()
         return result[0] or 0, result[1] or 0, result[2] or 0
 
-    def get_graph_edges(self, public_key, neighbor_level=1):
+    def get_graph_edges(self, public_key):
+        neighbor_level = 1
         query = u"""SELECT public_key_a, public_key_b FROM triblerchain_aggregates
                     WHERE public_key_a = ? OR public_key_b = ?"""
 
@@ -167,7 +169,7 @@ class TriblerChainDB(TrustChainDB):
               ON ta.public_key_a = traffic.pk
         """ % {"query": query, "traffic": total_traffic}
 
-        return self.execute(query, (buffer(public_key), buffer(public_key))).fetchall()
+        return succeed(self.execute(query, (buffer(public_key), buffer(public_key))).fetchall())
 
     def check_statistics_database(self):
         """
