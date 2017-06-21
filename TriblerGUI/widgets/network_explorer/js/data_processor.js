@@ -29,7 +29,7 @@ function processData(response) {
         focusNodePublicKey,
         sortNodes,
         makeLocalKeyMap, // after sorting
-        addNeighborsToNodes,
+        addNeighborsToNodes
     ];
 
     return convertResponse(response, converters);
@@ -64,7 +64,8 @@ function mapNodes(response) {
             public_key: node.public_key,
             total_up: node.total_up,
             total_down: node.total_down,
-            score: node.score
+            score: node.score,
+            total_neighbors: node.total_neighbors
         }
     });
 
@@ -340,13 +341,14 @@ function groupBy(list, key) {
 
 /**
  * @typedef {Object} GraphNode
- * @property {String} public_key     - the public key of this node
- * @property {number} local_key      - the local key of this node (corresponds with GraphData.local_keys)
- * @property {number} total_up       - the total upload by this node
- * @property {number} total_down     - the total download by this node
- * @property {number} score          - the score between 0 and 1 for the rating in the network of the node
- * @property {boolean} is_user       - true if this node represents the user
- * @property {GraphNode[]} neighbors - the list of neighbors of this node
+ * @property {String} public_key      - the public key of this node
+ * @property {number} local_key       - the local key of this node (corresponds with GraphData.local_keys)
+ * @property {number} total_up        - the total upload by this node
+ * @property {number} total_down      - the total download by this node
+ * @property {number} score           - the score between 0 and 1 for the rating in the network of the node
+ * @property {number} total_neighbors - The number of neighbors the node has
+ * @property {boolean} is_user        - true if this node represents the user
+ * @property {GraphNode[]} neighbors  - the list of neighbors of this node
  */
 
 /**

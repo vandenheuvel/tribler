@@ -121,7 +121,7 @@ class TriblerChainDB(TrustChainDB):
         :return: amount uploaded, amount downloaded
         """
         query = u"""
-            SELECT sum(uploaded), sum(downloaded) FROM (
+            SELECT sum(uploaded), sum(downloaded), count(*) FROM (
               SELECT traffic_a_to_b AS uploaded, traffic_b_to_a AS downloaded 
               FROM triblerchain_aggregates WHERE public_key_a = ?
               UNION 
@@ -131,7 +131,7 @@ class TriblerChainDB(TrustChainDB):
         """
 
         result = self.execute(query, (buffer(public_key), buffer(public_key))).fetchone()
-        return result[0] or 0, result[1] or 0
+        return result[0] or 0, result[1] or 0, result[2] or 0
 
     def get_graph_edges(self, public_key, neighbor_level=1):
         query = u"""SELECT public_key_a, public_key_b FROM triblerchain_aggregates
@@ -148,7 +148,7 @@ class TriblerChainDB(TrustChainDB):
             """ % {"level": level, "last_level": query}
 
         total_traffic = u"""
-            SELECT pk, sum(uploaded) AS uploaded, sum(downloaded) AS downloaded FROM (
+            SELECT pk, sum(uploaded) AS uploaded, sum(downloaded) AS downloaded, count(*) AS neighbors FROM (
               SELECT public_key_a AS pk, traffic_a_to_b AS uploaded, traffic_b_to_a AS downloaded 
               FROM triblerchain_aggregates
               UNION 
@@ -158,7 +158,7 @@ class TriblerChainDB(TrustChainDB):
         """
         query = u"""
             SELECT ta.public_key_a, ta.public_key_b, ta.traffic_a_to_b, ta.traffic_b_to_a,
-                   traffic.uploaded, traffic.downloaded
+                   traffic.uploaded, traffic.downloaded, traffic.neighbors
             FROM triblerchain_aggregates ta
             JOIN (%(query)s) other 
               ON ta.public_key_a = other.public_key_a

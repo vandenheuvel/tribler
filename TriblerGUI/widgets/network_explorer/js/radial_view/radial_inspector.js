@@ -68,7 +68,9 @@ function RadialInspector(d3element, options) {
                 formatted_upload: formatBytes(node.total_up),
                 formatted_download: formatBytes(node.total_down),
                 formatted_balance: (balance > 0 ? "+" : "") + formatBytes(balance),
-                peer_count: node.neighbors.length,
+                peer_count: node.total_neighbors,
+                shown_peer_count: node.neighbors.length,
+                x: self._getNodeIdentifier(node),
                 color: radial_nodes._calculateFill(node)
             };
             bindings.user = "user" + (bindings.peer_count === 1 ? "" : "s");
@@ -77,8 +79,9 @@ function RadialInspector(d3element, options) {
             self._getNodeIdentifier(node),
             "Anonymous",
             [
-                "Shared <strong>{formatted_upload}</strong> with {peer_count} {user}",
-                "Consumed <strong>{formatted_download}</strong> from {peer_count} {user}",
+                "Shared <strong>{formatted_upload}</strong>",
+                "Consumed <strong>{formatted_download}</strong>",
+                "Showing {shown_peer_count} of {peer_count} connected {user}.",
                 "<span class='badge' style='background:{color}'>Balance: <strong>{formatted_balance}</strong></span>"
             ], bindings);
     };

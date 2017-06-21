@@ -166,7 +166,7 @@ class TriblerChainCommunity(TrustChainCommunity):
                 self.pending_bytes[pk].clean.reset(0)
         yield super(TriblerChainCommunity, self).unload_community()
 
-    def get_node(self, public_key, nodes, total_up=None, total_down=None):
+    def get_node(self, public_key, nodes, total_up=None, total_down=None, total_neighbors=None):
         """
         Get a node in an encoded format and with the maximum values given the current dictionary of nodes.
 
@@ -184,13 +184,16 @@ class TriblerChainCommunity(TrustChainCommunity):
         """
         if public_key in nodes:
             return {"public_key": public_key, "total_up": max(total_up, nodes[public_key]["total_up"]),
-                    "total_down": max(total_down, nodes[public_key]["total_down"])}
+                    "total_down": max(total_down, nodes[public_key]["total_down"]),
+                    "total_neighbors": max(total_neighbors, nodes[public_key]["total_neighbors"])}
         else:
-            if total_up and total_down:
-                return {"public_key": public_key, "total_up": total_up, "total_down": total_down}
+            if total_up and total_down and total_neighbors:
+                return {"public_key": public_key, "total_up": total_up, "total_down": total_down,
+                        "total_neighbors": total_neighbors}
             else:
                 total_traffic = self.persistence.total_traffic(public_key)
-                return {"public_key": public_key, "total_up": total_traffic[0], "total_down": total_traffic[1]}
+                return {"public_key": public_key, "total_up": total_traffic[0], "total_down": total_traffic[1],
+                        "total_neighbors": total_traffic[2]}
 
     @staticmethod
     def update_edges(from_pk, to_pk, edges, amount=0):
@@ -231,7 +234,8 @@ class TriblerChainCommunity(TrustChainCommunity):
             to_pk = str(edge[1])
             amount_up = edge[2]
             amount_down = edge[3]
-            nodes[from_pk] = self.get_node(from_pk, nodes, total_up=edge[4], total_down=edge[5])
+            nodes[from_pk] = self.get_node(from_pk, nodes, total_up=edge[4], total_down=edge[5],
+                                           total_neighbors=edge[6])
             nodes[to_pk] = self.get_node(to_pk, nodes)
             self.update_edges(from_pk, to_pk, edges, amount=amount_up)
             self.update_edges(to_pk, from_pk, edges, amount=amount_down)

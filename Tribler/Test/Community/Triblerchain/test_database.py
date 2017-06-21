@@ -104,19 +104,22 @@ class TestDatabase(TrustChainTestCase):
         self.db.insert_aggregate_block(self.block2)
         self.db.insert_aggregate_block(self.block3)
 
-        pk_1_up, pk_1_down = self.db.total_traffic("11")
-        pk_f_up, pk_f_down = self.db.total_traffic("ff")
-        fake_up, fake_down = self.db.total_traffic("aa")
+        pk_1_up, pk_1_down, pk_1_neigh = self.db.total_traffic("11")
+        pk_f_up, pk_f_down, pk_f_neigh = self.db.total_traffic("ff")
+        fake_up, fake_down, fake_neigh = self.db.total_traffic("aa")
 
         # Multiple links
         self.assertEqual(self.block1.transaction["down"] + self.block2.transaction["up"], pk_1_up)
         self.assertEqual(self.block1.transaction["up"] + self.block2.transaction["down"], pk_1_down)
+        self.assertEqual(2, pk_1_neigh)
         # One link
         self.assertEqual(self.block3.transaction["up"], pk_f_up)
         self.assertEqual(self.block3.transaction["down"], pk_f_down)
+        self.assertEqual(1, pk_f_neigh)
         # No links
         self.assertEqual(0, fake_up)
         self.assertEqual(0, fake_down)
+        self.assertEqual(0, fake_neigh)
 
     @blocking_call_on_reactor_thread
     def test_neighbors(self):
