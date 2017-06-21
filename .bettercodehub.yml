@@ -184,6 +184,7 @@ exclude:
 - /TriblerGUI/widgets/loading_list_item.py
 - /TriblerGUI/widgets/loadingpage.py
 - /TriblerGUI/widgets/manageplaylistpage.py
+- /TriblerGUI/widgets/network_explorer/js/style_config.js
 - /TriblerGUI/widgets/playlist_list_item.py
 - /TriblerGUI/widgets/playlistpage.py
 - /TriblerGUI/widgets/searchresultspage.py
@@ -205,6 +206,9 @@ exclude:
 - /mac/makedistmac_64bit.sh
 - /twisted/plugins/.*
 - /win/locate-python.py
+- /run_tribler.py
+- /setup.py
+- /tribler.sh
 component_depth: 1
 languages:
 - javascript
