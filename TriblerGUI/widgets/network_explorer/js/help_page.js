@@ -160,7 +160,7 @@ function HelpPage(options) {
         // Fill array with the data belonging to each edge
         for (var i = 0; i < numberOfEdges; i++) {
             var x = (i + 1) * spacing;
-            self._drawLink(containerSvg, x, 0, conf.edgeLength, edgeWidthScale(i), 0.5, conf.dividingWidth);
+            self._drawLink(containerSvg, x, 0, conf.edgeLength, edgeWidthScale(i), 0.5);
             self._drawLabel(containerSvg, conf.width.labels[i], x, labelY);
         }
     };
@@ -183,7 +183,7 @@ function HelpPage(options) {
         // Fill array with the data belonging to each edge
         for (var i = 0; i < numberOfEdges; i++) {
             var x = (i + 1) * spacing;
-            self._drawLink(containerSvg, x, 0, conf.edgeLength, edgeWidth, (i + 1) / (numberOfEdges + 1), conf.dividingWidth);
+            self._drawLink(containerSvg, x, 0, conf.edgeLength, edgeWidth, (i + 1) / (numberOfEdges + 1));
             self._drawLabel(containerSvg, conf.separator.labels[i], x, labelY);
         }
     };
@@ -210,17 +210,17 @@ function HelpPage(options) {
      * @param separatorThickness
      * @private
      */
-    self._drawLink = function (parent, x, y, length, width, ratio, separatorThickness) {
+    self._drawLink = function (parent, x, y, length, width, ratio) {
         parent
             .append("line")
             .attr("x1", x - length / 2)
-            .attr("x2", x - length / 2 + length * ratio - separatorThickness / 2)
+            .attr("x2", x - length / 2 + length * ratio - self.config.help.edges.dividingWidth / 2)
             .attr("stroke", self.config.link.color)
             .attr("stroke-width", width);
 
         parent
             .append("line")
-            .attr("x1", x - length / 2 + length * ratio + separatorThickness / 2)
+            .attr("x1", x - length / 2 + length * ratio + self.config.help.edges.dividingWidth / 2)
             .attr("x2", x + length / 2)
             .attr("stroke", self.config.link.color)
             .attr("stroke-width", width);
