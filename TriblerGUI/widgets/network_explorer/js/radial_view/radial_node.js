@@ -182,7 +182,7 @@ function RadialNodes(svg, options) {
                 .transition()
                 .duration(self.config.marker.fadeInDuration)
                 .style("opacity", 1)
-                .attr("r", self.config.marker.radius);
+                .attr("r", self._calculateRadius(node) * self.config.marker.radiusFactor);
         });
 
     };
