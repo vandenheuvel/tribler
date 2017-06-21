@@ -42,7 +42,7 @@ function RadialPositioning(options) {
         });
 
         // Make a tree from the graph
-        var tree = graphToTree(newGraphData.focus_node);
+        var tree = self._makeTreeFromGraphNode(newGraphData.focus_node);
 
         // Bind each tree node to its graph node
         tree.nodes.forEach(function (treeNode) {
@@ -70,4 +70,91 @@ function RadialPositioning(options) {
 
     };
 
+    /**
+     * Turns a graph structure into a tree structure
+     * @param {GraphNode} graphRootNode - the focus node of the graph
+     * @returns {{root: TreeNode, nodes: TreeNode[]}} - the root and all nodes of the tree
+     */
+    self._makeTreeFromGraphNode = function (graphRootNode) {
+
+        var treeRoot = {
+                graphNode: graphRootNode,
+                children: [],
+                parent: null,
+                depth: 0,
+                descendants: 1
+            },
+            treeNodes = [treeRoot],
+            nextQueue = [treeRoot],
+            treeNode,
+            queue,
+            keys = [graphRootNode.public_key];
+
+        while ((queue = nextQueue.splice(0)).length > 0) {
+
+            while (treeNode = queue.shift()) {
+
+                treeNode.graphNode.neighbors.forEach(function (neighbor) {
+
+                    // Check if the neighbor is not already in the tree
+                    if (keys.indexOf(neighbor.public_key) >= 0) return;
+
+                    keys.push(neighbor.public_key);
+
+                    // Make a tree node and add to queue
+                    var treeChild = {
+                        graphNode: neighbor,
+                        children: [],
+                        parent: treeNode,
+                        depth: treeNode.depth + 1,
+                        descendants: 1
+                    };
+
+                    treeNodes.push(treeChild);
+                    treeNode.children.push(treeChild);
+                    nextQueue.push(treeChild);
+                })
+            }
+        }
+
+        self._calculateDescendants(treeRoot);
+
+        return {root: treeRoot, nodes: treeNodes};
+    };
+
+    /**
+     * Calculates the number of descendants of each node and sets this number as a property
+     * @param treeNode
+     * @returns {number} - the number of descendants (>= 1)
+     * @private
+     */
+    self._calculateDescendants = function (treeNode) {
+        return treeNode.descendants = treeNode.children.reduce(function (runningSum, childNode) {
+            return runningSum + self._calculateDescendants(childNode);
+        }, 1);
+    }
+
+}
+
+/**
+ * @typedef {Object} Tree
+ * @property {TreeNode} root
+ * @property {TreeNode[]} nodes
+ * @property {number[]} nodes_per_depth
+ */
+
+/**
+ * @typedef {Object} TreeNode
+ * @property {GraphNode} graphNode
+ * @property {TreeNode[]} children
+ * @property {TreeNode|null} parent
+ * @property {number} depth
+ * @property {number} descendants
+ */
+
+/**
+ * Export functions so Mocha can test it
+ */
+if (typeof module !== 'undefined') {
+    module.exports = RadialPositioning;
 }
