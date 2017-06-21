@@ -4,10 +4,13 @@ Handle HTTP requests for the trust display, whilst validating the arguments and 
 import json
 from binascii import hexlify
 
+from twisted.internet.defer import Deferred
 from twisted.web import http, resource
 
 from Tribler.community.triblerchain.community import TriblerChainCommunity
 from Tribler.Core.exceptions import OperationNotEnabledByConfigurationException
+
+NOT_DONE_YET = 1
 
 
 class TrustchainEndpoint(resource.Resource):
@@ -302,13 +305,29 @@ class TrustChainNetworkEndpoint(resource.Resource):
 
         max_neighbors = self.get_max_neighbors(request.args)
 
-        nodes, edges = tribler_chain_community.get_graph(focus_node, neighbor_level, max_neighbors)
+        # nodes, edges = tribler_chain_community.get_graph(focus_node, neighbor_level, max_neighbors)
+        def on_graph_calculated(nodes, edges):
+            request.write(json.dumps({"user_node": user_node,
+                                      "focus_node": focus_node,
+                                      "neighbor_level": neighbor_level,
+                                      "nodes": nodes,
+                                      "edges": edges}))
+            request.finish()
 
-        return json.dumps({"user_node": user_node,
-                           "focus_node": focus_node,
-                           "neighbor_level": neighbor_level,
-                           "nodes": nodes,
-                           "edges": edges})
+
+        # TODO: Check whether this is necessary
+        def on_error(error):
+            request.setResponseCode(http.INTERNAL_SERVER_ERROR)
+            request.write(json.dumps({"error": error.getErrorMessage()}))
+            request.finish()
+
+        deferred = Deferred()
+        deferred.addCallback(tribler_chain_community.persistence.get_graph_edges)
+        deferred.addCallback(tribler_chain_community.get_graph, public_key=focus_node)
+        deferred.addCallback(on_graph_calculated)
+        deferred.addErrback(on_error)
+
+        return NOT_DONE_YET
 
     @staticmethod
     def use_dummy_data(dataset, community):

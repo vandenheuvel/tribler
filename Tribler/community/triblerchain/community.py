@@ -195,6 +195,7 @@ class TriblerChainCommunity(TrustChainCommunity):
                 return {"total_up": total_traffic[0], "total_down": total_traffic[1],
                         "total_neighbors": total_traffic[2]}
 
+
     def format_edges(self, public_key, neighbor_level):
         if public_key is None:
             public_key = hexlify(self.my_member.public_key)
