@@ -216,8 +216,7 @@ class TrustChainNetworkEndpoint(resource.Resource):
         """
         Process the GET request which retrieves information about the TrustChain network.
 
-        .. http:get:: /trustchain/network?dataset=(string: dataset)
-                                          &focus_node=(string: public key)
+        .. http:get:: /trustchain/network?focus_node=(string: public key)
                                           &neighbor_level=(int: neighbor level)
                                           &max_neighbors=(int: max_neighbors)
                                           &mandatory_nodes=(list: mandatory_nodes)
@@ -228,11 +227,6 @@ class TrustChainNetworkEndpoint(resource.Resource):
         and the neighbors of those neighbors are taken into consideration).
 
         Note: the parameters are handled as follows:
-        - dataset
-            - Not given: TrustChain data
-            - "static": Static dummy data
-            - "random": Random dummy data
-            - otherwise: TrustChain data
         - focus_node
             - Not given: HTTP 400
             - Non-String value: HTTP 400
@@ -295,9 +289,6 @@ class TrustChainNetworkEndpoint(resource.Resource):
         except OperationNotEnabledByConfigurationException as exc:
             return TrustChainNetworkEndpoint.return_error(request, status_code=http.NOT_FOUND, message=exc.args)
 
-        if "dataset" in request.args:
-            self.use_dummy_data(request.args["dataset"][0], tribler_chain_community)
-
         if "focus_node" not in request.args:
             return TrustChainNetworkEndpoint.return_error(request, message="focus_node parameter missing")
 
@@ -305,12 +296,10 @@ class TrustChainNetworkEndpoint(resource.Resource):
         if not focus_node:
             return TrustChainNetworkEndpoint.return_error(request, message="focus_node parameter empty")
 
-        focus_node = self.get_focus_node(focus_node, tribler_chain_community)
+        if focus_node == "self":
+            focus_node = hexlify(tribler_chain_community.my_member.public_key)
 
-        if tribler_chain_community.persistence.dummy_setup:
-            user_node = "00"
-        else:
-            user_node = hexlify(tribler_chain_community.my_member.public_key)
+        user_node = hexlify(tribler_chain_community.my_member.public_key)
 
         neighbor_level = self.get_neighbor_level(request.args)
 
@@ -330,39 +319,6 @@ class TrustChainNetworkEndpoint(resource.Resource):
         d.addCallback(finalize_request)
 
         return NOT_DONE_YET
-
-    @staticmethod
-    def use_dummy_data(dataset, community):
-        """
-        Set a dummy database for the rest of this run.
-
-        Note that once a dummy database is set, this dummy database is used until the software is restarted.
-        :param dataset: the dummy dataset type
-        :param community: the community to get the database from
-        :return:
-        """
-        if isinstance(dataset, basestring):
-            if dataset == "static" or dataset == "random":
-                if dataset == "static":
-                    community.persistence.use_dummy_data(use_random=False)
-                elif dataset == "random":
-                    community.persistence.use_dummy_data(use_random=True)
-
-    @staticmethod
-    def get_focus_node(focus_node, community):
-        """
-        Set the focus node.
-
-        :param focus_node: the focus_node argument given in the request
-        :param community: the community to get the database from
-        :return: the focus node value
-        """
-        if focus_node == "self":
-            if community.persistence.dummy_setup:
-                focus_node = "00"
-            else:
-                focus_node = hexlify(community.my_member.public_key)
-        return focus_node
 
     @staticmethod
     def get_neighbor_level(arguments):

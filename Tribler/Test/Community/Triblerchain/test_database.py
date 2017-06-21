@@ -181,25 +181,3 @@ class TestDatabase(TrustChainTestCase):
         aggregate_version, = next(self.db.execute(u"SELECT value FROM option WHERE key = 'aggregate_version' LIMIT 1"))
         self.assertEqual(database_version, u"100")
         self.assertEqual(aggregate_version, u"101")
-
-    @blocking_call_on_reactor_thread
-    def test_random_dummy_data(self):
-        """
-        The database should contain 104 rows when random dummy data is used.
-        """
-        self.db.use_dummy_data(use_random=True)
-
-        num_rows = self.db.execute(u"SELECT count (*) FROM triblerchain_aggregates").fetchone()[0]
-        self.assertGreater(num_rows, 0)
-        self.assertTrue(self.db.dummy_setup)
-
-    @blocking_call_on_reactor_thread
-    def test_static_dummy_data(self):
-        """
-        The database should contain the fixed data set when non-random dummy data is used.
-        """
-        self.db.use_dummy_data(use_random=False)
-
-        num_rows = self.db.execute(u"SELECT count (*) FROM triblerchain_aggregates").fetchone()[0]
-        self.assertEqual(num_rows, 17)
-        self.assertTrue(self.db.dummy_setup)

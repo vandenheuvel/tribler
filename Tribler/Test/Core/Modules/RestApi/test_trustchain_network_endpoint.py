@@ -40,12 +40,11 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         self.dispersy.get_communities = lambda: [self.tribler_chain_community]
         self.session.get_dispersy_instance = lambda: self.dispersy
 
-    def set_up_endpoint_request(self, dataset, focus_node, neighbor_level, max_neighbors=1):
+    def set_up_endpoint_request(self, focus_node, neighbor_level, max_neighbors=1):
         """
         Create a mocked session, create a TrustchainNetworkEndpoint instance
         and create a request from the provided parameters.
 
-        :param dataset: dataset to use for the request
         :param focus_node: node for which to request the data
         :param neighbor_level: amount of levels from this node to request
         :return: a 2-tuple of the TrustchainNetworkEndpoint and the request
@@ -56,8 +55,9 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         request = MockObject()
         request.setHeader = lambda header, flags: None
         request.setResponseCode = lambda status_code: None
-        request.args = {"dataset": [str(dataset)], "focus_node": [str(focus_node)],
-                        "neighbor_level": [str(neighbor_level)], "max_neighbors": [str(max_neighbors)]}
+        request.args = {"focus_node": [str(focus_node)],
+                        "neighbor_level": [str(neighbor_level)],
+                        "max_neighbors": [str(max_neighbors)]}
         return network_endpoint, request
 
     def test_get_no_focus_node(self):
@@ -65,7 +65,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         Evaluate whether the API returns an Bad Request error if there is no focus node specified.
         """
         exp_message = {"error": "focus_node parameter missing"}
-        network_endpoint, request = self.set_up_endpoint_request("trustchain", "X", 1)
+        network_endpoint, request = self.set_up_endpoint_request("X", 1)
         del request.args["focus_node"]
         self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
 
@@ -74,7 +74,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         Evaluate whether the API returns a Bad Request error if the focus node is empty.
         """
         exp_message = {"error": "focus_node parameter empty"}
-        network_endpoint, request = self.set_up_endpoint_request("trustchain", "X", 1)
+        network_endpoint, request = self.set_up_endpoint_request("X", 1)
         request.args["focus_node"] = [""]
         self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
 
@@ -82,14 +82,14 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         """
         Evaluate whether the max_neighbors argument is correctly parsed.
         """
-        network_endpoint, request = self.set_up_endpoint_request("trustchain", "X", 1, 4)
+        network_endpoint, request = self.set_up_endpoint_request("X", 1, 4)
         self.assertEqual(4, network_endpoint.get_max_neighbors(request.args))
 
     def test_no_max_neighbors(self):
         """
         Evaluate whether max_neighbors return the correct default value when the argument is not present.
         """
-        network_endpoint, request = self.set_up_endpoint_request("trustchain", "X", 1, 4)
+        network_endpoint, request = self.set_up_endpoint_request("X", 1, 4)
         del request.args["max_neighbors"]
         self.assertEqual(maxint, network_endpoint.get_max_neighbors(request.args))
 
@@ -97,7 +97,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         """
         Evaluate whether max_neighbors return the correct default value when the argument is negative.
         """
-        network_endpoint, request = self.set_up_endpoint_request("trustchain", "X", 1, 4)
+        network_endpoint, request = self.set_up_endpoint_request("X", 1, 4)
         request.args["max_neighbors"] = ["-1"]
         self.assertEqual(maxint, network_endpoint.get_max_neighbors(request.args))
 
@@ -130,7 +130,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
                        u"nodes": [{u"public_key": u"xyz", u"total_up": 0, u"total_down": 0, u"score": 0.5}],
                        u"edges": []}
         d.callback(([{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}], []))
-        return self.do_request('trustchain/network?dataset=trustchain&focus_node=30&neighbor_level=1',
+        return self.do_request('trustchain/network?focus_node=30&neighbor_level=1',
                                expected_code=200, expected_json=exp_message)\
             .addCallback(lambda message: self.assertEqual(message, dumps(exp_message)))
 
@@ -147,7 +147,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
                        u"edges": [{u"from": u"xyz", u"to": u"abc", u"amount": 30}]}
         d.callback(([{"public_key": "xyz", "total_up": 0, "total_down": 0, u"score": 0.5}],
                     [{"from": "xyz", "to": "abc", "amount": 30}]))
-        return self.do_request('trustchain/network?dataset=trustchain&focus_node=30&neighbor_level=1',
+        return self.do_request('trustchain/network?focus_node=30&neighbor_level=1',
                                expected_code=200, expected_json=exp_message) \
             .addCallback(lambda message: self.assertEqual(message, dumps(exp_message)))
 
@@ -164,7 +164,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
                                    u"total_neighbors": 0}],
                        u"edges": []}
         d.callback(([{"public_key": "0000", "total_up": 0, "total_down": 0, "score": 0.5, "total_neighbors": 0}], []))
-        return self.do_request('trustchain/network?dataset=trustchain&focus_node=self&neighbor_level=1',
+        return self.do_request('trustchain/network?focus_node=self&neighbor_level=1',
                                expected_code=200, expected_json=exp_message) \
             .addCallback(lambda message: self.assertEqual(message, dumps(exp_message)))
 
@@ -182,7 +182,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
                        u"edges": []}
 
         d.callback(([{"public_key": "0000", "total_up": 0, "total_down": 0, "score": 0.5, "total_neighbors": 0}], []))
-        return self.do_request('trustchain/network?dataset=trustchain&focus_node=self&neighbor_level=-1',
+        return self.do_request('trustchain/network?focus_node=self&neighbor_level=-1',
                                expected_code=200, expected_json=exp_message) \
             .addCallback(lambda message: self.assertEqual(message, dumps(exp_message)))
 
@@ -237,15 +237,4 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
             (_ for _ in ()).throw(OperationNotEnabledByConfigurationException("trustchain is not enabled"))
         exp_message = {u"error": u"trustchain is not enabled"}
         return self.do_request('trustchain/network?focus_node=self',
-                               expected_code=http.NOT_FOUND, expected_json=exp_message)
-
-    @deferred(timeout=10)
-    def test_mc_community_exception_dummy_data(self):
-        """
-        Evaluate whether the API returns the correct error when the trustchain community can't be found with dummy data.
-        """
-        TrustChainNetworkEndpoint.get_tribler_chain_community = lambda _: \
-            (_ for _ in ()).throw(OperationNotEnabledByConfigurationException("trustchain is not enabled"))
-        exp_message = {u"error": u"trustchain is not enabled"}
-        return self.do_request('trustchain/network?dataset=static&focus_node=self',
                                expected_code=http.NOT_FOUND, expected_json=exp_message)

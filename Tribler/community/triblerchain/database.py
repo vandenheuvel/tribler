@@ -45,7 +45,6 @@ class TriblerChainDB(TrustChainDB):
         """
         super(TriblerChainDB, self).__init__(working_directory, db_name)
         self.check_statistics_database()
-        self.dummy_setup = False
 
     def add_block(self, block):
         """
@@ -200,73 +199,3 @@ class TriblerChainDB(TrustChainDB):
         else:
             self.executescript(triblerchain_aggregates_schema)
             self.commit()
-
-    #TODO: needs to be removed before merge to Tribler
-    def use_dummy_data(self, use_random=True):
-        """
-        Creates a new database and fills it with dummy data.
-        :param use_random: true if you want randomly generated data
-        """
-        if self.dummy_setup:
-            return
-
-        self.dummy_setup = True
-
-        self.close()
-
-        self._connection = connect(":memory:")
-        self._cursor = self._connection.cursor()
-
-        self.check_database(u"0")
-        self.check_statistics_database()
-
-        if use_random:
-            blocks = [["00" if edge[0] == 0 else "{0:08x}".format(edge[0] * 41903747),
-                       "00" if edge[1] == 0 else "{0:08x}".format(edge[1] * 41903747),
-                       randint(100, 1e10), randint(100, 1e10)]
-                      for edge in gnp_random_graph(100, 0.05).edges()]
-
-        else:
-            blocks = [
-                # from, to, up, down
-                ['00', '01', 1, 1],
-                ['01', '02', 100, 100],
-                ['01', '03', 100, 100],
-                ['01', '04', 100, 100],
-                ['01', '05', 100, 100],
-                ['00', '01', 10, 5],
-                ['01', '00', 3, 6],
-                ['01', '00', 46, 12],
-                ['00', '02', 123, 6],
-                ['02', '00', 21, 3],
-                ['00', '03', 22, 68],
-                ['03', '00', 234, 12],
-                ['00', '04', 57, 357],
-                ['04', '00', 223, 2],
-                ['01', '05', 13, 5],
-                ['05', '01', 14, 6],
-                ['01', '06', 234, 5],
-                ['01', '10', 102, 5],
-                ['10', '01', 123, 0],
-                ['02', '07', 87, 5],
-                ['07', '02', 342, 1],
-                ['02', '08', 0, 5],
-                ['02', '08', 78, 23],
-                ['03', '04', 20, 5],
-                ['04', '03', 3, 5],
-                ['04', '09', 650, 5],
-                ['09', '04', 650, 5],
-                ['05', '06', 234, 5],
-                ['06', '05', 5, 323],
-                ['06', '07', 12, 5],
-                ['07', '06', 12, 5],
-                ['09', '10', 51, 123],
-                ['10', '09', 76, 5]
-            ]
-
-        for block in blocks:
-            insert_block = TrustChainBlock()
-            insert_block.public_key = unhexlify(block[0])
-            insert_block.link_public_key = unhexlify(block[1])
-            insert_block.transaction = {"up": block[2], "down": block[3]}
-            self.insert_aggregate_block(insert_block)
