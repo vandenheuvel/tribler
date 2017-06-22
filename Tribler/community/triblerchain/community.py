@@ -1,5 +1,3 @@
-from binascii import hexlify
-
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.task import LoopingCall
@@ -195,20 +193,18 @@ class TriblerChainCommunity(TrustChainCommunity):
                 return {"total_up": total_traffic[0], "total_down": total_traffic[1],
                         "total_neighbors": total_traffic[2]}
 
-    def format_edges(self, public_key, neighbor_level):
+    def format_edges(self, edge_list, public_key):
         """
         Get all the relevant edges from the local TrustChain database.
+        :param edge_list: intermediate result from the database
         :param public_key: public key of the focus node
-        :param neighbor_level: the redius within which the neighbors have to be returned
         :return: a tuple with a dict of nodes and a dict with a list of edges per public key
         """
         nodes = {public_key: self.get_node(public_key, {})}
         edges = {}
 
-        query_result = self.persistence.get_graph_edges(public_key, neighbor_level)
-
         # Find all nodes and all edges in the result
-        for edge in query_result:
+        for edge in edge_list:
             from_pk = str(edge[0])
             to_pk = str(edge[1])
             amount_up = edge[2]
@@ -225,20 +221,16 @@ class TriblerChainCommunity(TrustChainCommunity):
 
         return nodes, edges
 
-    @blocking_call_on_reactor_thread
-    def get_graph(self, public_key, neighbor_level, max_neighbors, mandatory_nodes):
+    @staticmethod
+    def build_graph((nodes, edges), public_key, neighbor_level, max_neighbors, mandatory_nodes):
         """
-        Return a dictionary with the neighboring nodes and edges of a certain focus node within a certain radius,
-        regarding the local TrustChain database, limited in the amount of higher level neighbors per node.
-
-        :param public_key: the public key of the focus node in raw format
+        Create a graph representing the network.
+        :param public_key: public key of the focus node
         :param neighbor_level: the radius within which the neighbors have to be returned
         :param max_neighbors: the maximum amount of higher level neighbors one node may have
         :param mandatory_nodes: list of nodes that have to be in the visualization if possible
-        :return: a tuple of a list with nodes and a list with edges
+        :return: a tuple containing the list of nodes and list of edges respectively
         """
-        nodes, edges = self.format_edges(public_key, neighbor_level)
-
         return_nodes = []
         return_edges = []
 
@@ -270,7 +262,7 @@ class TriblerChainCommunity(TrustChainCommunity):
                 for edge in edges[node]:
                     # Free edge, opposite node in same level
                     if edge[0] in this_level:
-                        self.add_edges(edge, return_edges, node, next_level)
+                        TriblerChainCommunity.add_edges(edge, return_edges, node, next_level)
 
                     # Edge to next level
                     elif edge[0] not in nodes_visited and current_level != neighbor_level:
@@ -279,7 +271,7 @@ class TriblerChainCommunity(TrustChainCommunity):
                             if num_edges >= max_neighbors:
                                 continue
                             num_edges += 1
-                        self.add_edges(edge, return_edges, node, next_level, True)
+                        TriblerChainCommunity.add_edges(edge, return_edges, node, next_level, True)
 
                     # Else the node is in a lower level and thus the edge is not shown
             this_level = next_level
@@ -305,6 +297,21 @@ class TriblerChainCommunity(TrustChainCommunity):
             return_edges.append(new_edge)
             return_edges.append({"from": edge[0], "to": node, "amount": edge[2]})
 
+    def get_graph(self, public_key, neighbor_level, max_neighbors, mandatory_nodes):
+        """
+        Return a dictionary with the neighboring nodes and edges of a certain focus node within a certain radius,
+        regarding the local TrustChain database, limited in the amount of higher level neighbors per node.
+
+        :param public_key: the public key of the focus node in raw format
+        :param neighbor_level: the radius within which the neighbors have to be returned
+        :param max_neighbors: the maximum amount of higher level neighbors one node may have
+        :param mandatory_nodes: list of nodes that have to be in the visualization if possible
+        :return: a deferred object with callbacks to format the data
+        """
+        d = self.persistence.get_graph_edges(public_key, neighbor_level)
+        d.addCallback(self.format_edges, public_key)
+        d.addCallback(self.build_graph, public_key, neighbor_level, max_neighbors, mandatory_nodes)
+        return d
 
 class TriblerChainCommunityCrawler(TriblerChainCommunity):
     """

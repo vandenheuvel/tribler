@@ -1,3 +1,7 @@
+from twisted.internet import reactor
+from twisted.internet.defer import inlineCallbacks, returnValue, Deferred
+from twisted.internet.task import deferLater
+
 from Tribler.Test.Community.Trustchain.test_community import BaseTestTrustChainCommunity
 from Tribler.Test.Community.Trustchain.test_trustchain_utilities import TrustChainTestCase
 from Tribler.community.triblerchain.block import TriblerChainBlock
@@ -7,9 +11,6 @@ from Tribler.community.tunnel.routing import Circuit
 from Tribler.dispersy.requestcache import IntroductionRequestCache
 from Tribler.dispersy.tests.dispersytestclass import DispersyTestFunc
 from Tribler.dispersy.util import blocking_call_on_reactor_thread
-from twisted.internet import reactor
-from twisted.internet.defer import inlineCallbacks, returnValue
-from twisted.internet.task import deferLater
 
 
 class TestPendingBytes(TrustChainTestCase):
@@ -390,7 +391,6 @@ class TestTriblerChainCommunity(BaseTestTrustChainCommunity):
             ("aa", "bb", 10, 15, 10, 15, 1),
             ("bb", "cc", 8, 3, 23, 13, 2)
         ]
-        node.community.persistence.get_graph_edges = lambda _1, _2: edge_list
         node.community.persistence.total_traffic = lambda pk: (0, 0, 1)
 
         expected_nodes = {
@@ -405,11 +405,11 @@ class TestTriblerChainCommunity(BaseTestTrustChainCommunity):
             "cc": [("bb", 3, 8)]
         }
 
-        nodes, edges = node.community.format_edges("aa", 2)
+        nodes, edges = node.community.format_edges(edge_list, "aa")
         self.assertDictEqual(nodes, expected_nodes)
         self.assertDictEqual(expected_edges, edges)
 
-    def test_get_graph_no_edges(self):
+    def test_build_graph_no_edges(self):
         """
         Verify whether get_graph returns a correct result if no edges are present.
         """
@@ -419,18 +419,16 @@ class TestTriblerChainCommunity(BaseTestTrustChainCommunity):
         }
         edges = {}
 
-        node.community.format_edges = lambda _1, _2: (nodes, edges)
-
         expected_nodes = [
             {"public_key": "aa", "total_up": 0, "total_down": 0, "total_neighbors": 0, "score": 0.5}
         ]
         expected_edges = []
 
-        actual_nodes, actual_edges = node.community.get_graph("aa", 2, 0, [])
+        actual_nodes, actual_edges = node.community.build_graph((nodes, edges), "aa", 2, 0, [])
         self.assertListEqual(expected_nodes, actual_nodes)
         self.assertListEqual(expected_edges, actual_edges)
 
-    def test_get_graph(self):
+    def test_build_graph(self):
         """
         Verify whether get_graph returns a correct list of nodes and edges
         """
@@ -449,8 +447,6 @@ class TestTriblerChainCommunity(BaseTestTrustChainCommunity):
             "cc": [("aa", 0, 0), ("bb", 0, 0)],
         }
 
-        node.community.format_edges = lambda _1, _2: (nodes, edges)
-
         expected_nodes = [
             {"public_key": "aa", "total_up": 0, "total_down": 0, "total_neighbors": 2, "score": 0.5},
             {"public_key": "bb", "total_up": 1, "total_down": 1, "total_neighbors": 5, "score": 0.5},
@@ -465,7 +461,7 @@ class TestTriblerChainCommunity(BaseTestTrustChainCommunity):
             {"from": "cc", "to": "bb", "amount": 0},
         ]
 
-        actual_nodes, actual_edges = node.community.get_graph("aa", 1, 1, ["cc"])
+        actual_nodes, actual_edges = node.community.build_graph((nodes, edges), "aa", 1, 1, ["cc"])
         self.assertItemsEqual(expected_nodes, actual_nodes)
         self.assertItemsEqual(expected_edges, actual_edges)
 
@@ -485,8 +481,6 @@ class TestTriblerChainCommunity(BaseTestTrustChainCommunity):
             "cc": [("aa", 0, 0), ("bb", 0, 0)]
         }
 
-        node.community.format_edges = lambda _1, _2: (nodes, edges)
-
         expected_nodes = [
             {"public_key": "aa", "total_up": 0, "total_down": 0, "total_neighbors": 2, "score": 0.5},
             {"public_key": "bb", "total_up": 1, "total_down": 1, "total_neighbors": 5, "score": 0.5},
@@ -501,7 +495,51 @@ class TestTriblerChainCommunity(BaseTestTrustChainCommunity):
             {"from": "cc", "to": "bb", "amount": 0},
         ]
 
-        actual_nodes, actual_edges = node.community.get_graph("aa", 1, 2, [])
-        self.assertItemsEqual(expected_nodes, actual_nodes)
-        self.assertItemsEqual(expected_edges, actual_edges)
+        def verify_result((actual_nodes, actual_edges)):
+            self.assertItemsEqual(expected_nodes, actual_nodes)
+            self.assertItemsEqual(expected_edges, actual_edges)
 
+        node, = self.create_nodes(1)
+        node.community.persistence.get_graph_edges = lambda _1, _2: Deferred()
+        node.community.format_edges = lambda _1, _2: (nodes, edges)
+
+        d = node.community.get_graph("aa", 1, 2, [])
+        d.addCallback(verify_result)
+        d.callback("test")
+        return d
+
+    def test_get_graph(self):
+        """
+        Verify whether the get_graph method adds the two callbacks correctly
+        """
+        test_result = "test_1"
+        test_public_key = "test_2"
+        test_neighbor_level = "test_3"
+        test_max_neighbors = "test_4"
+        test_mandatory_nodes = "test_5"
+        test_nodes_edges = ("test_6", "test_7")
+        test_final_result = "test_8"
+
+        def mock_format(result, public_key):
+            self.assertEqual(result, test_result)
+            self.assertEqual(public_key, test_public_key)
+            return test_nodes_edges
+
+        def mock_build((nodes, edges), public_key, neighbor_level, max_neighbors, mandatory_nodes):
+            self.assertEqual(nodes, test_nodes_edges[0])
+            self.assertEqual(edges, test_nodes_edges[1])
+            self.assertEqual(public_key, test_public_key)
+            self.assertEqual(neighbor_level, test_neighbor_level)
+            self.assertEqual(max_neighbors, test_max_neighbors)
+            self.assertEqual(mandatory_nodes, test_mandatory_nodes)
+            return test_final_result
+
+        node, = self.create_nodes(1)
+        node.community.persistence.get_graph_edges = lambda _1, _2: Deferred()
+        node.community.format_edges = mock_format
+        node.community.build_graph = mock_build
+
+        d = node.community.get_graph(test_public_key, test_neighbor_level, test_max_neighbors, test_mandatory_nodes)
+        d.addCallback(self.assertEqual, test_final_result)
+        d.callback(test_result)
+        return d

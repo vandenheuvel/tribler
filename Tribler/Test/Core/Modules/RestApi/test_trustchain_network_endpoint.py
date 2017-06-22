@@ -1,11 +1,11 @@
 """
 This module validates the functions defined in the TrustchainNetworkEndpoint Endpoint
 """
-from binascii import hexlify
-from json import dumps, loads
+from binascii import unhexlify
+from json import dumps
 from sys import maxint
 
-from twisted.internet.defer import inlineCallbacks
+from twisted.internet.defer import inlineCallbacks, Deferred
 from twisted.web import http
 
 from Tribler.Core.Modules.restapi.trustchain_endpoint import TrustChainNetworkEndpoint
@@ -101,92 +101,124 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         request.args["max_neighbors"] = ["-1"]
         self.assertEqual(maxint, network_endpoint.get_max_neighbors(request.args))
 
+    @staticmethod
+    def setup_mock_community(public_key):
+        """
+        Set up a fake community to use for testing.
+        :param public_key: public key of the my_member in the community
+        :return: deferred object to trigger callback chain on
+        """
+        mock_community = MockObject()
+        mock_community.my_member = MockObject()
+        mock_community.my_member.public_key = unhexlify(public_key)
+        mock_community.persistence = MockObject()
+        mock_community.persistence.dummy_setup = False
+        d = Deferred()
+        mock_community.get_graph = lambda _1, _2, _3, _4: d
+        TrustChainNetworkEndpoint.get_tribler_chain_community = lambda _: mock_community
+        return d
+
+    @deferred(timeout=10)
     def test_get_no_edges(self):
         """
         Evaluate whether the API passes the correct data if there are no edges returned.
         """
-        self.tribler_chain_community.get_graph = lambda public_key, neighbor_level, max_neighbors, mandatory_nodes: (
-            [{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}], [])
-        exp_message = {"user_node": hexlify(self.tribler_chain_community.my_member.public_key),
-                       "focus_node": "30",
-                       "neighbor_level": 1,
-                       "nodes": [{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}],
-                       "edges": []}
-        network_endpoint, request = self.set_up_endpoint_request("trustchain", 30, 1)
-        self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
+        d = self.setup_mock_community("0000")
+        exp_message = {u"user_node": u"0000",
+                       u"focus_node": u"30",
+                       u"neighbor_level": 1,
+                       u"nodes": [{u"public_key": u"xyz", u"total_up": 0, u"total_down": 0, u"score": 0.5}],
+                       u"edges": []}
+        d.callback(([{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}], []))
+        return self.do_request('trustchain/network?dataset=trustchain&focus_node=30&neighbor_level=1',
+                               expected_code=200, expected_json=exp_message)\
+            .addCallback(lambda message: self.assertEqual(message, dumps(exp_message)))
 
+    @deferred(timeout=10)
     def test_get_edges(self):
         """
         Evaluate whether the API passes the correct data if there are edges returned.
         """
-        self.tribler_chain_community.get_graph = lambda public_key, neighbor_level, max_neighbors, mandatory_nodes: (
-            [{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}], [
-                {"from": "xyz", "to": "abc", "amount": 30}])
-        exp_message = {"user_node": hexlify(self.tribler_chain_community.my_member.public_key),
-                       "focus_node": "30",
-                       "neighbor_level": 1,
-                       "nodes": [{"public_key": "xyz", "total_up": 0, "total_down": 0, "score": 0.5}],
-                       "edges": [{"from": "xyz", "to": "abc", "amount": 30}]}
-        network_endpoint, request = self.set_up_endpoint_request("trustchain", 30, 1)
-        self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
+        d = self.setup_mock_community("0000")
+        exp_message = {u"user_node": u"0000",
+                       u"focus_node": u"30",
+                       u"neighbor_level": 1,
+                       u"nodes": [{u"public_key": u"xyz", u"total_up": 0, u"total_down": 0, u"score": 0.5}],
+                       u"edges": [{u"from": u"xyz", u"to": u"abc", u"amount": 30}]}
+        d.callback(([{"public_key": "xyz", "total_up": 0, "total_down": 0, u"score": 0.5}],
+                    [{"from": "xyz", "to": "abc", "amount": 30}]))
+        return self.do_request('trustchain/network?dataset=trustchain&focus_node=30&neighbor_level=1',
+                               expected_code=200, expected_json=exp_message) \
+            .addCallback(lambda message: self.assertEqual(message, dumps(exp_message)))
 
+    @deferred(timeout=10)
     def test_get_self(self):
         """
         Evaluate whether the API uses the own public key when public_key is set to 'self'.
         """
-        user_public_key = hexlify(self.member.public_key)
-        exp_message = {"user_node": user_public_key,
-                       "focus_node": user_public_key,
-                       "neighbor_level": 1,
-                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0, "score": 0.5,
-                                  "total_neighbors": 0}],
-                       "edges": []}
-        network_endpoint, request = self.set_up_endpoint_request("trustchain", "self", 1)
-        self.assertDictEqual(exp_message, loads(network_endpoint.render_GET(request)))
+        d = self.setup_mock_community("0000")
+        exp_message = {u"user_node": u"0000",
+                       u"focus_node": u"0000",
+                       u"neighbor_level": 1,
+                       u"nodes": [{u"public_key": u"0000", u"total_up": 0, u"total_down": 0, u"score": 0.5,
+                                   u"total_neighbors": 0}],
+                       u"edges": []}
+        d.callback(([{"public_key": "0000", "total_up": 0, "total_down": 0, "score": 0.5, "total_neighbors": 0}], []))
+        return self.do_request('trustchain/network?dataset=trustchain&focus_node=self&neighbor_level=1',
+                               expected_code=200, expected_json=exp_message) \
+            .addCallback(lambda message: self.assertEqual(message, dumps(exp_message)))
 
+    @deferred(timeout=10)
     def test_negative_neighbor_level(self):
         """
         Evaluate whether the API uses neighbor level 1 when a negative number is provided.
         """
-        user_public_key = hexlify(self.member.public_key)
-        exp_message = {"user_node": user_public_key,
-                       "focus_node": hexlify(self.member.public_key),
-                       "neighbor_level": 1,
-                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0, "score": 0.5,
-                                  "total_neighbors": 0}],
-                       "edges": []}
-        network_endpoint, request = self.set_up_endpoint_request("trustchain", "self", -1)
-        self.assertDictEqual(exp_message, loads(network_endpoint.render_GET(request)))
+        d = self.setup_mock_community("0000")
+        exp_message = {u"user_node": u"0000",
+                       u"focus_node": u"0000",
+                       u"neighbor_level": 1,
+                       u"nodes": [{u"public_key": u"0000", u"total_up": 0, u"total_down": 0, u"score": 0.5,
+                                   u"total_neighbors": 0}],
+                       u"edges": []}
 
+        d.callback(([{"public_key": "0000", "total_up": 0, "total_down": 0, "score": 0.5, "total_neighbors": 0}], []))
+        return self.do_request('trustchain/network?dataset=trustchain&focus_node=self&neighbor_level=-1',
+                               expected_code=200, expected_json=exp_message) \
+            .addCallback(lambda message: self.assertEqual(message, dumps(exp_message)))
+
+    @deferred(timeout=10)
     def test_empty_dataset(self):
         """
         Evaluate whether the API sends a response when the dataset is not well-defined.
         """
-        user_public_key = hexlify(self.member.public_key)
-        exp_message = {"user_node": user_public_key,
-                       "focus_node": user_public_key,
-                       "neighbor_level": 1,
-                       "nodes": [{"public_key": user_public_key, "total_up": 0, "total_down": 0, "score": 0.5,
-                                  "total_neighbors": 0}],
-                       "edges": []}
-        network_endpoint, request = self.set_up_endpoint_request("", "self", 1)
-        self.assertDictEqual(exp_message, loads(network_endpoint.render_GET(request)))
+        d = self.setup_mock_community("0000")
+        exp_message = {u"user_node": u"0000",
+                       u"focus_node": u"0000",
+                       u"neighbor_level": 1,
+                       u"nodes": [{u"public_key": u"0000", u"total_up": 0, u"total_down": 0, u"score": 0.5,
+                                   u"total_neighbors": 0}],
+                       u"edges": []}
+        d.callback(([{"public_key": "0000", "total_up": 0, "total_down": 0, "score": 0.5, "total_neighbors": 0}], []))
+        return self.do_request('trustchain/network?dataset=&focus_node=self&neighbor_level=-1',
+                               expected_code=200, expected_json=exp_message) \
+            .addCallback(lambda message: self.assertEqual(message, dumps(exp_message)))
 
+    @deferred(timeout=10)
     def test_no_dataset(self):
         """
         Evaluate whether the API sends a response when the dataset is not defined.
         """
-        user_public_key = hexlify(self.member.public_key)
-        exp_message = {"nodes": [{"public_key": user_public_key, "total_down": 0, "total_up": 0, "score": 0.5,
-                                  "total_neighbors": 0}],
-                       "neighbor_level": 1,
-                       "user_node": user_public_key,
-                       "focus_node": user_public_key,
-                       "edges": []}
-
-        network_endpoint, request = self.set_up_endpoint_request("", "self", 1)
-        del request.args["dataset"]
-        self.assertDictEqual(exp_message, loads(network_endpoint.render_GET(request)))
+        d = self.setup_mock_community("0000")
+        exp_message = {u"nodes": [{u"public_key": u"0000", u"total_down": 0, u"total_up": 0, u"score": 0.5,
+                                   u"total_neighbors": 0}],
+                       u"neighbor_level": 1,
+                       u"user_node": u"0000",
+                       u"focus_node": u"0000",
+                       u"edges": []}
+        d.callback(([{"public_key": "0000", "total_up": 0, "total_down": 0, "score": 0.5, "total_neighbors": 0}], []))
+        return self.do_request('trustchain/network?focus_node=self&neighbor_level=-1',
+                               expected_code=200, expected_json=exp_message) \
+            .addCallback(lambda message: self.assertEqual(message, dumps(exp_message)))
 
     def test_mandatory_nodes(self):
         """
@@ -196,50 +228,14 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         expected_result = ["x", "y", "z"]
         self.assertEqual(TrustChainNetworkEndpoint.get_mandatory_nodes(arguments), expected_result)
 
-    @blocking_call_on_reactor_thread
-    def test_static_dataset(self):
-        """
-        Evaluate whether the API sends a response when the static dummy dataset is initialized.
-        """
-        network_endpoint, request = self.set_up_endpoint_request("static", "03", 1, 4)
-        response = network_endpoint.render_GET(request)
-        self.assertTrue(self.tribler_chain_community.persistence.dummy_setup)
-        self.assertEqual(len(loads(response)["nodes"]), 4)
-
-    @blocking_call_on_reactor_thread
-    def test_random_dataset(self):
-        """
-        Evaluate whether the API sends a response when the random dummy dataset is initialized.
-        """
-        network_endpoint, request = self.set_up_endpoint_request("random", "25", 1)
-        response = network_endpoint.render_GET(request)
-        self.assertTrue(self.tribler_chain_community.persistence.dummy_setup)
-        self.assertEqual(len(loads(response)["nodes"]), 1)
-
-    @blocking_call_on_reactor_thread
-    def test_self_dummy_data(self):
-        """
-        Evaluate whether the API picks "0" as public key when dummy data is used.
-        """
-        network_endpoint, request = self.set_up_endpoint_request("static", "self", 1)
-        response = network_endpoint.render_GET(request)
-        self.assertEqual(loads(response)["focus_node"], "00")
-
-        del request.args["dataset"]
-        response = network_endpoint.render_GET(request)
-        self.assertEqual(loads(response)["focus_node"], "00")
-
     @deferred(timeout=10)
     def test_mc_community_exception(self):
         """
         Evaluate whether the API returns the correct error when the trustchain community can't be found.
         """
-        mocked_session = MockObject()
-        network_endpoint = TrustChainNetworkEndpoint(mocked_session)
-        network_endpoint.get_tribler_chain_community = lambda:\
+        TrustChainNetworkEndpoint.get_tribler_chain_community = lambda _:\
             (_ for _ in ()).throw(OperationNotEnabledByConfigurationException("trustchain is not enabled"))
-
-        exp_message = {"error": "trustchain is not enabled"}
+        exp_message = {u"error": u"trustchain is not enabled"}
         return self.do_request('trustchain/network?focus_node=self',
                                expected_code=http.NOT_FOUND, expected_json=exp_message)
 
@@ -248,11 +244,8 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         """
         Evaluate whether the API returns the correct error when the trustchain community can't be found with dummy data.
         """
-        mocked_session = MockObject()
-        network_endpoint = TrustChainNetworkEndpoint(mocked_session)
-        network_endpoint.get_tribler_chain_community = lambda:\
+        TrustChainNetworkEndpoint.get_tribler_chain_community = lambda _: \
             (_ for _ in ()).throw(OperationNotEnabledByConfigurationException("trustchain is not enabled"))
-
-        exp_message = {"error": "trustchain is not enabled"}
+        exp_message = {u"error": u"trustchain is not enabled"}
         return self.do_request('trustchain/network?dataset=static&focus_node=self',
                                expected_code=http.NOT_FOUND, expected_json=exp_message)
