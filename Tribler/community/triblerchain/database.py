@@ -2,6 +2,8 @@ from binascii import hexlify, unhexlify
 from random import randint
 
 from sqlite3 import connect
+from twisted.internet import task, reactor
+
 from networkx import gnp_random_graph
 
 from Tribler.community.trustchain.database import TrustChainDB
@@ -137,6 +139,12 @@ class TriblerChainDB(TrustChainDB):
         return result[0] or 0, result[1] or 0, result[2] or 0
 
     def get_graph_edges(self, public_key, neighbor_level=1):
+        """
+        Gets all the edges for the network graph from the database.
+        :param public_key: hex value of the public key of the focus node
+        :param neighbor_level: the radius within which the neighbors have to be returned
+        :return: a deferred object that will eventually trigger with the query result
+        """
         query = u"""SELECT public_key_a, public_key_b FROM triblerchain_aggregates
                     WHERE public_key_a = ? OR public_key_b = ?"""
 
@@ -172,7 +180,12 @@ class TriblerChainDB(TrustChainDB):
             ORDER BY (ta.traffic_a_to_b + ta.traffic_b_to_a) DESC
         """ % {"query": query, "traffic": total_traffic}
 
-        return self.execute(query, (buffer(public_key), buffer(public_key))).fetchall()
+        def get_rows(result):
+            return result.fetchall()
+
+        d = task.deferLater(reactor, 0.0, self.execute, query, (buffer(public_key), buffer(public_key)))
+        d.addCallback(get_rows)
+        return d
 
     def check_statistics_database(self):
         """
