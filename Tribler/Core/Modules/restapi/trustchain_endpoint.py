@@ -178,18 +178,17 @@ class TrustChainNetworkEndpoint(resource.Resource):
 
     def __init__(self, session):
         """
-        Initialize the TrustNetworkEndpoint and make a session an attribute from the instance.
+        Create a new TrustChainNetworkEndpoint instance.
 
-        :param session: the Session object where the aggregated data can be retrieved from
+        :param session: a Session instance from where the aggregate network data can be retrieved from
         """
         resource.Resource.__init__(self)
         self.session = session
 
-
     @staticmethod
     def return_error(request, status_code=http.BAD_REQUEST, message="your request seems to be wrong"):
         """
-        Return a HTTP Code 400 with the given message.
+        Return a HTTP status code with the given error message.
 
         :param request: the request which has to be changed
         :param status_code: the HTTP status code to be returned
@@ -228,7 +227,7 @@ class TrustChainNetworkEndpoint(resource.Resource):
 
         Note: the parameters are handled as follows:
         - focus_node
-            - Not given: HTTP 400
+            - Not given: TriblerChain Community public key
             - Non-String value: HTTP 400
             - "self": TriblerChain Community public key
             - otherwise: Passed data, albeit a string
@@ -289,12 +288,12 @@ class TrustChainNetworkEndpoint(resource.Resource):
         except OperationNotEnabledByConfigurationException as exc:
             return TrustChainNetworkEndpoint.return_error(request, status_code=http.NOT_FOUND, message=exc.args)
 
-        if "focus_node" not in request.args:
-            return TrustChainNetworkEndpoint.return_error(request, message="focus_node parameter missing")
+        focus_node = "self"
+        if "focus_node" in request.args:
+            focus_node = request.args["focus_node"][0]
 
-        focus_node = request.args["focus_node"][0]
-        if not focus_node:
-            return TrustChainNetworkEndpoint.return_error(request, message="focus_node parameter empty")
+            if not focus_node:
+                return TrustChainNetworkEndpoint.return_error(request, message="focus_node parameter empty")
 
         if focus_node == "self":
             focus_node = hexlify(tribler_chain_community.my_member.public_key)
