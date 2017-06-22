@@ -69,7 +69,7 @@ class TrustPlotMplCanvas(MplCanvas):
         self.draw()
 
 
-class TrustPageGraph(QWidget):
+class TrustPagePlot(QWidget):
     """
     This page shows various trust statistics.
     """

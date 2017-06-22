@@ -3,6 +3,7 @@ import os
 from PyQt5.QtCore import QEvent
 from TriblerGUI.single_application import QtSingleApplication
 # QtWebEngineWidgets must be imported before a QCoreApplication instance is created, otherwise an import error occurs
+# see: https://stackoverflow.com/questions/41172301/pyqt-modules-cant-be-imported-after-qtwidgets-qapplicationsys-argv
 try:
     from PyQt5.QtWebEngineWidgets import QWebEngineView
 except ImportError:
