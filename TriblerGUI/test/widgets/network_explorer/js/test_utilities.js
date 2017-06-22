@@ -21,14 +21,16 @@ describe("utilities.js", function () {
                 [1001000, "1.001 MB"],
                 [9999000, "9.999 MB"],
                 [1000000000, "1.000 GB"],
-                [1001000000, "1.001 GB"],
+                [1001000000, "1.001 GB"]
             ];
 
             data.forEach(function (set) {
                 assert.equal(utilities.formatBytes(set[0]), set[1]);
 
                 // Check negatives, except zero
-                if(set[0] > 0) assert.equal(utilities.formatBytes(-set[0]), "-" + set[1]);
+                if (set[0] > 0) {
+                    assert.equal(utilities.formatBytes(-set[0]), "-" + set[1]);
+                }
             });
         });
     });
@@ -45,7 +47,7 @@ describe("utilities.js", function () {
                 [30, 30, 0, 30],
                 [30, 30, -2, 30],
                 [-30, 30, 0, -30],
-                [-30, 30, 0.5, 0],
+                [-30, 30, 0.5, 0]
             ];
 
             data.forEach(function (set) {
@@ -59,7 +61,7 @@ describe("utilities.js", function () {
             var data = [
                 [{x: 0, y: 0}, {x: 0, y: 10}, 10],
                 [{x: 0, y: 0}, {x: 3, y: 4}, 5],
-                [{x: 10, y: 20}, {x: 40, y: 60}, 50],
+                [{x: 10, y: 20}, {x: 40, y: 60}, 50]
             ];
 
             data.forEach(function (set) {
