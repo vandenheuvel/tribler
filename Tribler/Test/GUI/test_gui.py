@@ -7,11 +7,6 @@ from unittest import skipUnless
 from PyQt5.QtCore import QPoint, Qt, QTimer
 from PyQt5.QtGui import QPixmap, QRegion
 from PyQt5.QtTest import QTest
-try:
-    from PyQt5.QtWebEngineWidgets import QWebEngine
-except ImportError:
-    # If the QtWebEngineWidgets module is not found, the old trust page will be rendered.
-    pass
 from PyQt5.QtWidgets import QApplication, QListWidget, QTreeWidget
 
 import TriblerGUI.core_manager as core_manager
@@ -519,39 +514,6 @@ class TriblerGUITest(AbstractTriblerGUITest):
         self.screenshot(window, name="manage_playlist_after")
 
         QTest.mouseClick(window.edit_channel_manage_playlist_save_button, Qt.LeftButton)
-
-    def test_trust_page(self):
-        QTest.mouseClick(window.left_menu_button_trust_display, Qt.LeftButton)
-        # Since the trust page is rendered in JavaScript, it is tested there.
-        self.screenshot(window, name="trust_page_values")
-
-    def test_market_overview_page(self):
-        QTest.mouseClick(window.trust_button, Qt.LeftButton)
-        QTest.mouseClick(window.trade_button, Qt.LeftButton)
-        self.wait_for_list_populated(window.asks_list)
-        self.wait_for_list_populated(window.bids_list)
-        self.screenshot(window, name="market_page_overview")
-
-    def test_market_orders_page(self):
-        QTest.mouseClick(window.trust_button, Qt.LeftButton)
-        QTest.mouseClick(window.trade_button, Qt.LeftButton)
-        QTest.mouseClick(window.market_orders_button, Qt.LeftButton)
-        self.wait_for_list_populated(window.market_orders_list)
-        self.screenshot(window, name="market_page_orders")
-
-    def test_market_transactions_page(self):
-        QTest.mouseClick(window.trust_button, Qt.LeftButton)
-        QTest.mouseClick(window.trade_button, Qt.LeftButton)
-        QTest.mouseClick(window.market_transactions_button, Qt.LeftButton)
-        self.wait_for_list_populated(window.market_transactions_list)
-        self.screenshot(window, name="market_page_transactions")
-
-    def test_market_wallets_page(self):
-        QTest.mouseClick(window.trust_button, Qt.LeftButton)
-        QTest.mouseClick(window.trade_button, Qt.LeftButton)
-        QTest.mouseClick(window.market_wallets_button, Qt.LeftButton)
-        self.wait_for_variable("market_wallets_page.wallets")
-        self.screenshot(window, name="market_page_wallets")
 
 if __name__ == "__main__":
     unittest.main()

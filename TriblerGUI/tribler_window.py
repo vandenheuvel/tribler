@@ -139,15 +139,15 @@ class TriblerWindow(QMainWindow):
         self.discovered_page.initialize_discovered_page()
 
         # If QWebEngineView cannot be imported, make sure to render the plot trust page instead.
-        try:
-            from PyQt5.QtWebEngineWidgets import QWebEngineView
-            self.network_explorer_page.initialize_web_page()
-        except ImportError:
-            self.trust_page_plot.initialize_trust_page()
-            label = self.stackedWidget.widget(PAGE_TRUST_PLOT).window().trust_explanation_label
-            label.setText(label.text().replace("LINK_PLACEHOLDER", NETWORK_EXPLORER_HTML_PATH))
-            self.left_menu_button_trust_display.setText("Trust Plot")
-            self.left_menu_button_trust_display.clicked.connect(self.clicked_menu_button_trust_graph)
+        if os.environ.get("TEST_GUI") == "yes":
+            self.render_trust_plot()
+        else:
+            # TODO: Remove this try-except clause when QtWebEngineWidgets is a hard dependency
+            try:
+                from PyQt5.QtWebEngineWidgets import QWebEngineView
+                self.network_explorer_page.initialize_web_page()
+            except ImportError:
+                self.render_trust_plot()
 
         self.stackedWidget.setCurrentIndex(PAGE_LOADING)
 
@@ -214,6 +214,13 @@ class TriblerWindow(QMainWindow):
         self.installEventFilter(self.video_player_page)
 
         self.show()
+
+    def render_trust_plot(self):
+        self.trust_page_plot.initialize_trust_page()
+        label = self.stackedWidget.widget(PAGE_TRUST_PLOT).window().trust_explanation_label
+        label.setText(label.text().replace("LINK_PLACEHOLDER", NETWORK_EXPLORER_HTML_PATH))
+        self.left_menu_button_trust_display.setText("Trust Plot")
+        self.left_menu_button_trust_display.clicked.connect(self.clicked_menu_button_trust_graph)
 
     def update_tray_icon(self, use_monochrome_icon):
         if not QSystemTrayIcon.isSystemTrayAvailable():
