@@ -6,6 +6,7 @@ import sys
 from binascii import hexlify
 
 from twisted.web import http, resource
+from twisted.web.server import NOT_DONE_YET
 
 from Tribler.community.triblerchain.community import TriblerChainCommunity
 from Tribler.Core.exceptions import OperationNotEnabledByConfigurationException
@@ -285,7 +286,6 @@ class TrustChainNetworkEndpoint(resource.Resource):
                 }
 
         :param request: the HTTP GET request which specifies the focus node and optionally the neighbor level
-        :return: the node data formatted in JSON
         """
         # This header is needed because this request is not made from the same host
         request.setHeader('Access-Control-Allow-Origin', '*')
@@ -318,14 +318,18 @@ class TrustChainNetworkEndpoint(resource.Resource):
 
         mandatory_nodes = self.get_mandatory_nodes(request.args)
 
-        nodes, edges = tribler_chain_community.get_graph(focus_node, neighbor_level, max_neighbors,
-                                                         mandatory_nodes)
+        def finalize_request((nodes, edges)):
+            request.write(json.dumps({"user_node": user_node,
+                                      "focus_node": focus_node,
+                                      "neighbor_level": neighbor_level,
+                                      "nodes": nodes,
+                                      "edges": edges}))
+            request.finish()
 
-        return json.dumps({"user_node": user_node,
-                           "focus_node": focus_node,
-                           "neighbor_level": neighbor_level,
-                           "nodes": nodes,
-                           "edges": edges})
+        d = tribler_chain_community.get_graph(focus_node, neighbor_level, max_neighbors, mandatory_nodes)
+        d.addCallback(finalize_request)
+
+        return NOT_DONE_YET
 
     @staticmethod
     def use_dummy_data(dataset, community):
