@@ -1,13 +1,8 @@
-from binascii import hexlify, unhexlify
-from random import randint
+from binascii import hexlify
 
-from sqlite3 import connect
 from twisted.internet import task, reactor
 
-from networkx import gnp_random_graph
-
 from Tribler.community.trustchain.database import TrustChainDB
-from Tribler.community.trustchain.block import TrustChainBlock
 
 LATEST_TRIBLERCHAIN_AGGREGATES_VERSION = 1
 

@@ -3,7 +3,8 @@ import os
 
 from twisted.internet.defer import inlineCallbacks
 
-from Tribler.Test.Community.Trustchain.test_trustchain_utilities import TrustChainTestCase, TestBlock
+from Tribler.Test.Community.Triblerchain.test_triblerchain_utilities import TriblerTestBlock
+from Tribler.Test.Community.Trustchain.test_trustchain_utilities import TrustChainTestCase
 from Tribler.community.triblerchain.database import TriblerChainDB
 from Tribler.community.trustchain.database import DATABASE_DIRECTORY
 from Tribler.dispersy.util import blocking_call_on_reactor_thread
@@ -22,9 +23,9 @@ class TestDatabase(TrustChainTestCase):
         if not os.path.exists(path):
             os.makedirs(path)
         self.db = TriblerChainDB(self.getStateDir(), u'triblerchain')
-        self.block1 = TestBlock(transaction={'up': 42, 'down': 13})
-        self.block2 = TestBlock(transaction={'up': 46, 'down': 12})
-        self.block3 = TestBlock(transaction={'up': 11, 'down': 23})
+        self.block1 = TriblerTestBlock(transaction={'up': 42, 'down': 13})
+        self.block2 = TriblerTestBlock(transaction={'up': 46, 'down': 12})
+        self.block3 = TriblerTestBlock(transaction={'up': 11, 'down': 23})
 
     @blocking_call_on_reactor_thread
     def set_db_version(self, database_version, aggregate_version):
@@ -44,7 +45,8 @@ class TestDatabase(TrustChainTestCase):
         """
         Test whether the right number of interactors is returned
         """
-        self.block2 = TestBlock(previous=self.block1, transaction={'up': 42, 'down': 42})
+        self.block2 = TriblerTestBlock(previous=self.block1, transaction={'up': 42, 'down': 42,
+                                                                          "total_up": 42, "total_down": 42})
         self.db.add_block(self.block1)
         self.db.add_block(self.block2)
         self.assertEqual((2, 2), self.db.get_num_unique_interactors(self.block1.public_key))
@@ -126,8 +128,7 @@ class TestDatabase(TrustChainTestCase):
         """
         The database should return the correct list of neighbors and the traffic to and from them.
         """
-        extra_block = TestBlock()
-        extra_block.transaction = {"up": 0, "down": 0}
+        extra_block = TriblerTestBlock(transaction={"up": 0, "down": 0})
 
         # 00 -> 11, 11 -> 22, 22 -> 33, 33 -> 44
         self.block1.public_key = unhexlify("00")

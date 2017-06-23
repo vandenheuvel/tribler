@@ -10,6 +10,7 @@ from twisted.web import http
 
 from Tribler.Core.Modules.restapi.trustchain_endpoint import TrustChainNetworkEndpoint
 from Tribler.Core.exceptions import OperationNotEnabledByConfigurationException
+from Tribler.Test.Community.AbstractTestCommunity import AbstractTestCommunity
 from Tribler.community.triblerchain.community import TriblerChainCommunity
 from Tribler.dispersy.dispersy import Dispersy
 from Tribler.dispersy.endpoint import ManualEnpoint
@@ -20,7 +21,7 @@ from Tribler.Test.Core.base_test import MockObject
 from Tribler.Test.twisted_thread import deferred
 
 
-class TestTrustchainNetworkEndpoint(AbstractApiTest):
+class TestTrustchainNetworkEndpoint(AbstractApiTest, AbstractTestCommunity):
     """
     Evaluate the TrustNetworkEndpoint, the endpoint from which you can retrieve
     aggregated data from the trustchain.
@@ -31,13 +32,9 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
     def setUp(self, autoload_discovery=True):
         yield super(TestTrustchainNetworkEndpoint, self).setUp(autoload_discovery=autoload_discovery)
 
-        self.dispersy = Dispersy(ManualEnpoint(0), self.getStateDir())
-        self.dispersy._database.open()
-        master_member = DummyMember(self.dispersy, 1, "a" * 20)
-        self.member = self.dispersy.get_new_member(u"curve25519")
-
-        self.tribler_chain_community = TriblerChainCommunity(self.dispersy, master_member, self.member)
-        self.dispersy.get_communities = lambda: [self.tribler_chain_community]
+        self.tc_community = TriblerChainCommunity(self.dispersy, self.master_member, self.member)
+        self.tc_community.initialize()
+        self.dispersy._communities["a" * 20] = self.tc_community
         self.session.get_dispersy_instance = lambda: self.dispersy
 
     def set_up_endpoint_request(self, focus_node, neighbor_level, max_neighbors=1):
@@ -51,7 +48,7 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         """
         mocked_session = MockObject()
         network_endpoint = TrustChainNetworkEndpoint(mocked_session)
-        network_endpoint.get_tribler_chain_community = lambda: self.tribler_chain_community
+        network_endpoint.get_tribler_chain_community = lambda: self.tc_community
         request = MockObject()
         request.setHeader = lambda header, flags: None
         request.setResponseCode = lambda status_code: None
@@ -91,6 +88,14 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         network_endpoint, request = self.set_up_endpoint_request("X", 1, 4)
         request.args["max_neighbors"] = ["-1"]
         self.assertEqual(maxint, network_endpoint.get_max_neighbors(request.args))
+
+    def test_mandatory_nodes(self):
+        """
+        Evaluate whether the mandatory_nodes function works correctly.
+        """
+        arguments = {"mandatory_nodes": ["x,y,z"]}
+        expected_result = ["x", "y", "z"]
+        self.assertEqual(TrustChainNetworkEndpoint.get_mandatory_nodes(arguments), expected_result)
 
     @staticmethod
     def setup_mock_community(public_key):
@@ -210,14 +215,6 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
         return self.do_request('trustchain/network?focus_node=self&neighbor_level=-1',
                                expected_code=200, expected_json=exp_message) \
             .addCallback(lambda message: self.assertEqual(message, dumps(exp_message)))
-
-    def test_mandatory_nodes(self):
-        """
-        Evaluate whether the mandatory_nodes function works correctly.
-        """
-        arguments = {"mandatory_nodes": ["x,y,z"]}
-        expected_result = ["x", "y", "z"]
-        self.assertEqual(TrustChainNetworkEndpoint.get_mandatory_nodes(arguments), expected_result)
 
     @deferred(timeout=10)
     def test_mc_community_exception(self):
