@@ -60,15 +60,6 @@ class TestTrustchainNetworkEndpoint(AbstractApiTest):
                         "max_neighbors": [str(max_neighbors)]}
         return network_endpoint, request
 
-    def test_get_no_focus_node(self):
-        """
-        Evaluate whether the API returns an Bad Request error if there is no focus node specified.
-        """
-        exp_message = {"error": "focus_node parameter missing"}
-        network_endpoint, request = self.set_up_endpoint_request("X", 1)
-        del request.args["focus_node"]
-        self.assertEqual(dumps(exp_message), network_endpoint.render_GET(request))
-
     def test_get_empty_focus_node(self):
         """
         Evaluate whether the API returns a Bad Request error if the focus node is empty.

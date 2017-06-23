@@ -180,5 +180,3 @@ class TrustChainDB(Database):
             self.commit()
 
         return self.LATEST_DB_VERSION
-
-

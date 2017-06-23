@@ -120,7 +120,7 @@ class TriblerChainDB(TrustChainDB):
 
     def total_traffic(self, public_key):
         """
-        Find the amount of data the public key uploaded and downloaded.
+        Find the amount of data the node associated to this public key uploaded and downloaded.
         :param public_key: hex value of the public key
         :return: amount uploaded, amount downloaded
         """
