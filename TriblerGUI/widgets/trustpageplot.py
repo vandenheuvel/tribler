@@ -91,13 +91,6 @@ class TrustPagePlot(QWidget):
         self.trust_plot = TrustPlotMplCanvas(self.window().plot_widget, dpi=100)
         vlayout.addWidget(self.trust_plot)
 
-        self.window().trade_button.clicked.connect(self.on_trade_button_clicked)
-
-    def on_trade_button_clicked(self):
-        self.window().market_page.initialize_market_page()
-        self.window().navigation_stack.append(self.window().stackedWidget.currentIndex())
-        self.window().stackedWidget.setCurrentIndex(PAGE_MARKET)
-
     def load_trust_statistics(self):
         self.request_mgr = TriblerRequestManager()
         self.request_mgr.perform_request("trustchain/statistics", self.received_trustchain_statistics)

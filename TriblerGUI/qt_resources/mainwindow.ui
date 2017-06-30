@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>855</width>
-    <height>655</height>
+    <height>702</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -909,10 +909,39 @@ color: white;
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>../images/display.png</normaloff>../images/display.png</iconset>
+             <normaloff>../images/network_explorer.png</normaloff>../images/network_explorer.png</iconset>
            </property>
            <property name="checkable">
             <bool>true</bool>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="left_menu_button_market">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>26</height>
+            </size>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
+           </property>
+           <property name="text">
+            <string> Marketplace</string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../images/marketplace.png</normaloff>../images/marketplace.png</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
            </property>
            <property name="flat">
             <bool>true</bool>
@@ -954,13 +983,13 @@ color: white;
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>2</height>
+                <height>26</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>2</height>
+                <height>30</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -7735,8 +7764,8 @@ QTabBar::tab:selected {
                       <rect>
                        <x>0</x>
                        <y>0</y>
-                       <width>131</width>
-                       <height>236</height>
+                       <width>653</width>
+                       <height>285</height>
                       </rect>
                      </property>
                      <layout class="QFormLayout" name="formLayout_4">
@@ -8895,60 +8924,6 @@ border-top: 1px solid #555;
                </property>
               </widget>
              </item>
-             <item>
-              <spacer name="horizontalSpacer_69">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>10</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="EllipseButton" name="trade_button">
-               <property name="minimumSize">
-                <size>
-                 <width>50</width>
-                 <height>24</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>50</width>
-                 <height>24</height>
-                </size>
-               </property>
-               <property name="cursor">
-                <cursorShape>PointingHandCursor</cursorShape>
-               </property>
-               <property name="text">
-                <string>TRADE</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_20">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>10</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
             </layout>
            </widget>
           </item>
@@ -9376,48 +9351,7 @@ background-color: transparent;
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>10</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QToolButton" name="market_back_button">
-               <property name="minimumSize">
-                <size>
                  <width>16</width>
-                 <height>18</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16</width>
-                 <height>18</height>
-                </size>
-               </property>
-               <property name="cursor">
-                <cursorShape>PointingHandCursor</cursorShape>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">border: none;</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_77">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Minimum</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>10</width>
                  <height>20</height>
                 </size>
                </property>
@@ -11834,22 +11768,6 @@ color: #eee;</string>
    </hints>
   </connection>
   <connection>
-   <sender>market_back_button</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>on_page_back_clicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>218</x>
-     <y>75</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>427</x>
-     <y>327</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>transactions_back_button</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
@@ -11894,6 +11812,22 @@ color: #eee;</string>
     <hint type="destinationlabel">
      <x>427</x>
      <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>left_menu_button_market</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>clicked_menu_button_market()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>96</x>
+     <y>423</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>427</x>
+     <y>332</y>
     </hint>
    </hints>
   </connection>
